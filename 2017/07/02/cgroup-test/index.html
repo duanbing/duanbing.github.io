@@ -17,7 +17,7 @@
 <meta property="og:image" content="http://www.webpaas.com/usr/uploads/2015/03/2860866051.png">
 <meta property="og:image" content="http://www.webpaas.com/usr/uploads/2015/03/3921482247.png">
 <meta property="og:image" content="http://www.webpaas.com/usr/uploads/2015/03/2340083504.png">
-<meta property="og:updated_time" content="2017-07-01T16:14:44.000Z">
+<meta property="og:updated_time" content="2017-07-01T16:16:11.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="cgroup功能完全测试">
 <meta name="twitter:description" content="准备环境centos7  单核virtualbox  测试项目 cpu 配额以及硬限 memory 限制以及OOM net_cls 网速限制 blkio 配额以及影限  安装和启动cgroup：1yum install -y libcgroup-tools.x86_64 启动1service cgconfig start或者systemctl start cgconfig.service 基本的使">
@@ -106,7 +106,7 @@
 <h4 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h4><h4 id="cpu"><a href="#cpu" class="headerlink" title="cpu"></a>cpu</h4><ul>
 <li>cpu软限：</li>
 </ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">cgset -r cpu.shares=512 test1</div><div class="line">cgset -r cpu.shares=128 test2</div><div class="line"></div><div class="line">loop=0</div><div class="line">while (($loop &lt; 4)) </div><div class="line">	do</div><div class="line">	cgexec -g cpu:test1 ./deadloop &gt; /dev/null &amp;</div><div class="line">((loop++))</div><div class="line">	done</div><div class="line"></div><div class="line">while (($loop &lt; 4 + 4)) </div><div class="line">	do</div><div class="line">	cgexec -g cpu:test2 ./deadloop2 &gt; /dev/null &amp;</div><div class="line">((loop++))	</div><div class="line">done</div></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">cgset -r cpu.shares=512 test1</div><div class="line">cgset -r cpu.shares=128 test2</div><div class="line"></div><div class="line">loop=0</div><div class="line">while (($loop &lt; 4)) </div><div class="line">	do</div><div class="line">	cgexec -g cpu:test1 ./deadloop &gt; /dev/null &amp;</div><div class="line">((loop++))</div><div class="line">	done</div><div class="line"></div><div class="line">while (($loop &lt; 4 + 4)) </div><div class="line">	do</div><div class="line">	cgexec -g cpu:test2 ./deadloop2 &gt; /dev/null &amp;</div><div class="line">((loop++))	</div><div class="line">done</div></pre></td></tr></table></figure>
 <p>完整在这里:<a href="https://github.com/duanbing/mysh/blob/master/test_cgroup/cpu/test1.sh" target="_blank" rel="external">cgroup完整测试脚本</a> </p>
 <p>top打开可以看到结果：<br><img src="http://www.webpaas.com/usr/uploads/2015/03/3712925605.png" alt="clipboard.png"></p>
 <p>结论： 可以看到test1这个进程组和test2这个进程组的cpu使用量比例为： 3:1</p>
@@ -160,7 +160,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/cgroup-test/" data-id="cj4lhnnnu0000t9fybv82e04z" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/07/02/cgroup-test/" data-id="cj4lhpzox0000u7fyk3l7jy7v" class="article-share-link">Share</a>
       
       
     </footer>
