@@ -5,17 +5,17 @@
   
   <title>linux namespace学习 | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="Network Namespace可以实现网络的隔离，有点像路由器里的VRF。在虚拟化和LXC中有很重要的用处。 创建Network Namespace 1234ip netns add``` 例如： ip netns add test12查看namespace ip netns list12345给Namespace添加接口创建的Namespace不能添加真实的物理接口，只能添加虚拟接口veth">
+  <meta name="description" content="Network Namespace可以实现网络的隔离，有点像路由器里的VRF。在虚拟化和LXC中有很重要的用处。 创建Network Namespace12345ip netns add``` 例如： ip netns add test12查看namespace ip netns list12345给Namespace添加接口创建的Namespace不能添加真实的物理接口，只能添加虚拟接口veth">
 <meta name="keywords" content="linux namespace">
 <meta property="og:type" content="article">
 <meta property="og:title" content="linux namespace学习">
 <meta property="og:url" content="http://yoursite.com/2017/07/01/linux_network_namespace/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="Network Namespace可以实现网络的隔离，有点像路由器里的VRF。在虚拟化和LXC中有很重要的用处。 创建Network Namespace 1234ip netns add``` 例如： ip netns add test12查看namespace ip netns list12345给Namespace添加接口创建的Namespace不能添加真实的物理接口，只能添加虚拟接口veth">
-<meta property="og:updated_time" content="2017-07-01T15:56:44.000Z">
+<meta property="og:description" content="Network Namespace可以实现网络的隔离，有点像路由器里的VRF。在虚拟化和LXC中有很重要的用处。 创建Network Namespace12345ip netns add``` 例如： ip netns add test12查看namespace ip netns list12345给Namespace添加接口创建的Namespace不能添加真实的物理接口，只能添加虚拟接口veth">
+<meta property="og:updated_time" content="2017-07-01T15:58:45.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="linux namespace学习">
-<meta name="twitter:description" content="Network Namespace可以实现网络的隔离，有点像路由器里的VRF。在虚拟化和LXC中有很重要的用处。 创建Network Namespace 1234ip netns add``` 例如： ip netns add test12查看namespace ip netns list12345给Namespace添加接口创建的Namespace不能添加真实的物理接口，只能添加虚拟接口veth">
+<meta name="twitter:description" content="Network Namespace可以实现网络的隔离，有点像路由器里的VRF。在虚拟化和LXC中有很重要的用处。 创建Network Namespace12345ip netns add``` 例如： ip netns add test12查看namespace ip netns list12345给Namespace添加接口创建的Namespace不能添加真实的物理接口，只能添加虚拟接口veth">
   
     <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -53,9 +53,9 @@
       </nav>
       <nav id="sub-nav">
         
-          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="Flux RSS"></a>
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Rechercher"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
@@ -87,8 +87,7 @@
     <div class="article-entry" itemprop="articleBody">
       
         <p>Network Namespace可以实现网络的隔离，有点像路由器里的VRF。在虚拟化和LXC中有很重要的用处。</p>
-<p>创建Network Namespace</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">ip netns add</div><div class="line">``` </div><div class="line"></div><div class="line">例如：</div></pre></td></tr></table></figure>
+<p>创建Network Namespace<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">ip netns add</div><div class="line"></div><div class="line">``` </div><div class="line"></div><div class="line">例如：</div></pre></td></tr></table></figure></p>
 <p>ip netns add test<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">查看namespace</div></pre></td></tr></table></figure></p>
 <p>ip netns list<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">给Namespace添加接口</div><div class="line"></div><div class="line">创建的Namespace不能添加真实的物理接口，只能添加虚拟接口veth（virtual Ethernet interface），它们经常成对出现并且像一个管道一样连在一起。</div><div class="line">创建一对veth：veth0和veth1</div></pre></td></tr></table></figure></p>
 <p>ip link add veth0 type veth peer name veth1<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">通过命令可以查看我们创建的veth</div></pre></td></tr></table></figure></p>
@@ -103,7 +102,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/01/linux_network_namespace/" data-id="cj4lh0ear0000pcfyeo7jdiwx" class="article-share-link">Partager</a>
+      <a data-url="http://yoursite.com/2017/07/01/linux_network_namespace/" data-id="cj4lh2yr90000prfyqyws9nwn" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux-namespace/">linux namespace</a></li></ul>
@@ -124,7 +123,7 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Mot-clés</h3>
+    <h3 class="widget-title">Tags</h3>
     <div class="widget">
       <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux-namespace/">linux namespace</a></li></ul>
     </div>
@@ -134,7 +133,7 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Nuage de mot-clés</h3>
+    <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
       <a href="/tags/linux-namespace/" style="font-size: 10px;">linux namespace</a>
     </div>
@@ -153,7 +152,7 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Articles récents</h3>
+    <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
         
@@ -174,7 +173,7 @@
   <div class="outer">
     <div id="footer-info" class="inner">
       &copy; 2017 Duan Bing<br>
-      Propulsé by <a href="http://hexo.io/" target="_blank">Hexo</a>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
     </div>
   </div>
 </footer>
