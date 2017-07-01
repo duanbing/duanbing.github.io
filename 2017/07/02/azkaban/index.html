@@ -14,7 +14,7 @@
 <meta property="og:description" content="azkanban是apache开源的一个离线作业调度系统，也称为DAG调度系统。最初是由linkedin开源的，用于解决hadoop的任务依赖（从ETL任务到数据分析任务等）的问题。本文先简单介绍下azkaban本身，然后重点介绍下azkaban的集群模式和设计思路。 Azkaban的架构非常简单。主要包含3部分：  Relational Database (MySQL) AzkabanWebSe">
 <meta property="og:image" content="http://webpaas.com/usr/uploads/2016/11/3803036613.png">
 <meta property="og:image" content="http://webpaas.com/usr/uploads/2016/11/959096803.png">
-<meta property="og:updated_time" content="2017-07-01T16:30:41.000Z">
+<meta property="og:updated_time" content="2017-07-01T16:32:01.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="azkaban集群模式介绍">
 <meta name="twitter:description" content="azkanban是apache开源的一个离线作业调度系统，也称为DAG调度系统。最初是由linkedin开源的，用于解决hadoop的任务依赖（从ETL任务到数据分析任务等）的问题。本文先简单介绍下azkaban本身，然后重点介绍下azkaban的集群模式和设计思路。 Azkaban的架构非常简单。主要包含3部分：  Relational Database (MySQL) AzkabanWebSe">
@@ -109,14 +109,12 @@
 </ul>
 </li>
 <li><p>AzkabanExecutorServer</p>
-<blockquote>
 <ul>
 <li>作业流（flow）执行 </li>
 <li>执行器调度：将不同的flow调度到不同的executor上</li>
 <li>作业插件管理： 支持多种作业类型</li>
 <li>存储日志</li>
 </ul>
-</blockquote>
 </li>
 </ul>
 <p>在3.0以后，azkaban支持了多执行器模式。其实支持multiexecutor还是个艰难的过程，2015年1月份(其实之前2.6版本之后将近一年都没有发布新的特性），hluu就提出了支持多执行器的思路，但是因为linkedin的作业调度系统逐渐转向了apache的另外一个项目Oozie（<a href="https://github.com/azkaban/azkaban/issues/439" target="_blank" rel="external">参考</a>），所以当时一度无人对azkaban进行维护。但是这个时候，包括微软的一些部门在内，都关注并使用了azkaban，davidzchen才开始再次考虑azk的规划。 直到2015年3月，hluu终于将<a href="https://github.com/azkaban/azkaban/pull/477" target="_blank" rel="external">modify Executor side to support Multiple executor feature</a>这个pr合并到了主干，并且在3.0版本发布多执行器模式的feature。</p>
@@ -160,7 +158,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/azkaban/" data-id="cj4li80wm0003x6fyl4zhvbd2" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/07/02/azkaban/" data-id="cj4li9qyw0001xmfyt0o3gb1j" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/job-flow/">job,flow</a></li></ul>
