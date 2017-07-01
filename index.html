@@ -61,6 +61,165 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-cgroup-test" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/07/02/cgroup-test/" class="article-date">
+  <time datetime="2017-07-01T16:04:17.000Z" itemprop="datePublished">2017-07-02</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/07/02/cgroup-test/">cgroup功能完全测试</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h3><h4 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h4><p>centos7  单核<br>virtualbox </p>
+<h4 id="测试项目"><a href="#测试项目" class="headerlink" title="测试项目"></a>测试项目</h4><ul>
+<li>cpu 配额以及硬限</li>
+<li>memory 限制以及OOM</li>
+<li>net_cls 网速限制</li>
+<li>blkio 配额以及影限</li>
+</ul>
+<h4 id="安装和启动cgroup："><a href="#安装和启动cgroup：" class="headerlink" title="安装和启动cgroup："></a>安装和启动cgroup：</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">yum install -y libcgroup-tools.x86_64</div></pre></td></tr></table></figure>
+<p>启动<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">service cgconfig start或者systemctl start cgconfig.service</div></pre></td></tr></table></figure></p>
+<p>基本的使用命令这里就不做详细解释了，参见：</p>
+<p><a href="https://access.redhat.com/documentation/zh-CN/Red_Hat_Enterprise_Linux/6/html/Resource_Management_Guide/" target="_blank" rel="external">https://access.redhat.com/documentation/zh-CN/Red_Hat_Enterprise_Linux/6/html/Resource_Management_Guide/</a></p>
+<h4 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h4><h4 id="cpu"><a href="#cpu" class="headerlink" title="cpu"></a>cpu</h4><ul>
+<li>cpu软限：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">cgset -r cpu.shares=512 test1</div><div class="line">cgset -r cpu.shares=128 test2</div><div class="line"></div><div class="line">	loop=0</div><div class="line">while (($loop &lt; 4)) </div><div class="line">	do</div><div class="line">	cgexec -g cpu:test1 ./deadloop &gt; /dev/null &amp;</div><div class="line">((loop++))</div><div class="line">	done</div><div class="line"></div><div class="line">while (($loop &lt; 4 + 4)) </div><div class="line">	do</div><div class="line">	cgexec -g cpu:test2 ./deadloop2 &gt; /dev/null &amp;</div><div class="line">((loop++))</div><div class="line">	done</div></pre></td></tr></table></figure>
+<pre><code>完整在这里:[cgroup完整测试脚本](https://github.com/duanbing/mysh/blob/master/test_cgroup/cpu/test1.sh) 
+
+top打开可以看到结果：
+![clipboard.png][1]
+
+结论： 可以看到test1这个进程组和test2这个进程组的cpu使用量比例为： 3:1
+
+* cpu  hardlimit硬限
+cgroups里面 可以用cpu.cfs_period_us和cpu.cfs_quota_us来限制进程组中进程单位时间可以使用的cpu时间。cfs就是“完全公平调度”，cpu.cfs_period_us是时间周期，默认为100000us，cfs_quota_us就是这期间内可以使用的cpu时间，-1表示无限制。
+
+设置如下：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"># 设置test1的cpu使用时间为50%,默认cpu.cfs_period=100000us</div><div class="line"></div><div class="line">	cgset -r cpu.cfs_quota_us=50000 test1</div><div class="line">	cgset -r cpu.cfs_quota_us=25000 test2</div></pre></td></tr></table></figure>
+
+结果如下：
+![clipboard2.png][2]
+
+可以看到， test1的四个deadloop进程加起来大约50%左右的cpu，  test2总共消耗25%左右的cpu。注意我这里是单核。 多核的话，一个cgroup可以用到n倍的cpu时间。
+
+
+* cpuset 限制使用的核心节点和内存节点
+cpuset.cpus、cpuset.mems 就是用来限制进程可以使用的 cpu 核心和内存节点的。  这里因为是单核。 所以没有测试这个
+
+大家可以参考：[用 cgroups 管理 cpu 资源](http://xiezhenye.com/2013/10/%E7%94%A8-cgroups-%E7%AE%A1%E7%90%86-cpu-%E8%B5%84%E6%BA%90.html)
+</code></pre><h4 id="memory测试"><a href="#memory测试" class="headerlink" title="memory测试"></a>memory测试</h4><pre><code>* 内存限制
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"># 限制内存和虚拟内存</div><div class="line">	cgset -r memory.limit_in_bytes=16M test1</div><div class="line">	cgset -r memory.memsw.limit_in_bytes=16M test1</div><div class="line"># 关闭oom killer</div><div class="line">#cgset -r memory.oom_control=1 test1</div><div class="line"></div><div class="line">	cgexec -g memory:test1 ./mem_alloc</div><div class="line">	cgexec -g memory:test2 dd if=/dev/zero of=./file.256M bs=1M count=256</div></pre></td></tr></table></figure>
+
+可以看到结果如下：
+![clipboard.png][3]
+test1 这个cgroup因为内存超限，被oom kill了。 查看test2的内存使用情况如下：
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[root@localhost test2]# cat memory.limit_in_bytes </div><div class="line">16777216</div></pre></td></tr></table></figure>
+
+* 限制网卡
+
+参考：[http://lxr.free-electrons.com/source/Documentation/cgroups/net_cls.txt](http://lxr.free-electrons.com/source/Documentation/cgroups/net_cls.txt)
+</code></pre><h4 id="工具介绍-tc-iperf"><a href="#工具介绍-tc-iperf" class="headerlink" title="工具介绍 tc,iperf"></a>工具介绍 tc,iperf</h4><pre><code>* tc（traffic controller）是Linux下面的网络流量控制工具，详细说明见[Linux 的高级路由和流量控制](http://lartc.org/LARTC-zh_CN.GB2312.pdf)。
+TC基本思想是Linux内核首先把需要发送的数据包交给TC队列，由TC进行排队，然后内核再从TC队列中取出，通过网卡驱动发送出去。 TC有三个核心概念：
+
+qdisc(queueing discipline) 规则队列：可以是树形
+class 类别：附属于一个qdisc
+filiter 过滤器：映射指定标签的数据包到qdisc
+qdisc和class的命名方式以： major number : minor number，qdisc占用major，class占用minor。
+
+简单测试：
+针对网卡enp0s3,首先清理之前的qdisc，然后新建major number为10的qdisc。
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">tc qdisc del dev enp0s3</div><div class="line">tc qdisc add dev enp0s3 handle 1: htb</div></pre></td></tr></table></figure>
+
+在qdics上增加一个分类，设置带宽为100Mbit。创建过滤器，使用cgroup标签：
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">tc class add dev enp0s3 parent 1: classid 1:1 htb rate 100mbit</div><div class="line">								  tc filter add dev enp0s3 parent 1: protocol ip prio 1 handle 1: cgroup</div></pre></td></tr></table></figure>
+
+                                                             如果修改带宽限制：
+                                                             <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">tc class change dev enp0s3 parent 1: classid 1:1 htb  rate 200mbit</div></pre></td></tr></table></figure>
+
+                                                                                                     创建一个net_cls 的组，上面tc创建的class的classid是10:1 ，这个id在cgroup以0xAAAABBBB方式表示，其中AAAA是major number，BBBB是minor number，执行：
+                                                                                                     <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">cgcreate -g net_cls:test1</div><div class="line">echo 0x100001 &gt; /sys/fs/cgroup/net_cls/test1/net_cls.classid</div></pre></td></tr></table></figure>
+
+                                                                                                     * iperf 
+                                                                                                     iperf  是一个网络性能测试工具。Iperf可以测试TCP和UDP带宽质量。Iperf可以测量最大TCP带宽，具有多种参数和UDP特性。iperf可以报告带宽，延迟抖动和数据包丢失。
+
+                                                                                                     iperf -s 就可以启动服务端，  iperf -c $ip 就能启动客户端进行测试
+
+                                                                                                     测试结果如下：
+
+                                                                                                     ![clipboard.png][4]
+                                                                                                     可以看到， iperf测试的结果是在10m左右的网速。
+
+
+                                                                                                     参考： [cgroup+tc对单个进程进行带宽限制](http://4249964.blog.51cto.com/4239964/1563868)
+</code></pre><h4 id="blkio测试"><a href="#blkio测试" class="headerlink" title="blkio测试"></a>blkio测试</h4><pre><code>* 设置不同cg的io相对速度
+设置如下：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">																										 cgset -r blkio.weight=200 test1</div><div class="line">																										 cgset -r blkio.weight=400 test2</div><div class="line"></div><div class="line">#注意blkio对page cache无效，所以这只对direct io进行设置</div><div class="line"></div><div class="line">																										 rm -rf ./2g*</div><div class="line"></div><div class="line">																										 cgexec -g blkio:test1 dd if=/dev/sda of=./2g oflag=direct bs=1M count=1014 &amp;</div><div class="line">																										 cgexec -g blkio:test2 dd if=/dev/sda of=./2g2 oflag=direct bs=1M count=1024 &amp;</div></pre></td></tr></table></figure>
+
+安装iotop查看单个进程的io
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">yum -y install iotop</div></pre></td></tr></table></figure>
+
+结果如下：
+
+![clipboard.png][5]
+可以看出 test1 和test2的io速度保持在1:2左右。
+
+* 限制io的速度
+
+我们通过blkio.throttle.write_bps_device来限制每秒的写字节上限。格式为：
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">major:minor operations_per_second</div></pre></td></tr></table></figure>
+
+步骤如下：
+
+1， 查看设备的major和minor。  我直接限制当前所在分区的读写io。
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">[root@localhost blkio]# df -h</div><div class="line">Filesystem               Size  Used Avail Use% Mounted on</div><div class="line">/dev/mapper/centos-root   14G  9.6G  4.4G  69% /</div><div class="line">devtmpfs                 913M     0  913M   0% /dev</div><div class="line">tmpfs                    921M     0  921M   0% /dev/shm</div><div class="line">tmpfs                    921M  8.4M  913M   1% /run</div><div class="line">tmpfs                    921M     0  921M   0% /sys/fs/cgroup</div><div class="line">/dev/sda1                497M  134M  363M  27% /boot</div><div class="line">[root@localhost blkio]# ls -l /dev/mapper/centos-root </div><div class="line">lrwxrwxrwx. 1 root root 7 Mar 15 04:59 /dev/mapper/centos-root -&gt; ../dm-1</div><div class="line">[root@localhost blkio]# ls -l /dev/dm-1 </div><div class="line">brw-rw----. 1 root disk 253, 1 Mar 15 04:59 /dev/dm-1</div></pre></td></tr></table></figure>
+
+2, 设置test1这个组的写上线为1M
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">cgset -r blkio.throttle.write_bps_device=&quot;253:1 1048576&quot; test1</div></pre></td></tr></table></figure>
+
+3, 测试结果如下：
+
+![clipboard.png][6]
+可见 test1的写速度长期维持在1M左右
+</code></pre><h3 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h3><pre><code>各项结果都比较符合预期。 
+测试代码在 git上： 
+[container技术剖析](https://github.com/duanbing/mysh.git)
+
+[1]: http://www.webpaas.com/usr/uploads/2015/03/3712925605.png
+[2]: http://www.webpaas.com/usr/uploads/2015/03/1326954497.png
+[3]: http://www.webpaas.com/usr/uploads/2015/03/220808703.png
+[4]: http://www.webpaas.com/usr/uploads/2015/03/2860866051.png
+[5]: http://www.webpaas.com/usr/uploads/2015/03/3921482247.png
+[6]: http://www.webpaas.com/usr/uploads/2015/03/2340083504.png
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/07/02/cgroup-test/" data-id="cj4lhb24v0000ryfyeznoreem" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-drf" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2017/07/02/drf/" class="article-date">
@@ -124,7 +283,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/drf/" data-id="cj4lh7jmq0001rffy1b93fkvt" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/07/02/drf/" data-id="cj4lhb2540002ryfyevj6bnll" class="article-share-link">Share</a>
       
       
     </footer>
@@ -182,7 +341,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/01/linux_network_namespace/" data-id="cj4lh7jmj0000rffy2he9nncv" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/07/01/linux_network_namespace/" data-id="cj4lhb2510001ryfywd2gnzvt" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux-namespace/">linux namespace</a></li></ul>
@@ -236,6 +395,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2017/07/02/cgroup-test/">cgroup功能完全测试</a>
+          </li>
         
           <li>
             <a href="/2017/07/02/drf/">drf算法分析</a>
