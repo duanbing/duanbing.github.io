@@ -61,6 +61,113 @@
       <div class="outer">
         <section id="main">
   
+    <article id="blog-azkaban" class="article article-type-blog" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/07/02/azkaban/" class="article-date">
+  <time datetime="2017-07-01T16:23:38.000Z" itemprop="datePublished">2017-07-02</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/07/02/azkaban/">azkaban集群模式介绍</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>azkanban是apache开源的一个离线作业调度系统，也称为DAG调度系统。最初是由linkedin开源的，用于解决hadoop的任务依赖（从ETL任务到数据分析任务等）的问题。本文先简单介绍下azkaban本身，然后重点介绍下azkaban的集群模式和设计思路。</p>
+<p>Azkaban的架构非常简单。主要包含3部分：</p>
+<ul>
+<li>Relational Database (MySQL)</li>
+<li>AzkabanWebServer</li>
+<li>AzkabanExecutorServer</li>
+</ul>
+<p><img src="http://webpaas.com/usr/uploads/2016/11/3803036613.png" alt="azkaban2overviewdesign.png"></p>
+<p>其中介绍下2个主要部分：</p>
+<ul>
+<li><p>AzkabanWebServer</p>
+<blockquote>
+<ul>
+<li>project management：管理project</li>
+<li>authentication： 支持SSL鉴权</li>
+<li>scheduler： 支持定时调度，支持SLA设定</li>
+<li>monitoring ： 可以监控任务的执行过程</li>
+<li>user interface</li>
+</ul>
+</blockquote>
+</li>
+<li><p>AzkabanExecutorServer</p>
+<blockquote>
+<ul>
+<li>作业流（flow）执行 </li>
+<li>执行器调度：将不同的flow调度到不同的executor上</li>
+<li>作业插件管理： 支持多种作业类型</li>
+<li>存储日志</li>
+</ul>
+</blockquote>
+</li>
+</ul>
+<p>在3.0以后，azkaban支持了多执行器模式。其实支持multiexecutor还是个艰难的过程，2015年1月份(其实之前2.6版本之后将近一年都没有发布新的特性），hluu就提出了支持多执行器的思路，但是因为linkedin的作业调度系统逐渐转向了apache的另外一个项目Oozie（<a href="https://github.com/azkaban/azkaban/issues/439" target="_blank" rel="external">参考</a>），所以当时一度无人对azkaban进行维护。但是这个时候，包括微软的一些部门在内，都关注并使用了azkaban，davidzchen才开始再次考虑azk的规划。 直到2015年3月，hluu终于将<a href="https://github.com/azkaban/azkaban/pull/477" target="_blank" rel="external">modify Executor side to support Multiple executor feature</a>这个pr合并到了主干，并且在3.0版本发布多执行器模式的feature。</p>
+<p>2.5版本下面，所有的flow都是调度在executor本地运行。这样带来的问题也很明显：</p>
+<ol>
+<li>job数量受限于Executor所在机器的性能</li>
+<li>job并没有资源限制，极易出现资源竞争</li>
+</ol>
+<p>所以3.0重点解决这2个问题。那我们来看看，当前主干版本的集群化思路是怎么样的。基本上是如下一个problem-solving的思路：</p>
+<ol>
+<li>扩展Executor到多个节点，并且将任务的状态放到一个共享的存储上去（这里显然就是mysql了）</li>
+<li>web-server感知多个Executor，并且通过一定的调度算法将任务分配上去。</li>
+<li>被调度节点收到调度信息，加载任务，执行。</li>
+</ol>
+<p>那么按照这个思路来看azk的集群化思路。下面就是整个调度过程的函数调用图，去掉了各种细枝末节。<br><img src="http://webpaas.com/usr/uploads/2016/11/959096803.png" alt="CB9EB850-05EF-4025-8EFA-57AB66C04109.png"></p>
+<p>在新建ExecutorManager对象的时候，就已经setupMultiExecutorMode了。在setupMultiExecutorMode里面，启动线程，主要执行processQueuedFlows函数。processQueuedFlows每次从queuedFlows取出头元素，然后选择对应的Executor去跑任务。</p>
+<p>这里就涉及到Executor的选择算法。首先，azk设置一个activeExecutorsRefreshWindow，也就是刷新Executor排队顺序的时间，怎么理解，这里其实就是每隔一段时间去对excutor从新排序。   </p>
+<p>如果发现时间距离上次重排超过前面说的时间窗口，那就调用refreshExecutors()来进行重排。</p>
+<p>refreshExecutors()里面会提交获取executor的/serverStatistics接口给executorInforRefresherService这个线程池来获取Executor的信息，结果格式如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line">	&quot;remainingMemoryPercent&quot; : 75.46393753683981,</div><div class="line">		&quot;remainingMemoryInMB&quot; : 48475,</div><div class="line">		&quot;remainingFlowCapacity&quot; : 30,</div><div class="line">		&quot;numberOfAssignedFlows&quot; : 0,</div><div class="line">		&quot;lastDispatchedTime&quot; : 1479278404652,</div><div class="line">		&quot;cpuUsage&quot; : 0.99</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这样，通过Future拿到结果之后，就可以用于排序了。</p>
+<p>接下来就进入到selectExecutorAndDispatchFlow选择执行器，并将任务提交给它。调用filterList来对执行器进行过滤，调用comparatorWeightsMap来对Executor进行排序。</p>
+<p>这里首先我们来回顾下对应的配置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">azkaban.executorselector.filters=StaticRemainingFlowSize,MinimumFreeMemory,CpuStatus</div><div class="line"></div><div class="line">azkaban.executorselector.comparator.NumberOfAssignedFlowComparator=1</div><div class="line"></div><div class="line">azkaban.executorselector.comparator.Memory=1</div><div class="line"></div><div class="line">azkaban.executorselector.comparator.LastDispatched=1</div><div class="line"></div><div class="line">azkaban.executorselector.comparator.CpuUsage=1</div></pre></td></tr></table></figure></p>
+<p>其中开始在初始化ExecutorManager的时候，根据是否是多执行器模式，进行了setupMultiExecutorMode，里面会初始化filterList和comparatorWeightsMap</p>
+<p>其中fiter要保证不同的资源满足下面要求：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">MINIMUM_FREE_MEMORY &gt;= 6 * 1024</div><div class="line">MAX_CPU_CURRENT_USAGE &lt;= 95</div><div class="line">stats.getRemainingFlowCapacity() &gt; 0</div></pre></td></tr></table></figure>
+<p>分别表示内存剩余，cpu利用率以及剩余任务数，任务数默认最多是30个。</p>
+<p>comparatorWeightsMap的key和value其实就是上面的配置,value就是这个对比项的权重。实际对比的代码如下：</p>
+<pre><code>Collection&lt;FactorComparator&lt;T&gt;&gt; comparatorList = this.factorComparatorList.values();
+for (FactorComparator&lt;T&gt; comparator :comparatorList){
+    int result = comparator.compare(object1, object2);
+    result1  = result1 + (result &gt; 0 ? comparator.getWeight() : 0);
+    result2  = result2 + (result &lt; 0 ? comparator.getWeight() : 0);
+    logger.debug(String.format(&quot;[Factor: %s] compare result : %s (current score %s vs %s)&quot;,   comparator.getFactorName(), result, result1, result2));}
+</code></pre><p>针对每一项对比项，如果对赢了，就把对应的权重加给他。  最后选出权重最大的那个Executor，去调度flow。</p>
+<p>这就是整个过程。<br>最后大家也可以在百度脑图上看到具体的分析过程：</p>
+<ul>
+<li><a href="http://naotu.baidu.com/file/93feae48867a4af27460ca04a72b729a?token=c0ff1e64b76a8ff3" target="_blank" rel="external">web-server</a></li>
+<li><a href="http://naotu.baidu.com/file/2b71900d3c5cf577a4503b52761439a0?token=d68c6315396e7273" target="_blank" rel="external">exec-server</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/07/02/azkaban/" data-id="cj4li0omt0000vpfyn5x0frmn" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/job-flow/">job,flow</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="blog-go1-5gc" class="article article-type-blog" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2017/07/02/go1-5gc/" class="article-date">
@@ -96,7 +203,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/go1-5gc/" data-id="cj4lhxt8d0003v7fy0hfee157" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/07/02/go1-5gc/" data-id="cj4li0on50004vpfy7ixlbw4i" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/golang/">golang</a></li></ul>
@@ -170,7 +277,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/overlay/" data-id="cj4lhxt8k0005v7fyonhyp4jj" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/07/02/overlay/" data-id="cj4li0ond0008vpfy7ahrnvwy" class="article-share-link">Share</a>
       
       
     </footer>
@@ -270,7 +377,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/cgroup-test/" data-id="cj4lhxt800000v7fy95cm10oj" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/07/02/cgroup-test/" data-id="cj4li0omz0001vpfytwh223cj" class="article-share-link">Share</a>
       
       
     </footer>
@@ -343,7 +450,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/drf/" data-id="cj4lhxt860001v7fy4uv4kzsf" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/07/02/drf/" data-id="cj4li0on40003vpfy1bckvm3i" class="article-share-link">Share</a>
       
       
     </footer>
@@ -401,7 +508,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/01/linux_network_namespace/" data-id="cj4lhxt880002v7fyf3771nd9" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/07/01/linux_network_namespace/" data-id="cj4li0on80005vpfy1jttqr9q" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux-namespace/">linux namespace</a></li></ul>
@@ -425,7 +532,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/golang/">golang</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux-namespace/">linux namespace</a></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/golang/">golang</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/job-flow/">job,flow</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux-namespace/">linux namespace</a></li></ul>
     </div>
   </div>
 
@@ -435,7 +542,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/golang/" style="font-size: 10px;">golang</a> <a href="/tags/linux-namespace/" style="font-size: 10px;">linux namespace</a>
+      <a href="/tags/golang/" style="font-size: 10px;">golang</a> <a href="/tags/job-flow/" style="font-size: 10px;">job,flow</a> <a href="/tags/linux-namespace/" style="font-size: 10px;">linux namespace</a>
     </div>
   </div>
 
@@ -457,6 +564,10 @@
       <ul>
         
           <li>
+            <a href="/2017/07/02/azkaban/">azkaban集群模式介绍</a>
+          </li>
+        
+          <li>
             <a href="/2017/07/02/go1-5gc/">go1.5 GC分析</a>
           </li>
         
@@ -470,10 +581,6 @@
         
           <li>
             <a href="/2017/07/02/drf/">drf算法分析</a>
-          </li>
-        
-          <li>
-            <a href="/2017/07/01/linux_network_namespace/">linux namespace学习</a>
           </li>
         
       </ul>
