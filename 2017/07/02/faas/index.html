@@ -1,11 +1,261 @@
-extends includes/layout
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>faas介绍 | Container based Platform as a Service</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="是什么（What）目前包括主要的云计算服务商都推出了自己的FaaS服务，例如AWS的lambda，Google和Azure的Functions,IBM Bluemix的OpenWhisk, Docker社区也推出了基于k8s的https://github.com/fission/fission方案。国内的腾讯（SCF，无服务器云函数）和阿里（FunctionCompute）也都在今年几乎同时（20">
+<meta name="keywords" content="faas">
+<meta property="og:type" content="article">
+<meta property="og:title" content="faas介绍">
+<meta property="og:url" content="http://yoursite.com/2017/07/02/faas/index.html">
+<meta property="og:site_name" content="Container based Platform as a Service">
+<meta property="og:description" content="是什么（What）目前包括主要的云计算服务商都推出了自己的FaaS服务，例如AWS的lambda，Google和Azure的Functions,IBM Bluemix的OpenWhisk, Docker社区也推出了基于k8s的https://github.com/fission/fission方案。国内的腾讯（SCF，无服务器云函数）和阿里（FunctionCompute）也都在今年几乎同时（20">
+<meta property="og:image" content="http://webpaas.com/usr/uploads/2017/06/3984893645.png">
+<meta property="og:image" content="http://webpaas.com/usr/uploads/2017/06/4094717606.png">
+<meta property="og:image" content="http://webpaas.com/usr/uploads/2017/06/459164339.jpeg">
+<meta property="og:image" content="http://webpaas.com/usr/uploads/2017/06/3600822644.png">
+<meta property="og:updated_time" content="2017-07-01T16:27:09.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="faas介绍">
+<meta name="twitter:description" content="是什么（What）目前包括主要的云计算服务商都推出了自己的FaaS服务，例如AWS的lambda，Google和Azure的Functions,IBM Bluemix的OpenWhisk, Docker社区也推出了基于k8s的https://github.com/fission/fission方案。国内的腾讯（SCF，无服务器云函数）和阿里（FunctionCompute）也都在今年几乎同时（20">
+<meta name="twitter:image" content="http://webpaas.com/usr/uploads/2017/06/3984893645.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Container based Platform as a Service" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Container based Platform as a Service</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="blog-faas" class="article article-type-blog" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/07/02/faas/" class="article-date">
+  <time datetime="2017-07-01T16:25:47.000Z" itemprop="datePublished">2017-07-02</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      faas介绍
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="是什么（What）"><a href="#是什么（What）" class="headerlink" title="是什么（What）"></a>是什么（What）</h2><p>目前包括主要的云计算服务商都推出了自己的FaaS服务，例如AWS的lambda，Google和Azure的Functions,IBM Bluemix的OpenWhisk, Docker社区也推出了基于k8s的<a href="https://github.com/fission/fission方案。国内的腾讯（SCF，无服务器云函数）和阿里（FunctionCompute）也都在今年几乎同时（2017/4/26）推出了Functions计算，并且都自称“国内第一”。" target="_blank" rel="external">https://github.com/fission/fission方案。国内的腾讯（SCF，无服务器云函数）和阿里（FunctionCompute）也都在今年几乎同时（2017/4/26）推出了Functions计算，并且都自称“国内第一”。</a> 因此，我们看到大家都对“serverless”以及“FaaS”产生了浓厚的兴趣。 serverless是一个非常形象化的概念，要实现serverless，目前主流的方式是结合BaaS和FaaS技术来实现。 BaaS这次不做详细介绍，BaaS即 Backend as a Service, 简单理解就是通过API的形式对外提供服务，我们知道IaaS托管了包括硬件在内的所有功能,PaaS托管了包括runtime以下的所有功能，也包括中间件的提供，SaaS讲究开箱即用，直接面向终端用户，与开发者关系不同，那么BaaS是后端即服务，其实我理解本质上也是属于PaaS的一种，但是它是通过API的形式，开放不同细分领域的功能，例如推送，检索等服务，让用户实现“前端+BaaS”完成整体服务的构建。</p>
+<p>那究竟什么是FaaS呢？了解到FaaS，肯定大家是先知道AWS的lambda。lambda通过然让用户上传逻辑清晰的代码段（目前支持Node.js (JavaScript)、Python、Java (兼容 Java 8) 和 C# (.NET Core) ），然后支持通过Event或者Ad Hoc类的request进行trigger，运行用户上传的代码。 产生对应的结果存放在shared storage上，或者调用third parth的api（也就是BaaS）完成进一步的逻辑处理。<br><img src="http://webpaas.com/usr/uploads/2017/06/3984893645.png" alt="image2017-6-38-52-27.png"><br>没错，FaaS用起来就是这么简单。这个时候，我们有几个其他的关键feature要指明：</p>
+<ol>
+<li>“函数”退出之后，本次计算结束</li>
+<li>“函数”必须是完全无状态的，虽然函数的执行环境可以配置一定的磁盘，内存，但是函数执行完成之后，整个环境就会销毁。</li>
+<li>FaaS是按需使用，按使用计费的： 如果你是购买VM或者container来进行计算，那么你要付费的是整个VM/container的生命周期内的资源消耗，使用了FaaS你只需要按照你请求过来，代码运行需要的资源大小，代码运行的时间进行收费。真正的做到了按需使用，按使用计费。</li>
+<li>FaaS是能够保证业务代码的执行是快速启动的：跟语言本身有关，如果要加一个期限，在这里给了一个advice :20ms内启动instance。</li>
+<li><p>FaaS是能够自动快速scale out的： </p>
+<p>那么，我们就要对比下了，FaaS和PaaS的关系是怎么样的？ 我们从以上几个特点分析即可。如果你的PaaS能够完全做到，那么你的PaaS就已经支持FaaS了。</p>
+</li>
+</ol>
+<h2 id="有什么用（Why）"><a href="#有什么用（Why）" class="headerlink" title="有什么用（Why）"></a>有什么用（Why）</h2><p>那FaaS有什么优势呢？本质上来讲，云计算本身就是一个serverless的过程，例如IaaS托管了你的硬件，PaaS托管了你的Runtime和OS以及midware，那么FaaS本质上让你不用去实现软件内部的业务调度逻辑了。<br><img src="http://webpaas.com/usr/uploads/2017/06/4094717606.png" alt="image2017-6-38-56-43.png"><br>例如，你已经不需要什么FIFO机制或者Libev来实现业务逻辑的复杂调度了。云服务提供商本来就是需要提供用户需要的计算（形式）。具体的好处体现在以下几点:</p>
+<ol>
+<li>大幅度的降低ad hoc类业务的服务器成本： 可以想象你的成本，由一个连续函数按照时间积分，变成连续函数上的离散点的数值和，相当于去掉了一个时间维度，其结果肯定是大大减少了。</li>
+<li>“事后计费”，极大的减少了资源预估的复杂度。</li>
+<li>系统运维成本<br>a.不需要关心基础设施运维<br>b.不需要关心业务的横向伸缩<br>c.业务代码开发和部署简单（这里包含研发成本）<br>d.Ops只需要关注3rd API的可用性</li>
+<li><p>系统可用性<br>a.通用逻辑依赖第三方服务有SLA保障<br>b.自身架构清晰</p>
+<p>当然这里也提下FaaS存在的一些问题：</p>
+<ul>
+<li>安全，安全，安全。  你越多的功能组件交给3rd party，你存在的安全风险就越大。最近顺丰和菜鸟闹掰的事件是一个典型的例子。</li>
+<li>高度依赖： aws提供了自身很多service给lambda用，aliyun提供了很多service给函数计算用，你如果要跨云迁移（部署）你的业务，成本非常高。</li>
+<li>集成测试： 除非3rd提供了测试的账号，或者软件自身实现了debug逻辑，否则集成测试无从下手。</li>
+</ul>
+</li>
+</ol>
+<h2 id="如何实现（How）"><a href="#如何实现（How）" class="headerlink" title="如何实现（How）"></a>如何实现（How）</h2><h3 id="1-代码管理和分级发布"><a href="#1-代码管理和分级发布" class="headerlink" title="1.代码管理和分级发布"></a>1.代码管理和分级发布</h3><p>  目前AWS的lambda的函数的版本只有一个。</p>
+<h3 id="2-流量分发"><a href="#2-流量分发" class="headerlink" title="2.流量分发"></a>2.流量分发</h3><p>  首先流量从负载均衡器（包括4或者7层的负载均衡器）转发到Api Gateway。</p>
+<p>  典型的实现都提供Api Gateway（AG）。AG负责请求转发、合成和协议转换。 同时在这个基础上，提供实例自动注册，流量负载均衡以及防攻击。目前BOAS的接入层可以满足这个需求。<br>  <img src="http://webpaas.com/usr/uploads/2017/06/459164339.jpeg" alt="e79c6981155cf13f982bd23464bb66bf7080bf01.jpeg"></p>
+<h3 id="3-计费"><a href="#3-计费" class="headerlink" title="3.计费"></a>3.计费</h3><p>  因为需要处理突发请求，因此采用事后计费是合理的。事后计费，可以采用日志统计的方式进行计费。计费的因素目前主流因素包括：</p>
+<ul>
+<li>请求次数：</li>
+<li>资源使用： 套餐大小*使用时间<br>目前来看AWS和ali FC收费方式和价格完全一样。  大致如下：<br><img src="http://webpaas.com/usr/uploads/2017/06/3600822644.png" alt="image2017-6-316-58-29.png"><h3 id="4-计算引擎"><a href="#4-计算引擎" class="headerlink" title="4.计算引擎"></a>4.计算引擎</h3>请求经过Api Gateway，到达消息队列，计算引擎从消息队列取出消息，然后创建docker container执行用户的函数。基本思路是每个函数创建一个service，通过自动弹性伸缩调整service的副本，然后每个container（副本）内部，通过一个单独的进程来管理本container接收到的执行请求，请求结果收集等。<br>通过Docker Container作为函数运行的runtime。 理论上Docker Image可以支持目前几乎所有的语言和操作系统环境，但是考虑到start latency，我们需要保证ms级别启动用户的函数。那么本质上，启动消耗的时间主要是在安装操作系统和启动内核上，因此，我们可以通过预装和提前启动来解决启动内核的耗时，也就是准备好一批安装好标准操作系统的机器；针对不同的语言，同样可以提前准备好对应的语言环境。通过container启动的时候，将container的rootfs bind到宿主host的rootfs。这个方式速度很快，但是共享了操作系统，打破了隔离的要求。<br>计算引擎主要是从消息队列里面取出请求，但是不进行ACK（这个时候需要消息消费需要支持At least once模式），然后创建docker container，运行请求对应的代码，执行完成之后，给当前消息回复ACK，删除消息。<br>同时，目前主流的FaaS都限制了函数执行的超时，例如对 AWS Lambda 进行的同步调用必须在 300 秒钟内执行完毕。默认的超时为 3 秒，但您可以将超时设置在 1 到 300 秒之间的任何值。</li>
+</ul>
+<h3 id="5-自动弹性伸缩"><a href="#5-自动弹性伸缩" class="headerlink" title="5. 自动弹性伸缩"></a>5. 自动弹性伸缩</h3><p>  监控Api Gateway里面每个函数的请求数，然后决定是否scale out / in  service的replica。</p>
+<h3 id="6-监控以及故障处理"><a href="#6-监控以及故障处理" class="headerlink" title="6.监控以及故障处理"></a>6.监控以及故障处理</h3><p>  如果一个函数在计算的时候，出现了硬件故障，这个时候消息还在消息队列，没有删除。</p>
+<h2 id="典型场景（Where）"><a href="#典型场景（Where）" class="headerlink" title="典型场景（Where）"></a>典型场景（Where）</h2><ul>
+<li>低频请求场景<br>物联网行业中，由于物联网设备传输数据量小，且往往是固定时间间隔进行数据传输，因此经常涉及低频请求场景。例如：物联网应用程序每分钟仅运行一次，每次运行50ms，这意味着CPU的使用率为0.1%/小时，这也意味着其实有1000个相同的应用可以共享计算资源。而Serverless架构下，用户可以购买每分钟100ms的资源来满足计算需求，通过这种方式就能够有效解决效率问题，降低使用成本。</li>
+<li>事件驱动的后端应用<br>这个aws有一个典型的处理S3上文件的例子。webhooks也是一个典型的例子。</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/07/02/faas/" data-id="cj4lk409a00046pfylmzg3xwx" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/faas/">faas</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2017/07/02/azkaban/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">azkaban集群模式介绍</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/faas/">faas</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/golang/">golang</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/job-flow/">job flow</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux-namespace/">linux namespace</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/overlayfs/">overlayfs</a></li></ul>
+    </div>
+  </div>
 
 
-block content
-  .post-item
-  h2.post-title-wrapper
-      p.post-title=page.title
-  if page.date && page.source !== 'about/index.md'
-      div.post-date
-        time(datetime=page.date.toJSON())=date(page.date, date_format)
-  .post-content!= page.content
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/faas/" style="font-size: 10px;">faas</a> <a href="/tags/golang/" style="font-size: 10px;">golang</a> <a href="/tags/job-flow/" style="font-size: 10px;">job flow</a> <a href="/tags/linux-namespace/" style="font-size: 10px;">linux namespace</a> <a href="/tags/overlayfs/" style="font-size: 10px;">overlayfs</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archiv</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/07/02/faas/">faas介绍</a>
+          </li>
+        
+          <li>
+            <a href="/2017/07/02/azkaban/">azkaban集群模式介绍</a>
+          </li>
+        
+          <li>
+            <a href="/2017/07/02/go1-5gc/">go1.5 GC分析</a>
+          </li>
+        
+          <li>
+            <a href="/2017/07/02/overlay/">overlayfs介绍</a>
+          </li>
+        
+          <li>
+            <a href="/2017/07/02/cgroup-test/">cgroup功能完全测试</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Duan Bing<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

@@ -1,19 +1,702 @@
-extends includes/layout
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
 
-block content
-    - var categoriesList = list_categories({ show_count: false })
-    - var tagsList = list_tags({ show_count: false })
-    - var archivesList = list_archives({ show_count: false })
+  
+  <title>Container based Platform as a Service</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="Container based Platform as a Service">
+<meta property="og:url" content="http://yoursite.com/index.html">
+<meta property="og:site_name" content="Container based Platform as a Service">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Container based Platform as a Service">
+  
+    <link rel="alternate" href="/atom.xml" title="Container based Platform as a Service" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
 
-    div.archive
-      each post in site.posts.sort('date', -1).toArray()
-        .archive-item
-          div
-            if post.link
-                a.archive-item__link(href=url_for(post.link) target="_blank")
-                  span.archive-item__link__title=post.title || 'No Title'
-            else
-                a.archive-item__link(href=url_for(post.path) target="_blank")
-                  span.archive-item__link__title=post.title || 'No Title'
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Container based Platform as a Service</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main">
+  
+    <article id="blog-faas" class="article article-type-blog" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/07/02/faas/" class="article-date">
+  <time datetime="2017-07-01T16:25:47.000Z" itemprop="datePublished">2017-07-02</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/07/02/faas/">faas介绍</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="是什么（What）"><a href="#是什么（What）" class="headerlink" title="是什么（What）"></a>是什么（What）</h2><p>目前包括主要的云计算服务商都推出了自己的FaaS服务，例如AWS的lambda，Google和Azure的Functions,IBM Bluemix的OpenWhisk, Docker社区也推出了基于k8s的<a href="https://github.com/fission/fission方案。国内的腾讯（SCF，无服务器云函数）和阿里（FunctionCompute）也都在今年几乎同时（2017/4/26）推出了Functions计算，并且都自称“国内第一”。" target="_blank" rel="external">https://github.com/fission/fission方案。国内的腾讯（SCF，无服务器云函数）和阿里（FunctionCompute）也都在今年几乎同时（2017/4/26）推出了Functions计算，并且都自称“国内第一”。</a> 因此，我们看到大家都对“serverless”以及“FaaS”产生了浓厚的兴趣。 serverless是一个非常形象化的概念，要实现serverless，目前主流的方式是结合BaaS和FaaS技术来实现。 BaaS这次不做详细介绍，BaaS即 Backend as a Service, 简单理解就是通过API的形式对外提供服务，我们知道IaaS托管了包括硬件在内的所有功能,PaaS托管了包括runtime以下的所有功能，也包括中间件的提供，SaaS讲究开箱即用，直接面向终端用户，与开发者关系不同，那么BaaS是后端即服务，其实我理解本质上也是属于PaaS的一种，但是它是通过API的形式，开放不同细分领域的功能，例如推送，检索等服务，让用户实现“前端+BaaS”完成整体服务的构建。</p>
+<p>那究竟什么是FaaS呢？了解到FaaS，肯定大家是先知道AWS的lambda。lambda通过然让用户上传逻辑清晰的代码段（目前支持Node.js (JavaScript)、Python、Java (兼容 Java 8) 和 C# (.NET Core) ），然后支持通过Event或者Ad Hoc类的request进行trigger，运行用户上传的代码。 产生对应的结果存放在shared storage上，或者调用third parth的api（也就是BaaS）完成进一步的逻辑处理。<br><img src="http://webpaas.com/usr/uploads/2017/06/3984893645.png" alt="image2017-6-38-52-27.png"><br>没错，FaaS用起来就是这么简单。这个时候，我们有几个其他的关键feature要指明：</p>
+<ol>
+<li>“函数”退出之后，本次计算结束</li>
+<li>“函数”必须是完全无状态的，虽然函数的执行环境可以配置一定的磁盘，内存，但是函数执行完成之后，整个环境就会销毁。</li>
+<li>FaaS是按需使用，按使用计费的： 如果你是购买VM或者container来进行计算，那么你要付费的是整个VM/container的生命周期内的资源消耗，使用了FaaS你只需要按照你请求过来，代码运行需要的资源大小，代码运行的时间进行收费。真正的做到了按需使用，按使用计费。</li>
+<li>FaaS是能够保证业务代码的执行是快速启动的：跟语言本身有关，如果要加一个期限，在这里给了一个advice :20ms内启动instance。</li>
+<li><p>FaaS是能够自动快速scale out的： </p>
+<p>那么，我们就要对比下了，FaaS和PaaS的关系是怎么样的？ 我们从以上几个特点分析即可。如果你的PaaS能够完全做到，那么你的PaaS就已经支持FaaS了。</p>
+</li>
+</ol>
+<h2 id="有什么用（Why）"><a href="#有什么用（Why）" class="headerlink" title="有什么用（Why）"></a>有什么用（Why）</h2><p>那FaaS有什么优势呢？本质上来讲，云计算本身就是一个serverless的过程，例如IaaS托管了你的硬件，PaaS托管了你的Runtime和OS以及midware，那么FaaS本质上让你不用去实现软件内部的业务调度逻辑了。<br><img src="http://webpaas.com/usr/uploads/2017/06/4094717606.png" alt="image2017-6-38-56-43.png"><br>例如，你已经不需要什么FIFO机制或者Libev来实现业务逻辑的复杂调度了。云服务提供商本来就是需要提供用户需要的计算（形式）。具体的好处体现在以下几点:</p>
+<ol>
+<li>大幅度的降低ad hoc类业务的服务器成本： 可以想象你的成本，由一个连续函数按照时间积分，变成连续函数上的离散点的数值和，相当于去掉了一个时间维度，其结果肯定是大大减少了。</li>
+<li>“事后计费”，极大的减少了资源预估的复杂度。</li>
+<li>系统运维成本<br>a.不需要关心基础设施运维<br>b.不需要关心业务的横向伸缩<br>c.业务代码开发和部署简单（这里包含研发成本）<br>d.Ops只需要关注3rd API的可用性</li>
+<li><p>系统可用性<br>a.通用逻辑依赖第三方服务有SLA保障<br>b.自身架构清晰</p>
+<p>当然这里也提下FaaS存在的一些问题：</p>
+<ul>
+<li>安全，安全，安全。  你越多的功能组件交给3rd party，你存在的安全风险就越大。最近顺丰和菜鸟闹掰的事件是一个典型的例子。</li>
+<li>高度依赖： aws提供了自身很多service给lambda用，aliyun提供了很多service给函数计算用，你如果要跨云迁移（部署）你的业务，成本非常高。</li>
+<li>集成测试： 除非3rd提供了测试的账号，或者软件自身实现了debug逻辑，否则集成测试无从下手。</li>
+</ul>
+</li>
+</ol>
+<h2 id="如何实现（How）"><a href="#如何实现（How）" class="headerlink" title="如何实现（How）"></a>如何实现（How）</h2><h3 id="1-代码管理和分级发布"><a href="#1-代码管理和分级发布" class="headerlink" title="1.代码管理和分级发布"></a>1.代码管理和分级发布</h3><p>  目前AWS的lambda的函数的版本只有一个。</p>
+<h3 id="2-流量分发"><a href="#2-流量分发" class="headerlink" title="2.流量分发"></a>2.流量分发</h3><p>  首先流量从负载均衡器（包括4或者7层的负载均衡器）转发到Api Gateway。</p>
+<p>  典型的实现都提供Api Gateway（AG）。AG负责请求转发、合成和协议转换。 同时在这个基础上，提供实例自动注册，流量负载均衡以及防攻击。目前BOAS的接入层可以满足这个需求。<br>  <img src="http://webpaas.com/usr/uploads/2017/06/459164339.jpeg" alt="e79c6981155cf13f982bd23464bb66bf7080bf01.jpeg"></p>
+<h3 id="3-计费"><a href="#3-计费" class="headerlink" title="3.计费"></a>3.计费</h3><p>  因为需要处理突发请求，因此采用事后计费是合理的。事后计费，可以采用日志统计的方式进行计费。计费的因素目前主流因素包括：</p>
+<ul>
+<li>请求次数：</li>
+<li>资源使用： 套餐大小*使用时间<br>目前来看AWS和ali FC收费方式和价格完全一样。  大致如下：<br><img src="http://webpaas.com/usr/uploads/2017/06/3600822644.png" alt="image2017-6-316-58-29.png"><h3 id="4-计算引擎"><a href="#4-计算引擎" class="headerlink" title="4.计算引擎"></a>4.计算引擎</h3>请求经过Api Gateway，到达消息队列，计算引擎从消息队列取出消息，然后创建docker container执行用户的函数。基本思路是每个函数创建一个service，通过自动弹性伸缩调整service的副本，然后每个container（副本）内部，通过一个单独的进程来管理本container接收到的执行请求，请求结果收集等。<br>通过Docker Container作为函数运行的runtime。 理论上Docker Image可以支持目前几乎所有的语言和操作系统环境，但是考虑到start latency，我们需要保证ms级别启动用户的函数。那么本质上，启动消耗的时间主要是在安装操作系统和启动内核上，因此，我们可以通过预装和提前启动来解决启动内核的耗时，也就是准备好一批安装好标准操作系统的机器；针对不同的语言，同样可以提前准备好对应的语言环境。通过container启动的时候，将container的rootfs bind到宿主host的rootfs。这个方式速度很快，但是共享了操作系统，打破了隔离的要求。<br>计算引擎主要是从消息队列里面取出请求，但是不进行ACK（这个时候需要消息消费需要支持At least once模式），然后创建docker container，运行请求对应的代码，执行完成之后，给当前消息回复ACK，删除消息。<br>同时，目前主流的FaaS都限制了函数执行的超时，例如对 AWS Lambda 进行的同步调用必须在 300 秒钟内执行完毕。默认的超时为 3 秒，但您可以将超时设置在 1 到 300 秒之间的任何值。</li>
+</ul>
+<h3 id="5-自动弹性伸缩"><a href="#5-自动弹性伸缩" class="headerlink" title="5. 自动弹性伸缩"></a>5. 自动弹性伸缩</h3><p>  监控Api Gateway里面每个函数的请求数，然后决定是否scale out / in  service的replica。</p>
+<h3 id="6-监控以及故障处理"><a href="#6-监控以及故障处理" class="headerlink" title="6.监控以及故障处理"></a>6.监控以及故障处理</h3><p>  如果一个函数在计算的时候，出现了硬件故障，这个时候消息还在消息队列，没有删除。</p>
+<h2 id="典型场景（Where）"><a href="#典型场景（Where）" class="headerlink" title="典型场景（Where）"></a>典型场景（Where）</h2><ul>
+<li>低频请求场景<br>物联网行业中，由于物联网设备传输数据量小，且往往是固定时间间隔进行数据传输，因此经常涉及低频请求场景。例如：物联网应用程序每分钟仅运行一次，每次运行50ms，这意味着CPU的使用率为0.1%/小时，这也意味着其实有1000个相同的应用可以共享计算资源。而Serverless架构下，用户可以购买每分钟100ms的资源来满足计算需求，通过这种方式就能够有效解决效率问题，降低使用成本。</li>
+<li>事件驱动的后端应用<br>这个aws有一个典型的处理S3上文件的例子。webhooks也是一个典型的例子。</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/07/02/faas/" data-id="cj4lk409a00046pfylmzg3xwx" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/faas/">faas</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
 
 
+  
+    <article id="blog-azkaban" class="article article-type-blog" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/07/02/azkaban/" class="article-date">
+  <time datetime="2017-07-01T16:23:38.000Z" itemprop="datePublished">2017-07-02</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/07/02/azkaban/">azkaban集群模式介绍</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>azkanban是apache开源的一个离线作业调度系统，也称为DAG调度系统。最初是由linkedin开源的，用于解决hadoop的任务依赖（从ETL任务到数据分析任务等）的问题。本文先简单介绍下azkaban本身，然后重点介绍下azkaban的集群模式和设计思路。</p>
+<p>Azkaban的架构非常简单。主要包含3部分：</p>
+<ul>
+<li>Relational Database (MySQL)</li>
+<li>AzkabanWebServer</li>
+<li>AzkabanExecutorServer</li>
+</ul>
+<p><img src="http://webpaas.com/usr/uploads/2016/11/3803036613.png" alt="azkaban2overviewdesign.png"></p>
+<p>其中介绍下2个主要部分：</p>
+<ul>
+<li><p>AzkabanWebServer</p>
+<ul>
+<li>project management：管理project</li>
+<li>authentication： 支持SSL鉴权</li>
+<li>scheduler： 支持定时调度，支持SLA设定</li>
+<li>monitoring ： 可以监控任务的执行过程</li>
+<li>user interface</li>
+</ul>
+</li>
+<li><p>AzkabanExecutorServer</p>
+<ul>
+<li>作业流（flow）执行 </li>
+<li>执行器调度：将不同的flow调度到不同的executor上</li>
+<li>作业插件管理： 支持多种作业类型</li>
+<li>存储日志</li>
+</ul>
+</li>
+</ul>
+<p>在3.0以后，azkaban支持了多执行器模式。其实支持multiexecutor还是个艰难的过程，2015年1月份(其实之前2.6版本之后将近一年都没有发布新的特性），hluu就提出了支持多执行器的思路，但是因为linkedin的作业调度系统逐渐转向了apache的另外一个项目Oozie（<a href="https://github.com/azkaban/azkaban/issues/439" target="_blank" rel="external">参考</a>），所以当时一度无人对azkaban进行维护。但是这个时候，包括微软的一些部门在内，都关注并使用了azkaban，davidzchen才开始再次考虑azk的规划。 直到2015年3月，hluu终于将<a href="https://github.com/azkaban/azkaban/pull/477" target="_blank" rel="external">modify Executor side to support Multiple executor feature</a>这个pr合并到了主干，并且在3.0版本发布多执行器模式的feature。</p>
+<p>2.5版本下面，所有的flow都是调度在executor本地运行。这样带来的问题也很明显：</p>
+<ol>
+<li>job数量受限于Executor所在机器的性能</li>
+<li>job并没有资源限制，极易出现资源竞争</li>
+</ol>
+<p>所以3.0重点解决这2个问题。那我们来看看，当前主干版本的集群化思路是怎么样的。基本上是如下一个problem-solving的思路：</p>
+<ol>
+<li>扩展Executor到多个节点，并且将任务的状态放到一个共享的存储上去（这里显然就是mysql了）</li>
+<li>web-server感知多个Executor，并且通过一定的调度算法将任务分配上去。</li>
+<li>被调度节点收到调度信息，加载任务，执行。</li>
+</ol>
+<p>那么按照这个思路来看azk的集群化思路。下面就是整个调度过程的函数调用图，去掉了各种细枝末节。<br><img src="http://webpaas.com/usr/uploads/2016/11/959096803.png" alt="CB9EB850-05EF-4025-8EFA-57AB66C04109.png"></p>
+<p>在新建ExecutorManager对象的时候，就已经setupMultiExecutorMode了。在setupMultiExecutorMode里面，启动线程，主要执行processQueuedFlows函数。processQueuedFlows每次从queuedFlows取出头元素，然后选择对应的Executor去跑任务。</p>
+<p>这里就涉及到Executor的选择算法。首先，azk设置一个activeExecutorsRefreshWindow，也就是刷新Executor排队顺序的时间，怎么理解，这里其实就是每隔一段时间去对excutor从新排序。   </p>
+<p>如果发现时间距离上次重排超过前面说的时间窗口，那就调用refreshExecutors()来进行重排。</p>
+<p>refreshExecutors()里面会提交获取executor的/serverStatistics接口给executorInforRefresherService这个线程池来获取Executor的信息，结果格式如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line">	&quot;remainingMemoryPercent&quot; : 75.46393753683981,</div><div class="line">		&quot;remainingMemoryInMB&quot; : 48475,</div><div class="line">		&quot;remainingFlowCapacity&quot; : 30,</div><div class="line">		&quot;numberOfAssignedFlows&quot; : 0,</div><div class="line">		&quot;lastDispatchedTime&quot; : 1479278404652,</div><div class="line">		&quot;cpuUsage&quot; : 0.99</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这样，通过Future拿到结果之后，就可以用于排序了。</p>
+<p>接下来就进入到selectExecutorAndDispatchFlow选择执行器，并将任务提交给它。调用filterList来对执行器进行过滤，调用comparatorWeightsMap来对Executor进行排序。</p>
+<p>这里首先我们来回顾下对应的配置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">azkaban.executorselector.filters=StaticRemainingFlowSize,MinimumFreeMemory,CpuStatus</div><div class="line"></div><div class="line">azkaban.executorselector.comparator.NumberOfAssignedFlowComparator=1</div><div class="line"></div><div class="line">azkaban.executorselector.comparator.Memory=1</div><div class="line"></div><div class="line">azkaban.executorselector.comparator.LastDispatched=1</div><div class="line"></div><div class="line">azkaban.executorselector.comparator.CpuUsage=1</div></pre></td></tr></table></figure></p>
+<p>其中开始在初始化ExecutorManager的时候，根据是否是多执行器模式，进行了setupMultiExecutorMode，里面会初始化filterList和comparatorWeightsMap</p>
+<p>其中fiter要保证不同的资源满足下面要求：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">MINIMUM_FREE_MEMORY &gt;= 6 * 1024</div><div class="line">MAX_CPU_CURRENT_USAGE &lt;= 95</div><div class="line">stats.getRemainingFlowCapacity() &gt; 0</div></pre></td></tr></table></figure>
+<p>分别表示内存剩余，cpu利用率以及剩余任务数，任务数默认最多是30个。</p>
+<p>comparatorWeightsMap的key和value其实就是上面的配置,value就是这个对比项的权重。实际对比的代码如下：</p>
+<pre><code>Collection&lt;FactorComparator&lt;T&gt;&gt; comparatorList = this.factorComparatorList.values();
+for (FactorComparator&lt;T&gt; comparator :comparatorList){
+    int result = comparator.compare(object1, object2);
+    result1  = result1 + (result &gt; 0 ? comparator.getWeight() : 0);
+    result2  = result2 + (result &lt; 0 ? comparator.getWeight() : 0);
+    logger.debug(String.format(&quot;[Factor: %s] compare result : %s (current score %s vs %s)&quot;,   comparator.getFactorName(), result, result1, result2));}
+</code></pre><p>针对每一项对比项，如果对赢了，就把对应的权重加给他。  最后选出权重最大的那个Executor，去调度flow。</p>
+<p>这就是整个过程。<br>最后大家也可以在百度脑图上看到具体的分析过程：</p>
+<ul>
+<li><a href="http://naotu.baidu.com/file/93feae48867a4af27460ca04a72b729a?token=c0ff1e64b76a8ff3" target="_blank" rel="external">web-server</a></li>
+<li><a href="http://naotu.baidu.com/file/2b71900d3c5cf577a4503b52761439a0?token=d68c6315396e7273" target="_blank" rel="external">exec-server</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/07/02/azkaban/" data-id="cj4lk408v00006pfy1rqbi0qh" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/job-flow/">job flow</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="blog-go1-5gc" class="article article-type-blog" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/07/02/go1-5gc/" class="article-date">
+  <time datetime="2017-07-01T16:21:00.000Z" itemprop="datePublished">2017-07-02</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/07/02/go1-5gc/">go1.5 GC分析</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>最近一次追查zk的session异常超时，发现程序在一段时间（长达90s），都处于pause状态，怀疑是golang（version：1.5）GC导致，虽然最后发现并不是GC的原因，但是追查过程中花了不少时间在GC的研究上，因此记录下来。</p>
+<p>开启golang GC日志很简单，在程序启动的环境变量里面加上GOTRACE=1。就有如下的日志打印出来。<br><img src="http://webpaas.com/usr/uploads/2016/10/3128633959.png" alt="A5F3129A-9AF7-4482-B25B-521D6EE20B10.png"></p>
+<p>首先解释下这个日志的意义。gg或者baidu出来这个解释目前都不是很全，因为go gc的日志每个版本都不一样。首先看下官网对于<a href="https://golang.org/pkg/runtime/#GC" target="_blank" rel="external">GC</a>的日志的解释：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">gctrace: setting gctrace=1 causes the garbage collector to emit a single line to standard</div><div class="line">error at each collection, summarizing the amount of memory collected and the</div><div class="line">length of the pause. Setting gctrace=2 emits the same summary but also</div><div class="line">repeats each collection. The format of this line is subject to change.</div><div class="line">Currently, it is:</div><div class="line">gc # @#s #%: #+#+# ms clock, #+#/#/#+# ms cpu, #-&gt;#-&gt;# MB, # MB goal, # P</div><div class="line">where the fields are as follows:</div><div class="line">gc #        the GC number, incremented at each GC</div><div class="line">@#s         time in seconds since program start</div><div class="line">#%          percentage of time spent in GC since program start</div><div class="line">#+...+#     wall-clock/CPU times for the phases of the GC</div><div class="line">#-&gt;#-&gt;# MB  heap size at GC start, at GC end, and live heap</div><div class="line"># MB goal   goal heap size</div><div class="line"># P         number of processors used</div><div class="line">The phases are stop-the-world (STW) sweep termination, concurrent</div><div class="line">mark and scan, and STW mark termination. The CPU times</div><div class="line">for mark/scan are broken down in to assist time (GC performed in</div><div class="line">		line with allocation), background GC time, and idle GC time.</div><div class="line">If the line ends with &quot;(forced)&quot;, this GC was forced by a</div><div class="line">runtime.GC() call and all phases are STW.</div></pre></td></tr></table></figure></p>
+<p>这里面主要有2个地方会比较难以理解： wall-clock/CPU times for the phases of the GC。 因为前面说了不同版本的gc实现并不一样，那么这个<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">### 三色标记法</div><div class="line">go1.5采用的是三色标记（Tri-color marking）算法。三色标记法将这个程序申请的内存对象以及引用关系抽象为一颗有向无环图(DAG)，然后根据这个图的所有节点去遍历并且找出无用的内存对象。这里的三色指的的白，灰，黑三色。内存对象会被划分到三种颜色的集合：</div><div class="line"></div><div class="line">* 白色集：在这里面的内存块会被回收掉，初始化为所有的内存对象</div><div class="line">* 灰色集：所有通过根对象可以根据DAG访问到（也就是被白色集的对象引用）的对象。这个集合的对象不能被回收，初始化为所有根对象直接引用的对象</div><div class="line">* 黑色集：所有通过根对象可以根据DAG访问到（也就是被白色集的对象引用）的对象，并且没有出边指向白色集的对象。初始化为空</div><div class="line">其中三色标记法有2个重要的原则来保证被回收的内存一定没人引用（tri-color invariant）：</div><div class="line"></div><div class="line">算法流程如下：</div><div class="line">1. 取出灰色集里面的对象，将其移动到黑色集；</div><div class="line">2. 遍历每一个白色集里面的对象，将其移动到灰色集，这就保证了每个被引用的对象都不会被回收；</div><div class="line">3. 重复上面2个步骤。</div><div class="line">当这个灰色集都为空了，scan的过程就结束了。这样可以保证一个很重要的三色恒定性：没有黑色的对象引用白色集合的对象。也就意味着剩下的白色集的对象是可以被回收的。</div><div class="line"></div><div class="line">三色标记法有2个很重要的特点：</div><div class="line">* 垃圾回收可以“on-the-fly”，也就是说可以在GC的时候只halt整个程序很短的时间</div><div class="line">* 通过监控程序的内存使用情况，周期性的进行GC</div><div class="line">* 程序分配内存的时候，就可以开始标记内存对象为白色</div><div class="line"></div><div class="line">这里借助wiki上的一个图来说明下：</div><div class="line">![tri-color gc](https://upload.wikimedia.org/wikipedia/commons/1/1d/Animation_of_tri-color_garbage_collection.gif)</div><div class="line"></div><div class="line">这是三色标记的基本原理，golang在三色标记的基础上又做了大量的优化，包括借助write barrier（记录mark过程中又变化了的对象，在mark termination阶段，atomic的进行mark），并行的标记和清理，缩短了stop-the-world的时间。golang的gc流程如下：</div><div class="line"></div><div class="line">![22D20EBC-49A2-48BF-89BD-1101F1C3816E.png][2]</div><div class="line"></div><div class="line">总结下gcBackgroundMode下大致的步骤 :  gosweepone(concurrent sweep) -&gt; sweep term (STW for finish sweep) -&gt; scan(concurrent scan) -&gt;InstallWB -&gt; mark -&gt; markTem(STW) -&gt; setup sweep</div><div class="line">其中可以看到只是在scan开始的时候和mark结束的时候有stop-the-world，其余时间，程序都是照常进行的。</div><div class="line"></div><div class="line">### gc日志格式分析</div><div class="line">讲完了GC的大致原理，我们来看下如何对gc的日志进行分析。首先要了解gc的格式。这里我们只针对1.5的gc的格式分析。</div></pre></td></tr></table></figure></p>
+<p>gc 6934 @208086.178s 0%: 1.2+39874+0.14+0.34+27 ms clock, 14+39874+0+5501/0.002/2088+324 ms cpu, 158-&gt;784-&gt;713 MB, 162 MB goal, 100 P<br>1         2      3    4   5     6     7   8            9   10  11 12   13   14    15         16   17   18      19           20</p>
+<p>1： gc编号，每次gc会进行递增<br>2： 程序启动之后运行的时间<br>3： gc时间占据整个总时间的百分比<br>4： SweepTerm的时钟时间,会STW，来等待并发的sweep完成<br>5： scan的时钟时间<br>6:  建立write barriers的时钟时间<br>7： mark的时钟时间<br>8： MarkTerm的时钟时间，这个时间会进行STW<br>9： sweepTermCpu: 分别对应上面的cpu时间，不再解释<br>10: scanCpu:<br>11: installWBCpu:<br>12: gcController.assistTime<br>13: gcController.dedicatedMarkTime + gcController.fractionalMarkTime<br>14: gcController.idleMarkTime<br>其中12-14是mark的具体过程的时间.<br>15: markTermCpu<br>16,17,18 : gc开始，结束以及活跃的heap的个数<br>20: 用于gc的cpu核数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">![081AD229-62EA-4F39-B7FC-4F84C0F91FAF.png][3]</div><div class="line"></div><div class="line">因此，知道了这些字段的含义，我们就可以针对gc的情况做一个gc的监控。比较推荐的方式是读时间的百分比</div><div class="line">4： SweepTerm的时钟时间,会STW，来等待并发的sweep完成</div><div class="line">5： scan的时钟时间</div><div class="line">6:  建立write barriers的时钟时间</div><div class="line">7： mark的时钟时间</div><div class="line">8： MarkTerm的时钟时间，这个时间会进行STW</div><div class="line">9： sweepTeº待并发的sweep完成</div><div class="line">5： scan的时钟时间</div><div class="line">6:  建立wryte barriers的时钟时间</div><div class="line">7： mark的时钟时间</div><div class="line">8： Marktorm的时钟时间，这个时间会进行STW</div><div class="line">9： sweepTermCp r 分别对应上面的cpu时间，不再解释</div><div class="line">10: scanCpu:</div><div class="line">1at installWBCpu:</div><div class="line">12: gcController.assistTime</div><div class="line">13: gcController.df the trailing by_size array differs between Go and C,</div><div class="line">	// NumSizeClasses was changed, but we can not change Go struct because of backward compatibility.</div><div class="line">	memmove(unsafe.Pointer(stats), unsafe.Pointer(&amp;memstats), sizeof_C_MStats)</div><div class="line"></div><div class="line">	// Stack numbers are part of the heap numbers, separate those out for user consumption</div><div class="line">	stats.StackSys += stats.StackInuse</div><div class="line">	stats.HeapInuse -= stats.StackInuse</div><div class="line">	stats.HeapSys -= stats.StackInuse</div><div class="line">	&#125;</div></pre></td></tr></table></figure>
+<p>这里还推荐另外一种方式：直接分析gc的日志格式，这也就是我上面花了大量篇幅来介绍gc日志格式的原因。这个项目叫<a href="https://github.com/davecheney/gcvis" target="_blank" rel="external">gcvis</a>, 对程序本身没有任何影响。但是最新的版本只针对1.6的gc日志格式，因此，我们修改了一个版本，适应1.5，地址在：<a href="https://github.com/duanbing/gcvis" target="_blank" rel="external">duanbing/gcvis</a>,使用方法就不多介绍了。大家可以按照文档去happy下。</p>
+<p>【参考】<br><a href="https://talks.golang.org/2015/go-gc.pdf" target="_blank" rel="external">Go GC：Latency Problem Solved</a><br><a href="https://www.kernel.org/doc/Documentation/memory-barriers.txt" target="_blank" rel="external">memory barriers</a><br><a href="http://research.microsoft.com/en-us/um/people/lamport/pubs/garbage.pdf" target="_blank" rel="external">On-the-fly garbage collection</a><br><a href="https://en.wikipedia.org/wiki/Tracing_garbage_collection" target="_blank" rel="external">Tracing_garbage_collection</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/07/02/go1-5gc/" data-id="cj4lk409d00056pfyeb7smjtw" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/golang/">golang</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="blog-overlay" class="article article-type-blog" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/07/02/overlay/" class="article-date">
+  <time datetime="2017-07-01T16:18:47.000Z" itemprop="datePublished">2017-07-02</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/07/02/overlay/">overlayfs介绍</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h3><p>overlayfs是目前使用比较广泛的层次文件系统，实现简单，读写性能较好，并且稳定. 可以充分利用不同或则相同overlay文件系统的page cache，具有</p>
+<ul>
+<li>上下合并</li>
+<li>同名遮盖</li>
+<li>写时拷贝</li>
+<li>对内存资源的利用较好<br>等特点。缺点是： </li>
+<li>向上拷贝速度较慢<br>在PaaS或使用其他的密集环境(high-density environment)推荐使用。</li>
+</ul>
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><p>下面我们举1个简单的例子。<br>1, 首先加载overlayfs内核模块<br>我使用的是3.10的内核，里面已经加载了overlay<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[root@olfs olfs]# lsmod  | grep over</div><div class="line">overlay                29855  1</div></pre></td></tr></table></figure></p>
+<p>如果输出为空，就通过下面命令加载一下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">modprobe overlay</div></pre></td></tr></table></figure></p>
+<p>没有报错，就说明加载成功了。<br>2， 挂载overlay文件系统<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">[root@olfs]# tree</div><div class="line">.</div><div class="line">|-- lower</div><div class="line">|   `-- l1.txt</div><div class="line">|-- merged</div><div class="line">|-- upper</div><div class="line">|   `-- u2.txt</div><div class="line">`-- work</div><div class="line"></div><div class="line">4 directories, 1 file</div><div class="line">### 这里指定lower是-o，也就是只读</div><div class="line">[root@olfs]# mount -t overlay overlay -olowerdir=./lower,upperdir=./upper,workdir=./work ./merged</div><div class="line">[root@olfs]# df -h</div><div class="line">...</div><div class="line">overlay                19G   12G  6.8G  63% /root/docker/olfs/merged</div></pre></td></tr></table></figure></p>
+<p>可以看到， /root/docker/olfs/merged已经挂载成为一个overlayfs了。</p>
+<p>3， 下面我们测试一下</p>
+<ul>
+<li>上下合并<br>刚才通过tree命令，我们看到lower目录下，有一个l1.txt,我们进入merged目录， <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">[root@olfs]# cd merged/</div><div class="line">[root@merged]# ls</div><div class="line">l1.txt  u2.txt</div><div class="line">[root@merged]# cat l1.txt </div><div class="line">american</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>这就说明， 2个目录的文件进行了合并。</p>
+<ul>
+<li>同名遮盖<br>那我们再修改一下这个文件， 再看下文件内容<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[root@olfs merged]# echo &quot;russia&quot; &gt; l1.txt </div><div class="line">[root@olfs merged]# cat l1.txt </div><div class="line">russia</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>返回去，看下lower目录，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[root@olfs olfs]# cd ../lower/</div><div class="line">[root@olfs lower]# cat l1.txt </div><div class="line">american</div></pre></td></tr></table></figure></p>
+<p>文件内容并没有变化，在看下upper目录<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">[root@olfs lower]# cd ../upper/</div><div class="line">[root@olfs upper]# cat l1.txt </div><div class="line">russia</div><div class="line">[root@olfs upper]# ll</div><div class="line">total 8</div><div class="line">-rw-r--r-- 1 root root 7 Dec 13 20:52 l1.txt</div><div class="line">-rw-r--r-- 1 root root 6 Dec 13 20:48 u2.txt</div></pre></td></tr></table></figure></p>
+<p>出现了2个文件，原来的u2.txt，和现在的l1.txt，l1.txt就是merged下面我们看到的l1.txt的内容。<br>并且2这的inode号是一样的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">[root@olfs upper]# ls -i l1.txt </div><div class="line">2329235 l1.txt</div><div class="line">[root@olfs upper]# ls -i ../merged/l1.txt </div><div class="line">2329235 ../merged/l1.txt</div></pre></td></tr></table></figure></p>
+<ul>
+<li>删除文件<br>我们在merged目录下，删除l1.txt，<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">[root@olfs merged]# ll ../lower/ </div><div class="line">total 4</div><div class="line">-rw-r--r-- 1 root root 9 Dec 13 20:38 l1.txt</div><div class="line">[root@olfs merged]# ll ../upper/</div><div class="line">total 4</div><div class="line">c--------- 1 root root 0, 0 Dec 13 20:56 l1.txt</div><div class="line">-rw-r--r-- 1 root root    6 Dec 13 20:48 u2.txt</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>可以看到， 这个文件在lower目录，依然不变， 但是在upper下面， 变成了一个，任何用户都没有任何权限，大小为0的字符设备。 overlay也就是一这种方式来标记文件删除的。 </p>
+<h3 id="docker中对overlayfs的应用"><a href="#docker中对overlayfs的应用" class="headerlink" title="docker中对overlayfs的应用"></a>docker中对overlayfs的应用</h3><p>docker很早就支持了overlayfs，而且，据我所知，由于aufs的复杂，和dm的性能低下，很多大厂都选择了overlayfs。 下面，我们看看docker是如何使用overlayfs的。</p>
+<p>首先，由于我们切换docker的存储引擎为overlayfs。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker -d -b docker0 -g /home/work/docker-runtime -s overlay</div></pre></td></tr></table></figure></p>
+<p>并且pull对应的images之后， run一个container，id为93b51bb1ca34。本地镜像都存放在在<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">### 生成了1个文件， lowid 指向父镜像的id， 这也唯一确定了lower dir。upper保存了最新的修改</div><div class="line">ll /home/work/docker-runtime/overlay/93b51bb1ca34192a8df935efa9400f17d1524bb197728659ad119868efdd7640-init/</div><div class="line">total 16</div><div class="line">-rw-r--r-- 1 root root   64 Dec 13 20:29 lower-id</div><div class="line">drwx------ 2 root root 4096 Dec 13 20:29 merged</div><div class="line">drwxr-xr-x 4 root root 4096 Dec 13 20:29 upper</div><div class="line">drwx------ 3 root root 4096 Dec 13 20:29 work</div><div class="line"></div><div class="line">#lower-id 是父镜像的id</div><div class="line">[root@olfs ~]# cat /home/work/docker-runtime/overlay/93b51bb1ca34192a8df935efa9400f17d1524bb197728659ad119868efdd7640-init/lower-id </div><div class="line">87e5b6b3ccc119ebfe9344583fb3f77804d6e3d9a3553d916fbf807028310e8e</div><div class="line"># “-init”结尾的目录是新创建的container的初始化层，保存container的元数据信息，属于只读</div><div class="line">[root@olfs docker-runtime]#  ll /home/work/docker-runtime/overlay/93b51bb1ca34192a8df935efa9400f17d1524bb197728659ad119868efdd7640-init/upper/etc/  </div><div class="line">total 0</div><div class="line">-rwxr-xr-x 1 root root  0 Dec 13 20:29 hostname</div><div class="line">-rwxr-xr-x 1 root root  0 Dec 13 20:29 hosts</div><div class="line">lrwxrwxrwx 1 root root 12 Dec 13 20:29 mtab -&gt; /proc/mounts</div><div class="line">-rwxr-xr-x 1 root root  0 Dec 13 20:29 resolv.conf</div><div class="line">###再看看不带“-init”结尾的目录，就是container里面的process的可读写层</div><div class="line">[root@olfs docker-runtime]# ll /home/work/docker-runtime/overlay/93b51bb1ca34192a8df935efa9400f17d1524bb197728659ad119868efdd7640</div><div class="line">total 16</div><div class="line">-rw-r--r-- 1 root root   64 Dec 13 20:29 lower-id</div><div class="line">drwxr-xr-x 1 root root 4096 Dec 13 20:29 merged</div><div class="line">drwxr-xr-x 9 root root 4096 Dec 13 20:29 upper</div><div class="line">drwx------ 3 root root 4096 Dec 13 20:29 work</div><div class="line"># upper放的就是刚才在container里面发生的变更（新增了一个work账号，以及一个test-docker文件）</div><div class="line">[root@olfs docker-runtime]# ll /home/work/docker-runtime/overlay/93b51bb1ca34192a8df935efa9400f17d1524bb197728659ad119868efdd7640/upper/    </div><div class="line">total 28</div><div class="line">drwxr-xr-x 2 root root 4096 Dec 13 20:29 dev</div><div class="line">drwxr-xr-x 2 root root 4096 Dec 13 21:57 etc</div><div class="line">drwxr-xr-x 3 root root 4096 Dec 13 21:57 home</div><div class="line">drwxr-xr-x 2 root root 4096 Dec 13 20:30 run</div><div class="line">drwxrwxrwt 2 root root 4096 Dec 13 20:30 tmp</div><div class="line">drwxr-xr-x 4 root root 4096 Sep 26  2014 usr</div><div class="line">drwxr-xr-x 7 root root 4096 Sep 26  2014 var</div><div class="line">[root@olfs docker-runtime]# cat /home/work/docker-runtime/overlay/93b51bb1ca34192a8df935efa9400f17d1524bb197728659ad119868efdd7640/upper/home/work/test-docker  </div><div class="line">add user work</div></pre></td></tr></table></figure></p>
+<p>commit一下当前这个container， 我们再测试下删除文件，删除之后，我们看到文件在upper dir变成了大小为0的字符设备。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[root@olfs ~]# ls -l /home/work/docker-runtime/overlay/e26fea079da324418af7f77dec415937a2bc1d14bf24715ca93fecc1fa737152/upper/home/work/</div><div class="line">total 0</div><div class="line">c--------- 1 root root 0, 0 Dec 13 22:24 test-docker</div></pre></td></tr></table></figure></p>
+<h3 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h3><p>我们使用淘宝的ppt里面的一个写入的过程，来形象的描叙一下overlayfs的原理。</p>
+<p><img src="http://www.webpaas.com/usr/uploads/2015/12/1421418527.png" alt="QQ截图20151213222906.png"><br>【参考】<br><a href="https://www.kernel.org/doc/Documentation/filesystems/overlayfs.txt" target="_blank" rel="external">overlayfs</a><br><a href="http://www.webpaas.com/usr/uploads/2015/01/1780039264.pdf" target="_blank" rel="external">淘宝overlayfs实践</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/07/02/overlay/" data-id="cj4lk409i00096pfyre9szmem" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/overlayfs/">overlayfs</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-cgroup-test" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/07/02/cgroup-test/" class="article-date">
+  <time datetime="2017-07-01T16:04:17.000Z" itemprop="datePublished">2017-07-02</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/07/02/cgroup-test/">cgroup功能完全测试</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h3><h4 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h4><p>centos7  单核<br>virtualbox </p>
+<h4 id="测试项目"><a href="#测试项目" class="headerlink" title="测试项目"></a>测试项目</h4><ul>
+<li>cpu 配额以及硬限</li>
+<li>memory 限制以及OOM</li>
+<li>net_cls 网速限制</li>
+<li>blkio 配额以及影限</li>
+</ul>
+<h4 id="安装和启动cgroup："><a href="#安装和启动cgroup：" class="headerlink" title="安装和启动cgroup："></a>安装和启动cgroup：</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">yum install -y libcgroup-tools.x86_64</div></pre></td></tr></table></figure>
+<p>启动<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">service cgconfig start或者systemctl start cgconfig.service</div></pre></td></tr></table></figure></p>
+<p>基本的使用命令这里就不做详细解释了，参见：</p>
+<p><a href="https://access.redhat.com/documentation/zh-CN/Red_Hat_Enterprise_Linux/6/html/Resource_Management_Guide/" target="_blank" rel="external">https://access.redhat.com/documentation/zh-CN/Red_Hat_Enterprise_Linux/6/html/Resource_Management_Guide/</a></p>
+<h4 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h4><h4 id="cpu"><a href="#cpu" class="headerlink" title="cpu"></a>cpu</h4><ul>
+<li>cpu软限：</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">cgset -r cpu.shares=512 test1</div><div class="line">cgset -r cpu.shares=128 test2</div><div class="line"></div><div class="line">loop=0</div><div class="line">while (($loop &lt; 4)) </div><div class="line">	do</div><div class="line">	cgexec -g cpu:test1 ./deadloop &gt; /dev/null &amp;</div><div class="line">((loop++))</div><div class="line">	done</div><div class="line"></div><div class="line">while (($loop &lt; 4 + 4)) </div><div class="line">	do</div><div class="line">	cgexec -g cpu:test2 ./deadloop2 &gt; /dev/null &amp;</div><div class="line">((loop++))	</div><div class="line">done</div></pre></td></tr></table></figure>
+<p>完整在这里:<a href="https://github.com/duanbing/mysh/blob/master/test_cgroup/cpu/test1.sh" target="_blank" rel="external">cgroup完整测试脚本</a> </p>
+<p>top打开可以看到结果：<br><img src="http://www.webpaas.com/usr/uploads/2015/03/3712925605.png" alt="clipboard.png"></p>
+<p>结论： 可以看到test1这个进程组和test2这个进程组的cpu使用量比例为： 3:1</p>
+<ul>
+<li>cpu  hardlimit硬限<br>cgroups里面 可以用cpu.cfs_period_us和cpu.cfs_quota_us来限制进程组中进程单位时间可以使用的cpu时间。cfs就是“完全公平调度”，cpu.cfs_period_us是时间周期，默认为100000us，cfs_quota_us就是这期间内可以使用的cpu时间，-1表示无限制。</li>
+</ul>
+<p>设置如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"># 设置test1的cpu使用时间为50%,默认cpu.cfs_period=100000us</div><div class="line"></div><div class="line">cgset -r cpu.cfs_quota_us=50000 test1</div><div class="line">cgset -r cpu.cfs_quota_us=25000 test2</div></pre></td></tr></table></figure></p>
+<p>结果如下：<br><img src="http://www.webpaas.com/usr/uploads/2015/03/1326954497.png" alt="clipboard2.png"></p>
+<p>可以看到， test1的四个deadloop进程加起来大约50%左右的cpu，  test2总共消耗25%左右的cpu。注意我这里是单核。 多核的话，一个cgroup可以用到n倍的cpu时间。</p>
+<ul>
+<li>cpuset 限制使用的核心节点和内存节点<br>cpuset.cpus、cpuset.mems 就是用来限制进程可以使用的 cpu 核心和内存节点的。  这里因为是单核。 所以没有测试这个</li>
+</ul>
+<p>大家可以参考：<a href="http://xiezhenye.com/2013/10/%E7%94%A8-cgroups-%E7%AE%A1%E7%90%86-cpu-%E8%B5%84%E6%BA%90.html" target="_blank" rel="external">用 cgroups 管理 cpu 资源</a></p>
+<h4 id="memory测试"><a href="#memory测试" class="headerlink" title="memory测试"></a>memory测试</h4><ul>
+<li>内存限制<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"># 限制内存和虚拟内存</div><div class="line">cgset -r memory.limit_in_bytes=16M test1</div><div class="line">cgset -r memory.memsw.limit_in_bytes=16M test1</div><div class="line"># 关闭oom killer</div><div class="line">#cgset -r memory.oom_control=1 test1</div><div class="line"></div><div class="line">cgexec -g memory:test1 ./mem_alloc</div><div class="line">cgexec -g memory:test2 dd if=/dev/zero of=./file.256M bs=1M count=256</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>可以看到结果如下：<br><img src="http://www.webpaas.com/usr/uploads/2015/03/220808703.png" alt="clipboard.png"><br>test1 这个cgroup因为内存超限，被oom kill了。 查看test2的内存使用情况如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[root@localhost test2]# cat memory.limit_in_bytes </div><div class="line">16777216</div></pre></td></tr></table></figure>
+<ul>
+<li>限制网卡</li>
+</ul>
+<p>参考：<a href="http://lxr.free-electrons.com/source/Documentation/cgroups/net_cls.txt" target="_blank" rel="external">http://lxr.free-electrons.com/source/Documentation/cgroups/net_cls.txt</a></p>
+<h4 id="工具介绍-tc-iperf"><a href="#工具介绍-tc-iperf" class="headerlink" title="工具介绍 tc,iperf"></a>工具介绍 tc,iperf</h4><ul>
+<li>tc（traffic controller）是Linux下面的网络流量控制工具，详细说明见<a href="http://lartc.org/LARTC-zh_CN.GB2312.pdf" target="_blank" rel="external">Linux 的高级路由和流量控制</a>。<br>TC基本思想是Linux内核首先把需要发送的数据包交给TC队列，由TC进行排队，然后内核再从TC队列中取出，通过网卡驱动发送出去。 TC有三个核心概念：</li>
+</ul>
+<p>qdisc(queueing discipline) 规则队列：可以是树形<br>class 类别：附属于一个qdisc<br>filiter 过滤器：映射指定标签的数据包到qdisc<br>qdisc和class的命名方式以： major number : minor number，qdisc占用major，class占用minor。</p>
+<p>简单测试：<br>针对网卡enp0s3,首先清理之前的qdisc，然后新建major number为10的qdisc。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">tc qdisc del dev enp0s3</div><div class="line">tc qdisc add dev enp0s3 handle 1: htb</div></pre></td></tr></table></figure></p>
+<p>在qdics上增加一个分类，设置带宽为100Mbit。创建过滤器，使用cgroup标签：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">tc class add dev enp0s3 parent 1: classid 1:1 htb rate 100mbit</div><div class="line">tc filter add dev enp0s3 parent 1: protocol ip prio 1 handle 1: cgroup</div></pre></td></tr></table></figure>
+<p>如果修改带宽限制：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">tc class change dev enp0s3 parent 1: classid 1:1 htb  rate 200mbit</div></pre></td></tr></table></figure></p>
+<p>创建一个net_cls 的组，上面tc创建的class的classid是10:1 ，这个id在cgroup以0xAAAABBBB方式表示，其中AAAA是major number，BBBB是minor number，执行：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">cgcreate -g net_cls:test1</div><div class="line">echo 0x100001 &gt; /sys/fs/cgroup/net_cls/test1/net_cls.classid</div></pre></td></tr></table></figure></p>
+<ul>
+<li>iperf<br>iperf  是一个网络性能测试工具。Iperf可以测试TCP和UDP带宽质量。Iperf可以测量最大TCP带宽，具有多种参数和UDP特性。iperf可以报告带宽，延迟抖动和数据包丢失。<br>iperf -s 就可以启动服务端，  iperf -c $ip 就能启动客户端进行测试<br>测试结果如下：<br><img src="http://www.webpaas.com/usr/uploads/2015/03/2860866051.png" alt="clipboard.png"><br>可以看到， iperf测试的结果是在10m左右的网速。<br>参考： <a href="http://4249964.blog.51cto.com/4239964/1563868" target="_blank" rel="external">cgroup+tc对单个进程进行带宽限制</a></li>
+</ul>
+<h4 id="blkio测试"><a href="#blkio测试" class="headerlink" title="blkio测试"></a>blkio测试</h4><ul>
+<li>设置不同cg的io相对速度<br>设置如下：<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">cgset -r blkio.weight=200 test1</div><div class="line">cgset -r blkio.weight=400 test2</div><div class="line">#注意blkio对page cache无效，所以这只对direct io进行设置</div><div class="line">rm -rf ./2g*</div><div class="line">cgexec -g blkio:test1 dd if=/dev/sda of=./2g oflag=direct bs=1M count=1014 &amp;</div><div class="line">cgexec -g blkio:test2 dd if=/dev/sda of=./2g2 oflag=direct bs=1M count=1024 &amp;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>安装iotop查看单个进程的io<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">yum -y install iotop</div></pre></td></tr></table></figure></p>
+<p>结果如下：<br><img src="http://www.webpaas.com/usr/uploads/2015/03/3921482247.png" alt="clipboard.png"><br>可以看出 test1 和test2的io速度保持在1:2左右。</p>
+<ul>
+<li>限制io的速度<br>我们通过blkio.throttle.write_bps_device来限制每秒的写字节上限。格式为：<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">major:minor operations_per_second</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>步骤如下：<br>1， 查看设备的major和minor。  我直接限制当前所在分区的读写io。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">[root@localhost blkio]# df -h</div><div class="line">Filesystem               Size  Used Avail Use% Mounted on</div><div class="line">/dev/mapper/centos-root   14G  9.6G  4.4G  69% /</div><div class="line">devtmpfs                 913M     0  913M   0% /dev</div><div class="line">tmpfs                    921M     0  921M   0% /dev/shm</div><div class="line">tmpfs                    921M  8.4M  913M   1% /run</div><div class="line">tmpfs                    921M     0  921M   0% /sys/fs/cgroup</div><div class="line">/dev/sda1                497M  134M  363M  27% /boot</div><div class="line">[root@localhost blkio]# ls -l /dev/mapper/centos-root </div><div class="line">lrwxrwxrwx. 1 root root 7 Mar 15 04:59 /dev/mapper/centos-root -&gt; ../dm-1</div><div class="line">[root@localhost blkio]# ls -l /dev/dm-1 </div><div class="line">brw-rw----. 1 root disk 253, 1 Mar 15 04:59 /dev/dm-1</div></pre></td></tr></table></figure></p>
+<p>2, 设置test1这个组的写上线为1M<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">cgset -r blkio.throttle.write_bps_device=&quot;253:1 1048576&quot; test1</div></pre></td></tr></table></figure></p>
+<p>3, 测试结果如下：<br><img src="http://www.webpaas.com/usr/uploads/2015/03/2340083504.png" alt="clipboard.png"><br>可见 test1的写速度长期维持在1M左右</p>
+<h3 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h3><p>各项结果都比较符合预期。<br>测试代码在 git上：<br><a href="https://github.com/duanbing/mysh.git" target="_blank" rel="external">container技术剖析</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/07/02/cgroup-test/" data-id="cj4lk409100016pfy6xw8i3z5" class="article-share-link">Teilen</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-drf" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/07/02/drf/" class="article-date">
+  <time datetime="2017-07-01T16:00:35.000Z" itemprop="datePublished">2017-07-02</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/07/02/drf/">drf算法分析</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="最大最小算法"><a href="#最大最小算法" class="headerlink" title="最大最小算法"></a>最大最小算法</h3><p>最大最小算法的形式化定义：</p>
+<ul>
+<li>资源按照需求递增的顺序进行分配</li>
+<li>不存在用户得到的资源超过自己的需求</li>
+<li>未得到满足的用户等价的分享资源</li>
+</ul>
+<p>与之对应的可执行定义：</p>
+<p>考虑用户集合1, …, n分别有资源需求x1, x2, …, xn.不失一般性,令资源需求满足x1 &lt;= x2 &lt;= … &lt;= xn.令服务器具有能力C.那么,我们初始把C/n资源给需求最小的用户.这可能会超过用户1的需求,继续处理.该过程结束时，每个用户得到的没有比自己要求更多，而且，如果其需求得不到满足，得到的资源也不会比其他用户得到的最多的资源还少.我们之所以称之为最大最小公平分配是因为我们最大化了资源得不到满足的用户最小分配的资源.</p>
+<p>举一个例子：<br>有一四个用户的集合,资源需求分别是2,2.6,4,5,其资源总能力为10,为其计算最大最小公平分配<br>解决方法:我们通过几轮的计算来计算最大最小公平分配.第一轮,我们暂时将资源划分成4个大小为2.5的.由于这超过了用户1的需求,这使得剩了0.5个均匀的分配给剩下的3个人资源,给予他们每个2.66.这又超过了用户2的需求,所以我们拥有额外的0.066…来分配给剩下的两个用户,给予每个用户2.5+0.66…+0.033…=2.7.因此公平分配是:用户1得到2,用户2得到2.6,用户3和用户4每个都得到2.7.</p>
+<h3 id="带权最大最小算法"><a href="#带权最大最小算法" class="headerlink" title="带权最大最小算法"></a>带权最大最小算法</h3><p>到目前为止,我们假设所有的用户拥有相同的权利来获取资源.有时候我们需要给予一些用户更大的配额.特别的,我们可能会给不同的用户1, …, n关联权重w1, w2, …, wn,这反映了他们间的资源配额.<br>我们通过定义带权的最大最小公平分配来扩展最大最小公平分配的概念以使其包含这样的权重:</p>
+<ul>
+<li>资源按照需求递增的顺序进行分配,通过权重来标准化</li>
+<li>不存在用户得到的资源超过自己的需求</li>
+<li>未得到满足的用户按照权重分享资源</li>
+</ul>
+<p>举一个例子</p>
+<p>有一四个用户的集合,资源需求分别是4,2,10,4,权重分别是2.5,4,0.5,1,资源总能力是16,为其计算最大最小公平分配.<br>解决方法:第一步是标准化权重,将最小的权重设置为1.这样权重集合更新为5,8,1,2.这样我们就假装需要的资源不是4份而是5+8+1+2=16份.因此将资源划分成16份.在资源分配的每一轮,我们按照权重的比例来划分资源,因此,在第一轮,我们计算C/n为16/16=1.在这一轮,用户分别获得5,8,1,2单元的资源,用户1得到了5个资源,但是只需要4,所以多了1个资源,同样的,用户2多了6个资源.用户3和用户4拖欠了,因为他们的配额低于需求.现在我们有7个单元的资源可以分配给用户3和用户4.他们的权重分别是1和2,最小的权重是1,因此不需要对权重进行标准化.给予用户3额外的7 × 1/3单元资源和用户4额外的7 × 2/3单元.这会导致用户4的配额达到了2 + 7 × 2/3 = 6.666,超过了需求.所以我们将额外的2.666单元给用户3,最终获得1 + 7/3 + 2.666 = 6单元.最终的分配是,4,2,6,4,这就是带权的最大最小公平分配.</p>
+<h3 id="DRF算法"><a href="#DRF算法" class="headerlink" title="DRF算法"></a>DRF算法</h3><p>Dominant Resource Fairness（DRF），一种通用的多资源的max-min fairness分配策略。DRF背后的直观想法是在多环境下一个用户的资源分配应该由用户的dominant share（主导份额的资源）决定，dominant share是在所有已经分配给用户的多种资源中，占据最大份额的一种资源。简而言之，DRF试图最大化所有用户中最小的dominant share（一句话表达了DRF的思想）。举个例子，假如用户A运行CPU密集的任务而用户B运行内存密集的任务，DRF会试图均衡用户A的CPU资源份额和用户B的内存资源份额。在单个资源的情形下，那么DRF就会退化为max-min fairness。</p>
+<p>DRF有四种主要特性，分别是：sharing incentive、strategy-proofness、Pareto efficiency和envy-freeness。</p>
+<p>DRF是通过确保系统的资源在用户之间是静态和均衡地进行分配来提供sharing incentive，用户不能获得比其他用户更多的资源，共享集群，而不是创建自己的专有集群。此外，DRF是strategy-proof，用户不能通过谎报其资源需求来获得更多的资源。DRF是Pareto-efficient，在满足其他特性的同时，分配所有可以利用的资源，不用取代现有的资源分配。最后，DRF是envy-free，用户不会更喜欢其他用户的资源分配。</p>
+<p>举一个例子：</p>
+<p>考虑一个9CPU、18GBRAM的系统，拥有两个用户，其中用户A运行的任务的需求向量为{1CPU, 4GB}，用户B运行的任务的需求向量为{3CPU，1GB}。</p>
+<p><img src="http://www.webpaas.com/usr/uploads/2015/04/3699732504.png" alt="12212737\_xXnW.png"></p>
+<p>在这个方案里面， A的每个任务的消耗总CPU的1/9和内存的4/18,所以A的dominant resource就是内存， 任务B的doninant就是cpu。如上图所示， 三个A任务总共消耗了{3CPU，12GB}，两个B任务总共消耗了{6CPU，2GB}。在这个分配中，每个用户的dominant resource是相等的。用户A获得了2/3的内存，B获得了2/3的CPU。</p>
+<p>以上的这个分配可以用如下方式计算出来：x和y分别是用户A和用户B的分配任务的数目，那么用户A消耗了{xCPU，4xGB}，用户B消耗了{3yCPU，yGB}，在图三中用户A和用户B消耗了同等dominant resource；用户A的dominant share为4x/18，用户B的dominant share为3y/9。所以DRF分配可以通过求解以下的优化问题来得到：</p>
+<p><img src="http://www.webpaas.com/usr/uploads/2015/04/1850794973.png" alt="12212738\_llIF.png"></p>
+<p>求解以上问题，可以得出x = 3以及y = 2。因而用户A获得{3CPU，12GB}，B得到{6CPU， 2GB}。</p>
+<p>需要注意的是，DRF并不是总需要使用户的dominant shares相等。当一个用户总的需求是被满足，用户不会需要更多的任务，因此多余的资源可以在其他用户之间进行分配，就好像max-min fairness。此外，如果一种资源被耗尽，那些不需要此种资源的用户仍然可以继续接收到更多其他类型的资源。</p>
+<p><img src="http://www.webpaas.com/usr/uploads/2015/04/2315095933.png" alt="12212740\_H81D.png"></p>
+<p>这是DRF算法的伪代码，算法会跟踪分配给每个用户的总资源，以及用户的dominant share：si。每一步，DRF都会从用户最低的dominant share里面选择一个任务来运行。假设用户的需求被满足，即系统中有足够可用的资源，那么用户的任务就会被加载启动。我们考虑一般情况，即一个用户拥有不用需求向量的任务，我们使用变量Di来表示用户i下一个要运行加载的任务。为了简单起见，伪码没有捕获任务结束事件，在这种情况下，用户会释放任务的资源，DRF会再一次选择拥有最低dominant share的用户去运行它的任务。</p>
+<p><img src="http://www.webpaas.com/usr/uploads/2015/04/3503420442.png" alt="12212743\_BDro.png"><br>考虑4.1的两个用户的简单例子，table1说明了DRF对这个简单例子的分配过程。DRF首先选择B来运行一个任务，结果B的资源占用率变为{3/9,1/18}，B的dominant share变成了max{3/9，1/18} = 1/3。接下来DRF选择A，因为此时A的dominant share为0。这个过程持续进行，直到不再可能运行任务新任务，在这种情况下，一般会出现CPU饱和。</p>
+<p>在以上分配过程的最后，用户A会得到{3CPU, 12GB}，同事B得到了{6CPU， 2GB}，每一个用户都获得了2/3的dominant resource。</p>
+<p>注意到，在这个例子中，一旦任何资源达到饱和，那么分配过程就会终止。然而通常情况下，它可以在某些资源已经饱和的情况下继续分配任务，因为有些任务对已经饱和的资源没有任何要求。</p>
+<p>以上这个算法在实现的时候可以用二叉堆来存储每一个用户的dominant share。对于n个用户，每一次调度决定都消耗了O(logn)时间。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p><a href="https://www.cs.berkeley.edu/~alig/papers/drf.pdf" target="_blank" rel="external">Dominant Resource Fairness: Fair Allocation of Multiple Resource Types
+</a></p>
+<p><a href="http://blog.csdn.net/pelick/article/details/19326865" target="_blank" rel="external">DRF算法</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/07/02/drf/" data-id="cj4lk409700036pfyj5zc25jb" class="article-share-link">Teilen</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-linux_network_namespace" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/07/01/linux_network_namespace/" class="article-date">
+  <time datetime="2017-07-01T14:21:02.000Z" itemprop="datePublished">2017-07-01</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/07/01/linux_network_namespace/">linux namespace学习</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Network Namespace可以实现网络的隔离，有点像路由器里的VRF。在虚拟化和LXC中有很重要的用处。</p>
+<p>创建Network Namespace<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ip netns add</div></pre></td></tr></table></figure></p>
+<p>例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ip netns add test</div></pre></td></tr></table></figure>
+<p>查看namespace</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ip netns list</div></pre></td></tr></table></figure>
+<p>给Namespace添加接口</p>
+<p>创建的Namespace不能添加真实的物理接口，只能添加虚拟接口veth（virtual Ethernet interface），它们经常成对出现并且像一个管道一样连在一起。<br>创建一对veth：veth0和veth1</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ip link add veth0 type veth peer name veth1</div></pre></td></tr></table></figure>
+<p>通过命令可以查看我们创建的veth</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">[root@controller0 ~]# ip link list</div><div class="line">1: lo:  mtu 16436 qdisc noqueue state UNKNOWN </div><div class="line">link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</div><div class="line">2: eth0:  mtu 1500 qdisc pfifo_fast state UNKNOWN qlen 1000</div><div class="line">link/ether 08:00:27:ec:3c:70 brd ff:ff:ff:ff:ff:ff</div><div class="line">3: eth1:  mtu 1500 qdisc pfifo_fast state UNKNOWN qlen 1000</div><div class="line">link/ether 08:00:27:d1:f2:b3 brd ff:ff:ff:ff:ff:ff</div><div class="line">4: eth2:  mtu 1500 qdisc pfifo_fast state UNKNOWN qlen 1000</div><div class="line">link/ether 08:00:27:ad:03:e8 brd ff:ff:ff:ff:ff:ff</div><div class="line">5: eth3:  mtu 1500 qdisc pfifo_fast state UP qlen 1000</div><div class="line">link/ether 08:00:27:b2:eb:13 brd ff:ff:ff:ff:ff:ff</div><div class="line">6: virbr0:  mtu 1500 qdisc noqueue state UNKNOWN </div><div class="line">link/ether 52:54:00:eb:0e:7e brd ff:ff:ff:ff:ff:ff</div><div class="line">7: virbr0-nic:  mtu 1500 qdisc noop state DOWN qlen 500</div><div class="line">link/ether 52:54:00:eb:0e:7e brd ff:ff:ff:ff:ff:ff</div><div class="line">10: veth1:  mtu 1500 qdisc noop state DOWN qlen 1000</div><div class="line">link/ether 86:e4:2c:b1:77:d0 brd ff:ff:ff:ff:ff:ff</div><div class="line">11: veth0:  mtu 1500 qdisc noop state DOWN qlen 1000</div><div class="line">link/ether 82:bf:54:c0:5c:a9 brd ff:ff:ff:ff:ff:ff</div></pre></td></tr></table></figure>
+<p>现在这两个veth都是属于默认（global）的Network Namespace，下面我们把veth0放到test的namespace里，veth1保留在global的namespace里。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">[root@controller0 ~]# ip link set veth0 netns test</div><div class="line">[root@controller0 ~]# ip netns exec test ip a</div><div class="line">9: lo:  mtu 16436 qdisc noop state DOWN </div><div class="line">link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</div><div class="line">11: veth0:  mtu 1500 qdisc noop state DOWN qlen 1000</div><div class="line">link/ether 82:bf:54:c0:5c:a9 brd ff:ff:ff:ff:ff:ff</div></pre></td></tr></table></figure>
+<p>发现veth0已经跑到test这个namespace里了，全局的network namespace里已没有了veth0.</p>
+<p>目前veth0和veth1时down的状态，下面我们为两个veth对配置IP地址</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">ip netns exec test ip addr add 192.168.10.2/24 dev veth0 </div><div class="line">ip netns exec test ip link set veth0 up</div><div class="line">[root@controller0 ~]# ip netns exec test ip a</div><div class="line">9: lo:  mtu 16436 qdisc noop state DOWN </div><div class="line">link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</div><div class="line">11: veth0:  mtu 1500 qdisc pfifo_fast state DOWN qlen 1000</div><div class="line">link/ether 82:bf:54:c0:5c:a9 brd ff:ff:ff:ff:ff:ff</div><div class="line">inet 192.168.10.2/24 scope global veth0</div><div class="line">[root@controller0 ~]#</div></pre></td></tr></table></figure>
+<p>给veth1配置IP地址，veth1在global的Network Namespace里</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">ip addr add 192.168.10.1/24 dev veth1 up</div><div class="line">[root@controller0 ~]# ip a</div><div class="line">10: veth1:  mtu 1500 qdisc pfifo_fast state UP qlen 1000</div><div class="line">link/ether 86:e4:2c:b1:77:d0 brd ff:ff:ff:ff:ff:ff</div><div class="line">inet 192.168.10.1/24 scope global veth1</div><div class="line">inet6 fe80::84e4:2cff:feb1:77d0/64 scope link </div><div class="line">valid_lft forever preferred_lft forever</div><div class="line">[root@controller0 ~]# ip netns exec test ip a</div><div class="line">9: lo:  mtu 16436 qdisc noop state DOWN </div><div class="line">link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</div><div class="line">11: veth0:  mtu 1500 qdisc pfifo_fast state UP qlen 1000</div><div class="line">link/ether 82:bf:54:c0:5c:a9 brd ff:ff:ff:ff:ff:ff</div><div class="line">inet 192.168.10.2/24 scope global veth0</div><div class="line">inet6 fe80::80bf:54ff:fec0:5ca9/64 scope link </div><div class="line">valid_lft forever preferred_lft forever</div></pre></td></tr></table></figure>
+<p>可以看到veth0和veth1都up了起来。验证一下连通性。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">[root@controller0 ~]# ping 192.168.10.2</div><div class="line">PING 192.168.10.2 (192.168.10.2) 56(84) bytes of data.</div><div class="line">64 bytes from 192.168.10.2: icmp_seq=1 ttl=64 time=0.084 ms</div><div class="line">64 bytes from 192.168.10.2: icmp_seq=2 ttl=64 time=0.102 ms</div><div class="line">--- 192.168.10.2 ping statistics ---</div><div class="line">2 packets transmitted, 2 received, 0% packet loss, time 1326ms</div><div class="line">rtt min/avg/max/mdev = 0.084/0.093/0.102/0.009 ms</div><div class="line">[root@controller0 ~]# ip netns exec test ping 192.168.10.1</div><div class="line">PING 192.168.10.1 (192.168.10.1) 56(84) bytes of data.</div><div class="line">64 bytes from 192.168.10.1: icmp_seq=1 ttl=64 time=0.076 ms</div><div class="line">64 bytes from 192.168.10.1: icmp_seq=2 ttl=64 time=0.076 ms</div><div class="line">^C</div><div class="line">--- 192.168.10.1 ping statistics ---</div><div class="line">2 packets transmitted, 2 received, 0% packet loss, time 1552ms</div><div class="line">rtt min/avg/max/mdev = 0.076/0.076/0.076/0.000 ms</div><div class="line">[root@controller0 ~]#</div></pre></td></tr></table></figure>
+<p>从外往里ping和从里往外ping都是通的。</p>
+<p>参考： <a href="https://github.com/yongluo2013/osf-openstack-training/blob/master/installation/How-to-connection-ns-outside.md" target="_blank" rel="external">https://github.com/yongluo2013/osf-openstack-training/blob/master/installation/How-to-connection-ns-outside.md</a> </p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/07/01/linux_network_namespace/" data-id="cj4lk409g00086pfycf7th4n8" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux-namespace/">linux namespace</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/faas/">faas</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/golang/">golang</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/job-flow/">job flow</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux-namespace/">linux namespace</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/overlayfs/">overlayfs</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/faas/" style="font-size: 10px;">faas</a> <a href="/tags/golang/" style="font-size: 10px;">golang</a> <a href="/tags/job-flow/" style="font-size: 10px;">job flow</a> <a href="/tags/linux-namespace/" style="font-size: 10px;">linux namespace</a> <a href="/tags/overlayfs/" style="font-size: 10px;">overlayfs</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archiv</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/07/02/faas/">faas介绍</a>
+          </li>
+        
+          <li>
+            <a href="/2017/07/02/azkaban/">azkaban集群模式介绍</a>
+          </li>
+        
+          <li>
+            <a href="/2017/07/02/go1-5gc/">go1.5 GC分析</a>
+          </li>
+        
+          <li>
+            <a href="/2017/07/02/overlay/">overlayfs介绍</a>
+          </li>
+        
+          <li>
+            <a href="/2017/07/02/cgroup-test/">cgroup功能完全测试</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Duan Bing<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

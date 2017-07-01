@@ -1,11 +1,294 @@
-extends includes/layout
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>cgroup功能完全测试 | Container based Platform as a Service</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="准备环境centos7  单核virtualbox  测试项目 cpu 配额以及硬限 memory 限制以及OOM net_cls 网速限制 blkio 配额以及影限  安装和启动cgroup：1yum install -y libcgroup-tools.x86_64 启动1service cgconfig start或者systemctl start cgconfig.service 基本的使">
+<meta property="og:type" content="article">
+<meta property="og:title" content="cgroup功能完全测试">
+<meta property="og:url" content="http://yoursite.com/2017/07/02/cgroup-test/index.html">
+<meta property="og:site_name" content="Container based Platform as a Service">
+<meta property="og:description" content="准备环境centos7  单核virtualbox  测试项目 cpu 配额以及硬限 memory 限制以及OOM net_cls 网速限制 blkio 配额以及影限  安装和启动cgroup：1yum install -y libcgroup-tools.x86_64 启动1service cgconfig start或者systemctl start cgconfig.service 基本的使">
+<meta property="og:image" content="http://www.webpaas.com/usr/uploads/2015/03/3712925605.png">
+<meta property="og:image" content="http://www.webpaas.com/usr/uploads/2015/03/1326954497.png">
+<meta property="og:image" content="http://www.webpaas.com/usr/uploads/2015/03/220808703.png">
+<meta property="og:image" content="http://www.webpaas.com/usr/uploads/2015/03/2860866051.png">
+<meta property="og:image" content="http://www.webpaas.com/usr/uploads/2015/03/3921482247.png">
+<meta property="og:image" content="http://www.webpaas.com/usr/uploads/2015/03/2340083504.png">
+<meta property="og:updated_time" content="2017-07-01T16:16:11.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="cgroup功能完全测试">
+<meta name="twitter:description" content="准备环境centos7  单核virtualbox  测试项目 cpu 配额以及硬限 memory 限制以及OOM net_cls 网速限制 blkio 配额以及影限  安装和启动cgroup：1yum install -y libcgroup-tools.x86_64 启动1service cgconfig start或者systemctl start cgconfig.service 基本的使">
+<meta name="twitter:image" content="http://www.webpaas.com/usr/uploads/2015/03/3712925605.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Container based Platform as a Service" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Container based Platform as a Service</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-cgroup-test" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/07/02/cgroup-test/" class="article-date">
+  <time datetime="2017-07-01T16:04:17.000Z" itemprop="datePublished">2017-07-02</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      cgroup功能完全测试
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h3><h4 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h4><p>centos7  单核<br>virtualbox </p>
+<h4 id="测试项目"><a href="#测试项目" class="headerlink" title="测试项目"></a>测试项目</h4><ul>
+<li>cpu 配额以及硬限</li>
+<li>memory 限制以及OOM</li>
+<li>net_cls 网速限制</li>
+<li>blkio 配额以及影限</li>
+</ul>
+<h4 id="安装和启动cgroup："><a href="#安装和启动cgroup：" class="headerlink" title="安装和启动cgroup："></a>安装和启动cgroup：</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">yum install -y libcgroup-tools.x86_64</div></pre></td></tr></table></figure>
+<p>启动<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">service cgconfig start或者systemctl start cgconfig.service</div></pre></td></tr></table></figure></p>
+<p>基本的使用命令这里就不做详细解释了，参见：</p>
+<p><a href="https://access.redhat.com/documentation/zh-CN/Red_Hat_Enterprise_Linux/6/html/Resource_Management_Guide/" target="_blank" rel="external">https://access.redhat.com/documentation/zh-CN/Red_Hat_Enterprise_Linux/6/html/Resource_Management_Guide/</a></p>
+<h4 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h4><h4 id="cpu"><a href="#cpu" class="headerlink" title="cpu"></a>cpu</h4><ul>
+<li>cpu软限：</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">cgset -r cpu.shares=512 test1</div><div class="line">cgset -r cpu.shares=128 test2</div><div class="line"></div><div class="line">loop=0</div><div class="line">while (($loop &lt; 4)) </div><div class="line">	do</div><div class="line">	cgexec -g cpu:test1 ./deadloop &gt; /dev/null &amp;</div><div class="line">((loop++))</div><div class="line">	done</div><div class="line"></div><div class="line">while (($loop &lt; 4 + 4)) </div><div class="line">	do</div><div class="line">	cgexec -g cpu:test2 ./deadloop2 &gt; /dev/null &amp;</div><div class="line">((loop++))	</div><div class="line">done</div></pre></td></tr></table></figure>
+<p>完整在这里:<a href="https://github.com/duanbing/mysh/blob/master/test_cgroup/cpu/test1.sh" target="_blank" rel="external">cgroup完整测试脚本</a> </p>
+<p>top打开可以看到结果：<br><img src="http://www.webpaas.com/usr/uploads/2015/03/3712925605.png" alt="clipboard.png"></p>
+<p>结论： 可以看到test1这个进程组和test2这个进程组的cpu使用量比例为： 3:1</p>
+<ul>
+<li>cpu  hardlimit硬限<br>cgroups里面 可以用cpu.cfs_period_us和cpu.cfs_quota_us来限制进程组中进程单位时间可以使用的cpu时间。cfs就是“完全公平调度”，cpu.cfs_period_us是时间周期，默认为100000us，cfs_quota_us就是这期间内可以使用的cpu时间，-1表示无限制。</li>
+</ul>
+<p>设置如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"># 设置test1的cpu使用时间为50%,默认cpu.cfs_period=100000us</div><div class="line"></div><div class="line">cgset -r cpu.cfs_quota_us=50000 test1</div><div class="line">cgset -r cpu.cfs_quota_us=25000 test2</div></pre></td></tr></table></figure></p>
+<p>结果如下：<br><img src="http://www.webpaas.com/usr/uploads/2015/03/1326954497.png" alt="clipboard2.png"></p>
+<p>可以看到， test1的四个deadloop进程加起来大约50%左右的cpu，  test2总共消耗25%左右的cpu。注意我这里是单核。 多核的话，一个cgroup可以用到n倍的cpu时间。</p>
+<ul>
+<li>cpuset 限制使用的核心节点和内存节点<br>cpuset.cpus、cpuset.mems 就是用来限制进程可以使用的 cpu 核心和内存节点的。  这里因为是单核。 所以没有测试这个</li>
+</ul>
+<p>大家可以参考：<a href="http://xiezhenye.com/2013/10/%E7%94%A8-cgroups-%E7%AE%A1%E7%90%86-cpu-%E8%B5%84%E6%BA%90.html" target="_blank" rel="external">用 cgroups 管理 cpu 资源</a></p>
+<h4 id="memory测试"><a href="#memory测试" class="headerlink" title="memory测试"></a>memory测试</h4><ul>
+<li>内存限制<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"># 限制内存和虚拟内存</div><div class="line">cgset -r memory.limit_in_bytes=16M test1</div><div class="line">cgset -r memory.memsw.limit_in_bytes=16M test1</div><div class="line"># 关闭oom killer</div><div class="line">#cgset -r memory.oom_control=1 test1</div><div class="line"></div><div class="line">cgexec -g memory:test1 ./mem_alloc</div><div class="line">cgexec -g memory:test2 dd if=/dev/zero of=./file.256M bs=1M count=256</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>可以看到结果如下：<br><img src="http://www.webpaas.com/usr/uploads/2015/03/220808703.png" alt="clipboard.png"><br>test1 这个cgroup因为内存超限，被oom kill了。 查看test2的内存使用情况如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[root@localhost test2]# cat memory.limit_in_bytes </div><div class="line">16777216</div></pre></td></tr></table></figure>
+<ul>
+<li>限制网卡</li>
+</ul>
+<p>参考：<a href="http://lxr.free-electrons.com/source/Documentation/cgroups/net_cls.txt" target="_blank" rel="external">http://lxr.free-electrons.com/source/Documentation/cgroups/net_cls.txt</a></p>
+<h4 id="工具介绍-tc-iperf"><a href="#工具介绍-tc-iperf" class="headerlink" title="工具介绍 tc,iperf"></a>工具介绍 tc,iperf</h4><ul>
+<li>tc（traffic controller）是Linux下面的网络流量控制工具，详细说明见<a href="http://lartc.org/LARTC-zh_CN.GB2312.pdf" target="_blank" rel="external">Linux 的高级路由和流量控制</a>。<br>TC基本思想是Linux内核首先把需要发送的数据包交给TC队列，由TC进行排队，然后内核再从TC队列中取出，通过网卡驱动发送出去。 TC有三个核心概念：</li>
+</ul>
+<p>qdisc(queueing discipline) 规则队列：可以是树形<br>class 类别：附属于一个qdisc<br>filiter 过滤器：映射指定标签的数据包到qdisc<br>qdisc和class的命名方式以： major number : minor number，qdisc占用major，class占用minor。</p>
+<p>简单测试：<br>针对网卡enp0s3,首先清理之前的qdisc，然后新建major number为10的qdisc。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">tc qdisc del dev enp0s3</div><div class="line">tc qdisc add dev enp0s3 handle 1: htb</div></pre></td></tr></table></figure></p>
+<p>在qdics上增加一个分类，设置带宽为100Mbit。创建过滤器，使用cgroup标签：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">tc class add dev enp0s3 parent 1: classid 1:1 htb rate 100mbit</div><div class="line">tc filter add dev enp0s3 parent 1: protocol ip prio 1 handle 1: cgroup</div></pre></td></tr></table></figure>
+<p>如果修改带宽限制：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">tc class change dev enp0s3 parent 1: classid 1:1 htb  rate 200mbit</div></pre></td></tr></table></figure></p>
+<p>创建一个net_cls 的组，上面tc创建的class的classid是10:1 ，这个id在cgroup以0xAAAABBBB方式表示，其中AAAA是major number，BBBB是minor number，执行：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">cgcreate -g net_cls:test1</div><div class="line">echo 0x100001 &gt; /sys/fs/cgroup/net_cls/test1/net_cls.classid</div></pre></td></tr></table></figure></p>
+<ul>
+<li>iperf<br>iperf  是一个网络性能测试工具。Iperf可以测试TCP和UDP带宽质量。Iperf可以测量最大TCP带宽，具有多种参数和UDP特性。iperf可以报告带宽，延迟抖动和数据包丢失。<br>iperf -s 就可以启动服务端，  iperf -c $ip 就能启动客户端进行测试<br>测试结果如下：<br><img src="http://www.webpaas.com/usr/uploads/2015/03/2860866051.png" alt="clipboard.png"><br>可以看到， iperf测试的结果是在10m左右的网速。<br>参考： <a href="http://4249964.blog.51cto.com/4239964/1563868" target="_blank" rel="external">cgroup+tc对单个进程进行带宽限制</a></li>
+</ul>
+<h4 id="blkio测试"><a href="#blkio测试" class="headerlink" title="blkio测试"></a>blkio测试</h4><ul>
+<li>设置不同cg的io相对速度<br>设置如下：<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">cgset -r blkio.weight=200 test1</div><div class="line">cgset -r blkio.weight=400 test2</div><div class="line">#注意blkio对page cache无效，所以这只对direct io进行设置</div><div class="line">rm -rf ./2g*</div><div class="line">cgexec -g blkio:test1 dd if=/dev/sda of=./2g oflag=direct bs=1M count=1014 &amp;</div><div class="line">cgexec -g blkio:test2 dd if=/dev/sda of=./2g2 oflag=direct bs=1M count=1024 &amp;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>安装iotop查看单个进程的io<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">yum -y install iotop</div></pre></td></tr></table></figure></p>
+<p>结果如下：<br><img src="http://www.webpaas.com/usr/uploads/2015/03/3921482247.png" alt="clipboard.png"><br>可以看出 test1 和test2的io速度保持在1:2左右。</p>
+<ul>
+<li>限制io的速度<br>我们通过blkio.throttle.write_bps_device来限制每秒的写字节上限。格式为：<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">major:minor operations_per_second</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>步骤如下：<br>1， 查看设备的major和minor。  我直接限制当前所在分区的读写io。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">[root@localhost blkio]# df -h</div><div class="line">Filesystem               Size  Used Avail Use% Mounted on</div><div class="line">/dev/mapper/centos-root   14G  9.6G  4.4G  69% /</div><div class="line">devtmpfs                 913M     0  913M   0% /dev</div><div class="line">tmpfs                    921M     0  921M   0% /dev/shm</div><div class="line">tmpfs                    921M  8.4M  913M   1% /run</div><div class="line">tmpfs                    921M     0  921M   0% /sys/fs/cgroup</div><div class="line">/dev/sda1                497M  134M  363M  27% /boot</div><div class="line">[root@localhost blkio]# ls -l /dev/mapper/centos-root </div><div class="line">lrwxrwxrwx. 1 root root 7 Mar 15 04:59 /dev/mapper/centos-root -&gt; ../dm-1</div><div class="line">[root@localhost blkio]# ls -l /dev/dm-1 </div><div class="line">brw-rw----. 1 root disk 253, 1 Mar 15 04:59 /dev/dm-1</div></pre></td></tr></table></figure></p>
+<p>2, 设置test1这个组的写上线为1M<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">cgset -r blkio.throttle.write_bps_device=&quot;253:1 1048576&quot; test1</div></pre></td></tr></table></figure></p>
+<p>3, 测试结果如下：<br><img src="http://www.webpaas.com/usr/uploads/2015/03/2340083504.png" alt="clipboard.png"><br>可见 test1的写速度长期维持在1M左右</p>
+<h3 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h3><p>各项结果都比较符合预期。<br>测试代码在 git上：<br><a href="https://github.com/duanbing/mysh.git" target="_blank" rel="external">container技术剖析</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/07/02/cgroup-test/" data-id="cj4lk409100016pfy6xw8i3z5" class="article-share-link">Teilen</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/07/02/overlay/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Neuer</strong>
+      <div class="article-nav-title">
+        
+          overlayfs介绍
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/07/02/drf/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">drf算法分析</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/faas/">faas</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/golang/">golang</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/job-flow/">job flow</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux-namespace/">linux namespace</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/overlayfs/">overlayfs</a></li></ul>
+    </div>
+  </div>
 
 
-block content
-  .post-item
-  h2.post-title-wrapper
-      p.post-title=page.title
-  if page.date && page.source !== 'about/index.md'
-      div.post-date
-        time(datetime=page.date.toJSON())=date(page.date, date_format)
-  .post-content!= page.content
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/faas/" style="font-size: 10px;">faas</a> <a href="/tags/golang/" style="font-size: 10px;">golang</a> <a href="/tags/job-flow/" style="font-size: 10px;">job flow</a> <a href="/tags/linux-namespace/" style="font-size: 10px;">linux namespace</a> <a href="/tags/overlayfs/" style="font-size: 10px;">overlayfs</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archiv</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/07/02/faas/">faas介绍</a>
+          </li>
+        
+          <li>
+            <a href="/2017/07/02/azkaban/">azkaban集群模式介绍</a>
+          </li>
+        
+          <li>
+            <a href="/2017/07/02/go1-5gc/">go1.5 GC分析</a>
+          </li>
+        
+          <li>
+            <a href="/2017/07/02/overlay/">overlayfs介绍</a>
+          </li>
+        
+          <li>
+            <a href="/2017/07/02/cgroup-test/">cgroup功能完全测试</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Duan Bing<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>
