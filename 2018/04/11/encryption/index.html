@@ -7,18 +7,16 @@
   
   <title>Container based Platform as a Service</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="PaaS技术交流QQ群：">
-<meta property="og:type" content="website">
+  <meta name="description" content="##非对称加密算法介绍 概念 秘钥(Private Key)：本地生成，例如ssh-keygen生成的~/.ssh/id_rsa文件等，需要严格保密托管； 公钥(Public Key)： 本地生成，对外公开，例如~/.ssh/id_rsa.pub文件，并且公钥可以由私钥进行生成，但是反过来公钥几乎没法推导出私钥 摘要(Digest)：对发送的消息内容进行Hash，可以是SHA256等；  数字签名">
+<meta property="og:type" content="article">
 <meta property="og:title" content="Container based Platform as a Service">
-<meta property="og:url" content="http://yoursite.com/atom.html">
+<meta property="og:url" content="http://yoursite.com/2018/04/11/encryption/index.html">
 <meta property="og:site_name" content="Container based Platform as a Service">
-<meta property="og:description" content="PaaS技术交流QQ群：">
-<meta property="og:image" content="http://pub.idqqimg.com/wpa/images/group.png">
-<meta property="og:updated_time" content="2017-07-01T17:56:54.000Z">
+<meta property="og:description" content="##非对称加密算法介绍 概念 秘钥(Private Key)：本地生成，例如ssh-keygen生成的~/.ssh/id_rsa文件等，需要严格保密托管； 公钥(Public Key)： 本地生成，对外公开，例如~/.ssh/id_rsa.pub文件，并且公钥可以由私钥进行生成，但是反过来公钥几乎没法推导出私钥 摘要(Digest)：对发送的消息内容进行Hash，可以是SHA256等；  数字签名">
+<meta property="og:updated_time" content="2018-04-11T13:01:37.560Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Container based Platform as a Service">
-<meta name="twitter:description" content="PaaS技术交流QQ群：">
-<meta name="twitter:image" content="http://pub.idqqimg.com/wpa/images/group.png">
+<meta name="twitter:description" content="##非对称加密算法介绍 概念 秘钥(Private Key)：本地生成，例如ssh-keygen生成的~/.ssh/id_rsa文件等，需要严格保密托管； 公钥(Public Key)： 本地生成，对外公开，例如~/.ssh/id_rsa.pub文件，并且公钥可以由私钥进行生成，但是反过来公钥几乎没法推导出私钥 摘要(Digest)：对发送的消息内容进行Hash，可以是SHA256等；  数字签名">
   
     <link rel="alternate" href="/atom.html" title="Container based Platform as a Service" type="application/atom+xml">
   
@@ -65,10 +63,10 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="page-undefined" class="article article-type-page" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-encryption" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/atom.html" class="article-date">
-  <time datetime="2017-07-01T17:56:54.000Z" itemprop="datePublished">2017-07-02</time>
+    <a href="/2018/04/11/encryption/" class="article-date">
+  <time datetime="2018-04-11T13:01:37.560Z" itemprop="datePublished">2018-04-11</time>
 </a>
     
   </div>
@@ -77,21 +75,60 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <body align="left">
-PaaS技术交流QQ群：
-<a target="_blank" href="http://shang.qq.com/wpa/qunwpa?idkey=6db0cd6b3b55f80983109b316df531919c227483b90905620304392295df66b0"><img border="0" src="http://pub.idqqimg.com/wpa/images/group.png" alt="Cloud/PaaS" title="Cloud/PaaS/Container"></a>
-</body>
+        <p>##非对称加密算法介绍</p>
+<h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><ul>
+<li>秘钥(Private Key)：本地生成，例如ssh-keygen生成的<code>~/.ssh/id_rsa</code>文件等，需要严格保密托管；</li>
+<li>公钥(Public Key)： 本地生成，对外公开，例如<code>~/.ssh/id_rsa.pub</code>文件，并且公钥可以由私钥进行生成，但是反过来公钥几乎没法推导出私钥</li>
+<li>摘要(Digest)：对发送的消息内容进行Hash，可以是SHA256等； </li>
+<li>数字签名(Signature)：使用发送者私钥对摘要进行加密获得；</li>
+<li>数字证书(Digit Certificate)：公正机关用自己的私钥，对发送者的公钥和相关信息（姓名，公司名字，国家等）进行加密，获得的文件，例如ca证书</li>
+</ul>
+<h3 id="认证"><a href="#认证" class="headerlink" title="认证"></a>认证</h3><h4 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h4><p>简单说明：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Msg: 原始消息；</div><div class="line">发送方： A</div><div class="line">接收方: B</div></pre></td></tr></table></figure></p>
+<p>流程如下：</p>
+<ol>
+<li>A 携带自己的（使用B的公钥加密MSG后的内容，签名，数字证书)发送到网络，</li>
+<li>B接受到之后，使用CA(公正机关)的公钥解密数字证书，获得A的公钥，</li>
+<li>然后B使用A的公钥解密签名，获得摘要;</li>
+<li>B使用自己的私钥解开收到的消息内容，获得MSG,然后对MSG进行Hash，获得摘要，跟步骤三获得摘要进行对比</li>
+</ol>
+<h4 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h4><ol>
+<li><p>如何证明你是发送者？<br>使用认证机关的公钥解析数字证书，获得发送者的公钥,然后签名，或者摘要，然后进入流程4</p>
+</li>
+<li><p>如何证明你是接受者？<br>流程4</p>
+</li>
+<li><p>如何证明内容秘钥被篡改？<br>先使用A的公钥<br>只需要将内容进行hash，对比hash值是否是跟摘要相等</p>
+</li>
+</ol>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/atom.html" data-id="cjfv772ep00005h4jopescs0v" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2018/04/11/encryption/" data-id="cjfv772fp00035h4jpblwdy0z" class="article-share-link">Teilen</a>
       
       
     </footer>
   </div>
   
     
+<nav id="article-nav">
+  
+    <a href="/2018/04/11/eth/consensus/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Neuer</strong>
+      <div class="article-nav-title">
+        
+          (no title)
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/08/02/kube-dns-md/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">kube_dns.md</div>
+    </a>
+  
+</nav>
+
   
 </article>
 
