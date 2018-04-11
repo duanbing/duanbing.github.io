@@ -50,7 +50,7 @@
         
           <a id="nav-rss-link" class="nav-icon" href="/atom.html" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
@@ -61,64 +61,29 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-eth/consensus" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="blog-eth/encryption" class="article article-type-blog" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2018/04/11/eth/consensus/" class="article-date">
-  <time datetime="2018-04-11T13:28:46.784Z" itemprop="datePublished">2018-04-11</time>
+    <a href="/2018/04/11/eth/encryption/" class="article-date">
+  <time datetime="2018-04-11T14:25:47.000Z" itemprop="datePublished">2018-04-11</time>
 </a>
     
   </div>
   <div class="article-inner">
     
     
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="以太坊共识机制"><a href="#以太坊共识机制" class="headerlink" title="以太坊共识机制"></a>以太坊共识机制</h2><h3 id="共识算法面临的问题"><a href="#共识算法面临的问题" class="headerlink" title="共识算法面临的问题"></a>共识算法面临的问题</h3><p>理想情况下，一个分布式算法包含下面3个特点：</p>
-<ul>
-<li>可终止性： 一致性的结果可以在有限的时间算出；</li>
-<li>共识性： 不同节点最终完成的结果应该相同</li>
-<li>合法性：决策的结果应该是其他进程提出的提案</li>
-</ul>
-<p>分布式系统尝尝面临以下问题：</p>
-<ol>
-<li>节点处理事务的能力不同，网络节点的吞吐有差异；</li>
-<li>节点间通信的信道可能不安全；</li>
-<li>可能出现拜占庭错误节点</li>
-<li>当天异步处理能力达到高度一致的时候，系统的可扩展性变得很差, 新节点很难加入；</li>
-</ol>
-<h3 id="以太坊共识算法"><a href="#以太坊共识算法" class="headerlink" title="以太坊共识算法"></a>以太坊共识算法</h3><h4 id="Clique"><a href="#Clique" class="headerlink" title="Clique"></a>Clique</h4><h5 id="区块认证"><a href="#区块认证" class="headerlink" title="区块认证"></a>区块认证</h5><p>原理：认证节点使用ECDSA算法进行加密 网络中的每一个区块是由于某一个认证节点进行认证的，其他节点仅仅需要验证认证信息来判断该区块是否合法</p>
-<ul>
-<li>认证节点： 具备区块签名的权利，可以对应POW算法中的miner节点</li>
-<li>非认证节点： 不具备签名的权利，是区块网络中的普通同步节点<br>同时这2类节点可以动态投票机制进行转换，后面介绍如何转换。</li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/11/eth/consensus/" data-id="cjfv772hj000m5h4jvyz6iq5t" class="article-share-link">Teilen</a>
-      
-      
-    </footer>
-  </div>
+      <header class="article-header">
+        
   
-</article>
-
-
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/11/eth/encryption/">非对称加密算法介绍</a>
+    </h1>
   
-    <article id="post-encryption" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/04/11/encryption/" class="article-date">
-  <time datetime="2018-04-11T13:01:37.560Z" itemprop="datePublished">2018-04-11</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
+
+      </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>##非对称加密算法介绍</p>
-<h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><ul>
+        <h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><ul>
 <li>秘钥(Private Key)：本地生成，例如ssh-keygen生成的<code>~/.ssh/id_rsa</code>文件等，需要严格保密托管；</li>
 <li>公钥(Public Key)： 本地生成，对外公开，例如<code>~/.ssh/id_rsa.pub</code>文件，并且公钥可以由私钥进行生成，但是反过来公钥几乎没法推导出私钥</li>
 <li>摘要(Digest)：对发送的消息内容进行Hash，可以是SHA256等； </li>
@@ -145,9 +110,67 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/11/encryption/" data-id="cjfv772fp00035h4jpblwdy0z" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2018/04/11/eth/encryption/" data-id="cjfv7ce11000l854job1ehnoi" class="article-share-link">Share</a>
       
       
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="blog-eth/consensus" class="article article-type-blog" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/11/eth/consensus/" class="article-date">
+  <time datetime="2018-04-11T14:25:47.000Z" itemprop="datePublished">2018-04-11</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/11/eth/consensus/">以太坊共识机制</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="共识算法面临的问题"><a href="#共识算法面临的问题" class="headerlink" title="共识算法面临的问题"></a>共识算法面临的问题</h3><p>理想情况下，一个分布式算法包含下面3个特点：</p>
+<ul>
+<li>可终止性： 一致性的结果可以在有限的时间算出；</li>
+<li>共识性： 不同节点最终完成的结果应该相同</li>
+<li>合法性：决策的结果应该是其他进程提出的提案</li>
+</ul>
+<p>分布式系统尝尝面临以下问题：</p>
+<ol>
+<li>节点处理事务的能力不同，网络节点的吞吐有差异；</li>
+<li>节点间通信的信道可能不安全；</li>
+<li>可能出现拜占庭错误节点</li>
+<li>当天异步处理能力达到高度一致的时候，系统的可扩展性变得很差, 新节点很难加入；</li>
+</ol>
+<h3 id="以太坊共识算法"><a href="#以太坊共识算法" class="headerlink" title="以太坊共识算法"></a>以太坊共识算法</h3><h4 id="Clique"><a href="#Clique" class="headerlink" title="Clique"></a>Clique</h4><h5 id="区块认证"><a href="#区块认证" class="headerlink" title="区块认证"></a>区块认证</h5><p>原理：认证节点使用ECDSA算法进行加密 网络中的每一个区块是由于某一个认证节点进行认证的，其他节点仅仅需要验证认证信息来判断该区块是否合法</p>
+<ul>
+<li>认证节点： 具备区块签名的权利，可以对应POW算法中的miner节点</li>
+<li>非认证节点： 不具备签名的权利，是区块网络中的普通同步节点<br>同时这2类节点可以动态投票机制进行转换，后面介绍如何转换。</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/04/11/eth/consensus/" data-id="cjfv7ce13000m854jsdwlr39h" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li></ul>
+
     </footer>
   </div>
   
@@ -181,7 +204,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/08/02/kube-dns-md/" data-id="cjfv772go000b5h4j0iojrtg6" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/08/02/kube-dns-md/" data-id="cjfv7cdzs000a854jk1tfrjyq" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/k8s/">k8s</a></li></ul>
@@ -258,7 +281,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/faas/" data-id="cjfv772gl00085h4jac3ortow" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/faas/" data-id="cjfv7cdzl0005854j5yjpuzs1" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/faas/">faas</a></li></ul>
@@ -361,7 +384,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/azkaban/" data-id="cjfv772fl00025h4j9so3bz6r" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/azkaban/" data-id="cjfv7cdz80001854jdp23fq4p" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/job-flow/">job flow</a></li></ul>
@@ -408,7 +431,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/go1-5gc/" data-id="cjfv772gf00075h4j54sboz6o" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/go1-5gc/" data-id="cjfv7cdzn0006854jmznge1tf" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/golang/">golang</a></li></ul>
@@ -482,7 +505,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/overlay/" data-id="cjfv772gn000a5h4jfcbs89y8" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/overlay/" data-id="cjfv7ce0d000i854j44fp1jhg" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/overlayfs/">overlayfs</a></li></ul>
@@ -584,7 +607,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/cgroup-test/" data-id="cjfv772fg00015h4jxpljothb" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/cgroup-test/" data-id="cjfv7cdzc0002854j4hfow3t7" class="article-share-link">Share</a>
       
       
     </footer>
@@ -657,7 +680,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/drf/" data-id="cjfv772fv00055h4j0fb1566r" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/drf/" data-id="cjfv7cdzk0004854jy0iogq2o" class="article-share-link">Share</a>
       
       
     </footer>
@@ -715,7 +738,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/01/linux_network_namespace/" data-id="cjfv772gp000c5h4j5gia1frs" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/01/linux_network_namespace/" data-id="cjfv7cdzo0009854jnon649mw" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux-namespace/">linux namespace</a></li></ul>
@@ -740,7 +763,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/faas/">faas</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/golang/">golang</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/job-flow/">job flow</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/k8s/">k8s</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux-namespace/">linux namespace</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/overlayfs/">overlayfs</a></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/faas/">faas</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/golang/">golang</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/job-flow/">job flow</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/k8s/">k8s</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux-namespace/">linux namespace</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/overlayfs/">overlayfs</a></li></ul>
     </div>
   </div>
 
@@ -750,14 +773,14 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/faas/" style="font-size: 10px;">faas</a> <a href="/tags/golang/" style="font-size: 10px;">golang</a> <a href="/tags/job-flow/" style="font-size: 10px;">job flow</a> <a href="/tags/k8s/" style="font-size: 10px;">k8s</a> <a href="/tags/linux-namespace/" style="font-size: 10px;">linux namespace</a> <a href="/tags/overlayfs/" style="font-size: 10px;">overlayfs</a>
+      <a href="/tags/blockchain/" style="font-size: 20px;">blockchain</a> <a href="/tags/faas/" style="font-size: 10px;">faas</a> <a href="/tags/golang/" style="font-size: 10px;">golang</a> <a href="/tags/job-flow/" style="font-size: 10px;">job flow</a> <a href="/tags/k8s/" style="font-size: 10px;">k8s</a> <a href="/tags/linux-namespace/" style="font-size: 10px;">linux namespace</a> <a href="/tags/overlayfs/" style="font-size: 10px;">overlayfs</a>
     </div>
   </div>
 
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Archiv</h3>
+    <h3 class="widget-title">Archives</h3>
     <div class="widget">
       <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">August 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li></ul>
     </div>
@@ -767,16 +790,16 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">letzter Beitrag</h3>
+    <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
         
           <li>
-            <a href="/2018/04/11/eth/consensus/">(no title)</a>
+            <a href="/2018/04/11/eth/encryption/">非对称加密算法介绍</a>
           </li>
         
           <li>
-            <a href="/2018/04/11/encryption/">(no title)</a>
+            <a href="/2018/04/11/eth/consensus/">以太坊共识机制</a>
           </li>
         
           <li>
