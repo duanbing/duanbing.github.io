@@ -14,7 +14,7 @@
 <meta property="og:url" content="http://yoursite.com/2018/04/11/eth/consensus/index.html">
 <meta property="og:site_name" content="Container based Platform as a Service">
 <meta property="og:description" content="共识算法面临的问题理想情况下，一个分布式算法包含下面3个特点：  可终止性： 一致性的结果可以在有限的时间算出； 共识性： 不同节点最终完成的结果应该相同 合法性：决策的结果应该是其他进程提出的提案  分布式系统尝尝面临以下问题：  节点处理事务的能力不同，网络节点的吞吐有差异； 节点间通信的信道可能不安全； 可能出现拜占庭错误节点 当天异步处理能力达到高度一致的时候，系统的可扩展性变得很差, 新">
-<meta property="og:updated_time" content="2018-04-12T02:27:33.469Z">
+<meta property="og:updated_time" content="2018-04-12T02:28:39.002Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="以太坊共识机制">
 <meta name="twitter:description" content="共识算法面临的问题理想情况下，一个分布式算法包含下面3个特点：  可终止性： 一致性的结果可以在有限的时间算出； 共识性： 不同节点最终完成的结果应该相同 合法性：决策的结果应该是其他进程提出的提案  分布式系统尝尝面临以下问题：  节点处理事务的能力不同，网络节点的吞吐有差异； 节点间通信的信道可能不安全； 可能出现拜占庭错误节点 当天异步处理能力达到高度一致的时候，系统的可扩展性变得很差, 新">
@@ -55,7 +55,7 @@
         
           <a id="nav-rss-link" class="nav-icon" href="/atom.html" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
@@ -119,11 +119,14 @@
 <h4 id="Ethash"><a href="#Ethash" class="headerlink" title="Ethash"></a>Ethash</h4><p>Ethash算法又称为PoW(Proof-of-Work),是基于计算能力的seal过程，基本原理简化为以下公式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Rand(h,n) &lt;= M/d</div></pre></td></tr></table></figure></p>
 <p>M是一个极大的数maxUint256,d是难度值，h是header.HashNoNonce，n是Nonce. 那么在这个算法里面，d越大，要求Rand的结果就越小，这样相对的计算量也就越大。</p>
 <p>真正的计算量是在hashimotoFull里面，最终调用的是hashimoto, 本质上是一个以非线性表查找方式进行的经过多次，多种Hash的计算。这种函数的性能取决于查找的逻辑，以及查找的表格的数据规模大小。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a href="https://blog.csdn.net/teaspring/article/details/78050274" target="_blank" rel="external">挖矿和共识算法的奥秘</a></li>
+</ul>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/11/eth/consensus/" data-id="cjfvwll9d000ida4j34qxi2jp" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2018/04/11/eth/consensus/" data-id="cjfvwmxs5000je54j6dqf32i4" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li></ul>
@@ -134,10 +137,19 @@
     
 <nav id="article-nav">
   
+    <a href="/2018/04/11/eth/encryption/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          非对称加密算法介绍
+        
+      </div>
+    </a>
   
-    <a href="/2018/04/11/eth/encryption/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Älter</strong>
-      <div class="article-nav-title">非对称加密算法介绍</div>
+  
+    <a href="/2017/07/02/faas/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">faas介绍</div>
     </a>
   
 </nav>
@@ -173,7 +185,7 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Archiv</h3>
+    <h3 class="widget-title">Archives</h3>
     <div class="widget">
       <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li></ul>
     </div>
@@ -183,16 +195,16 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">letzter Beitrag</h3>
+    <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
         
           <li>
-            <a href="/2018/04/11/eth/consensus/">以太坊共识机制</a>
+            <a href="/2018/04/11/eth/encryption/">非对称加密算法介绍</a>
           </li>
         
           <li>
-            <a href="/2018/04/11/eth/encryption/">非对称加密算法介绍</a>
+            <a href="/2018/04/11/eth/consensus/">以太坊共识机制</a>
           </li>
         
           <li>

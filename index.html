@@ -50,7 +50,7 @@
         
           <a id="nav-rss-link" class="nav-icon" href="/atom.html" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
@@ -60,6 +60,67 @@
 </header>
       <div class="outer">
         <section id="main">
+  
+    <article id="blog-eth/encryption" class="article article-type-blog" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/11/eth/encryption/" class="article-date">
+  <time datetime="2018-04-11T14:25:47.000Z" itemprop="datePublished">2018-04-11</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/11/eth/encryption/">非对称加密算法介绍</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><ul>
+<li>秘钥(Private Key)：本地生成，例如ssh-keygen生成的<code>~/.ssh/id_rsa</code>文件等，需要严格保密托管；</li>
+<li>公钥(Public Key)： 本地生成，对外公开，例如<code>~/.ssh/id_rsa.pub</code>文件，并且公钥可以由私钥进行生成，但是反过来公钥几乎没法推导出私钥</li>
+<li>摘要(Digest)：对发送的消息内容进行Hash，可以是SHA256等； </li>
+<li>数字签名(Signature)：使用发送者私钥对摘要进行加密获得；</li>
+<li>数字证书(Digit Certificate)：公正机关用自己的私钥，对发送者的公钥和相关信息（姓名，公司名字，国家等）进行加密，获得的文件，例如ca证书</li>
+</ul>
+<h3 id="认证"><a href="#认证" class="headerlink" title="认证"></a>认证</h3><h4 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h4><p>简单说明：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Msg: 原始消息；</div><div class="line">发送方： A</div><div class="line">接收方: B</div></pre></td></tr></table></figure></p>
+<p>流程如下：</p>
+<ol>
+<li>A 携带自己的（使用B的公钥加密MSG后的内容，签名，数字证书)发送到网络，</li>
+<li>B接受到之后，使用CA(公正机关)的公钥解密数字证书，获得A的公钥，</li>
+<li>然后B使用A的公钥解密签名，获得摘要;</li>
+<li>B使用自己的私钥解开收到的消息内容，获得MSG,然后对MSG进行Hash，获得摘要，跟步骤三获得摘要进行对比</li>
+</ol>
+<h4 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h4><ol>
+<li><p>如何证明你是发送者？<br>使用认证机关的公钥解析数字证书，获得发送者的公钥,然后签名，或者摘要，然后进入流程4</p>
+</li>
+<li><p>如何证明你是接受者？<br>流程4</p>
+</li>
+<li><p>如何证明内容秘钥被篡改？<br>先使用A的公钥<br>只需要将内容进行hash，对比hash值是否是跟摘要相等</p>
+</li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/04/11/eth/encryption/" data-id="cjfvwmxs4000ie54jeen2893d" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
   
     <article id="blog-eth/consensus" class="article article-type-blog" itemscope itemprop="blogPost">
   <div class="article-meta">
@@ -116,72 +177,14 @@
 <h4 id="Ethash"><a href="#Ethash" class="headerlink" title="Ethash"></a>Ethash</h4><p>Ethash算法又称为PoW(Proof-of-Work),是基于计算能力的seal过程，基本原理简化为以下公式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Rand(h,n) &lt;= M/d</div></pre></td></tr></table></figure></p>
 <p>M是一个极大的数maxUint256,d是难度值，h是header.HashNoNonce，n是Nonce. 那么在这个算法里面，d越大，要求Rand的结果就越小，这样相对的计算量也就越大。</p>
 <p>真正的计算量是在hashimotoFull里面，最终调用的是hashimoto, 本质上是一个以非线性表查找方式进行的经过多次，多种Hash的计算。这种函数的性能取决于查找的逻辑，以及查找的表格的数据规模大小。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/11/eth/consensus/" data-id="cjfvwll9d000ida4j34qxi2jp" class="article-share-link">Teilen</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="blog-eth/encryption" class="article article-type-blog" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/04/11/eth/encryption/" class="article-date">
-  <time datetime="2018-04-11T14:25:47.000Z" itemprop="datePublished">2018-04-11</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/11/eth/encryption/">非对称加密算法介绍</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><ul>
-<li>秘钥(Private Key)：本地生成，例如ssh-keygen生成的<code>~/.ssh/id_rsa</code>文件等，需要严格保密托管；</li>
-<li>公钥(Public Key)： 本地生成，对外公开，例如<code>~/.ssh/id_rsa.pub</code>文件，并且公钥可以由私钥进行生成，但是反过来公钥几乎没法推导出私钥</li>
-<li>摘要(Digest)：对发送的消息内容进行Hash，可以是SHA256等； </li>
-<li>数字签名(Signature)：使用发送者私钥对摘要进行加密获得；</li>
-<li>数字证书(Digit Certificate)：公正机关用自己的私钥，对发送者的公钥和相关信息（姓名，公司名字，国家等）进行加密，获得的文件，例如ca证书</li>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a href="https://blog.csdn.net/teaspring/article/details/78050274" target="_blank" rel="external">挖矿和共识算法的奥秘</a></li>
 </ul>
-<h3 id="认证"><a href="#认证" class="headerlink" title="认证"></a>认证</h3><h4 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h4><p>简单说明：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Msg: 原始消息；</div><div class="line">发送方： A</div><div class="line">接收方: B</div></pre></td></tr></table></figure></p>
-<p>流程如下：</p>
-<ol>
-<li>A 携带自己的（使用B的公钥加密MSG后的内容，签名，数字证书)发送到网络，</li>
-<li>B接受到之后，使用CA(公正机关)的公钥解密数字证书，获得A的公钥，</li>
-<li>然后B使用A的公钥解密签名，获得摘要;</li>
-<li>B使用自己的私钥解开收到的消息内容，获得MSG,然后对MSG进行Hash，获得摘要，跟步骤三获得摘要进行对比</li>
-</ol>
-<h4 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h4><ol>
-<li><p>如何证明你是发送者？<br>使用认证机关的公钥解析数字证书，获得发送者的公钥,然后签名，或者摘要，然后进入流程4</p>
-</li>
-<li><p>如何证明你是接受者？<br>流程4</p>
-</li>
-<li><p>如何证明内容秘钥被篡改？<br>先使用A的公钥<br>只需要将内容进行hash，对比hash值是否是跟摘要相等</p>
-</li>
-</ol>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/11/eth/encryption/" data-id="cjfvwll9e000jda4j8lgm5hyq" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2018/04/11/eth/consensus/" data-id="cjfvwmxs5000je54j6dqf32i4" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li></ul>
@@ -258,7 +261,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/faas/" data-id="cjfvwll860005da4jfnkvs63i" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/faas/" data-id="cjfvwmxqw0005e54jqjv53hrg" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/faas/">faas</a></li></ul>
@@ -361,7 +364,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/azkaban/" data-id="cjfvwll7w0002da4j1iajbsmd" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/azkaban/" data-id="cjfvwmxqe0001e54j7ppnntzm" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/job-flow/">job flow</a></li></ul>
@@ -408,7 +411,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/go1-5gc/" data-id="cjfvwll870006da4j2e2hipvb" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/go1-5gc/" data-id="cjfvwmxqx0006e54jnyaw6lki" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/golang/">golang</a></li></ul>
@@ -482,7 +485,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/overlay/" data-id="cjfvwll8e000ada4jmddzj2gu" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/overlay/" data-id="cjfvwmxr4000ae54jw31j6jg3" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/overlayfs/">overlayfs</a></li></ul>
@@ -584,7 +587,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/cgroup-test/" data-id="cjfvwll7r0001da4jxlkkhkow" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/cgroup-test/" data-id="cjfvwmxqj0002e54j8nf5fliq" class="article-share-link">Share</a>
       
       
     </footer>
@@ -657,7 +660,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/drf/" data-id="cjfvwll810003da4jautl7g99" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/drf/" data-id="cjfvwmxqu0004e54j3y6qbzu6" class="article-share-link">Share</a>
       
       
     </footer>
@@ -715,7 +718,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/01/linux_network_namespace/" data-id="cjfvwll8c0007da4jvbgobv8q" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/01/linux_network_namespace/" data-id="cjfvwmxr00009e54johvkr98f" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux-namespace/">linux namespace</a></li></ul>
@@ -757,7 +760,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Archiv</h3>
+    <h3 class="widget-title">Archives</h3>
     <div class="widget">
       <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li></ul>
     </div>
@@ -767,16 +770,16 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">letzter Beitrag</h3>
+    <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
         
           <li>
-            <a href="/2018/04/11/eth/consensus/">以太坊共识机制</a>
+            <a href="/2018/04/11/eth/encryption/">非对称加密算法介绍</a>
           </li>
         
           <li>
-            <a href="/2018/04/11/eth/encryption/">非对称加密算法介绍</a>
+            <a href="/2018/04/11/eth/consensus/">以太坊共识机制</a>
           </li>
         
           <li>
