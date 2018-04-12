@@ -113,11 +113,14 @@
 <p>Seal: 尝试通过本地签名认证（权力签名与认证，找到有权力的结点）来创建一个已密封的区块</p>
 <h5 id="投票机制"><a href="#投票机制" class="headerlink" title="投票机制"></a>投票机制</h5><p>当需要更新认证节点(signer)的时候，需要使用投票机制。用户首先利用rpc发起一次Propose,指定<strong>某个结点地址</strong>的<strong>状态</strong>. 然后每个认证节点在签发新的区块的时候，会从pending的proposal里面随机挑选一个proposal，并且将对应的节点地址填充到CoinBase里面，将对应的是否认证状态填充到nonce字段，作为一次投票。</p>
 <p>这个投票的区块也会作为新的区块加到区块链上去。同时，每个认证节点本地会维护一个投票结果计数器Tally，记录2个字段：1） Votes： 获得的票数； 2）认证状态（是否是认证节点. 当当前处理的区块获得的投票数大于认证节点个数一半的时候，节点就将被赋予新的状态。但是这里注意，如果是认证状态是真的，就将节点标记为认证节点，否则，还需要做一个特殊处理，因为这个时候少了一个认证节点的话，以为这很多区块都会立即获得超过半数的投票。这里采取的是只处理当前票指定的地址的状态变更,其余的则留到下次处理。</p>
+<h4 id="Ethash"><a href="#Ethash" class="headerlink" title="Ethash"></a>Ethash</h4><p>Ethash算法又称为PoW(Proof-of-Work),是基于计算能力的seal过程，基本原理简化为以下公式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Rand(h,n) &lt;= M/d</div></pre></td></tr></table></figure></p>
+<p>M是一个极大的数maxUint256,d是难度值，h是header.HashNoNonce，n是Nonce. 那么在这个算法里面，d越大，要求Rand的结果就越小，这样相对的计算量也就越大。</p>
+<p>真正的计算量是在hashimotoFull里面，最终调用的是hashimoto, 本质上是一个以非线性表查找方式进行的经过多次，多种Hash的计算。这种函数的性能取决于查找的逻辑，以及查找的表格的数据规模大小。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/11/eth/consensus/" data-id="cjfvvorqi000i5o4jsly5rysd" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2018/04/11/eth/consensus/" data-id="cjfvwll9d000ida4j34qxi2jp" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li></ul>
@@ -178,7 +181,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/11/eth/encryption/" data-id="cjfvvorr1000l5o4jy66whari" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2018/04/11/eth/encryption/" data-id="cjfvwll9e000jda4j8lgm5hyq" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li></ul>
@@ -255,7 +258,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/faas/" data-id="cjfvvorp900055o4jbc10j21t" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/faas/" data-id="cjfvwll860005da4jfnkvs63i" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/faas/">faas</a></li></ul>
@@ -358,7 +361,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/azkaban/" data-id="cjfvvorov00015o4jjba3leme" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/azkaban/" data-id="cjfvwll7w0002da4j1iajbsmd" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/job-flow/">job flow</a></li></ul>
@@ -405,7 +408,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/go1-5gc/" data-id="cjfvvorpb00065o4jer0jk57n" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/go1-5gc/" data-id="cjfvwll870006da4j2e2hipvb" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/golang/">golang</a></li></ul>
@@ -479,7 +482,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/overlay/" data-id="cjfvvorph000a5o4juriamnds" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/overlay/" data-id="cjfvwll8e000ada4jmddzj2gu" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/overlayfs/">overlayfs</a></li></ul>
@@ -581,7 +584,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/cgroup-test/" data-id="cjfvvorp000025o4jv73mjs8c" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/cgroup-test/" data-id="cjfvwll7r0001da4jxlkkhkow" class="article-share-link">Teilen</a>
       
       
     </footer>
@@ -654,7 +657,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/drf/" data-id="cjfvvorp800045o4jlac0829i" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/drf/" data-id="cjfvwll810003da4jautl7g99" class="article-share-link">Teilen</a>
       
       
     </footer>
@@ -712,7 +715,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/01/linux_network_namespace/" data-id="cjfvvorpd00095o4jd2or4it0" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/01/linux_network_namespace/" data-id="cjfvwll8c0007da4jvbgobv8q" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux-namespace/">linux namespace</a></li></ul>
