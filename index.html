@@ -108,7 +108,7 @@
 <p>VerifyUncles: 判断区块是否有uncles，如果有的话，验证失败</p>
 <p>VerifySeal： 校验签发节点的难度值</p>
 <p>Prepare: 填充区块头信息,其中新区块的Coinbase是所有未处理的提议中，所有有效投票（认证变非认证，或者非认证变认证）中的一个随机的被投票地址；同时设置header.Time为min(当前时间,parent.Time+延迟产生时间(config.Period))。</p>
-<p>Finalize:  保证新节点没有Uncles，没有rewards，最后返回新区快</p>
+<p>Finalize:  保证新节点没有Uncles，没有rewards,全部的transaction执行完毕，最后生成root，TxHash等成员，返回新区快</p>
 <p>Authorize: 设置公钥和签名生成函数</p>
 <p>Seal: 尝试通过本地签名认证（权力签名与认证，找到有权力的结点）来创建一个已密封的区块</p>
 <h5 id="投票机制"><a href="#投票机制" class="headerlink" title="投票机制"></a>投票机制</h5><p>当需要更新认证节点(signer)的时候，需要使用投票机制。用户首先利用rpc发起一次Propose,指定<strong>某个结点地址</strong>的<strong>状态</strong>. 然后每个认证节点在签发新的区块的时候，会从pending的proposal里面随机挑选一个proposal，并且将对应的节点地址填充到CoinBase里面，将对应的是否认证状态填充到nonce字段，作为一次投票。</p>
@@ -117,7 +117,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/11/eth/consensus/" data-id="cjfvvjmmk000i3z4j4rs7utd1" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2018/04/11/eth/consensus/" data-id="cjfvvorqi000i5o4jsly5rysd" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li></ul>
@@ -178,7 +178,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/11/eth/encryption/" data-id="cjfvvjmml000j3z4jhpl78z76" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2018/04/11/eth/encryption/" data-id="cjfvvorr1000l5o4jy66whari" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li></ul>
@@ -255,7 +255,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/faas/" data-id="cjfvvjmlv00063z4j5bweghop" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/faas/" data-id="cjfvvorp900055o4jbc10j21t" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/faas/">faas</a></li></ul>
@@ -358,7 +358,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/azkaban/" data-id="cjfvvjmkw00013z4jmeoqpj0h" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/azkaban/" data-id="cjfvvorov00015o4jjba3leme" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/job-flow/">job flow</a></li></ul>
@@ -405,7 +405,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/go1-5gc/" data-id="cjfvvjmlw00073z4jap4k0cah" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/go1-5gc/" data-id="cjfvvorpb00065o4jer0jk57n" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/golang/">golang</a></li></ul>
@@ -479,7 +479,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/overlay/" data-id="cjfvvjmm3000a3z4j6ed8zn4m" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/overlay/" data-id="cjfvvorph000a5o4juriamnds" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/overlayfs/">overlayfs</a></li></ul>
@@ -581,7 +581,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/cgroup-test/" data-id="cjfvvjml000023z4jcz53zfv9" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/cgroup-test/" data-id="cjfvvorp000025o4jv73mjs8c" class="article-share-link">Teilen</a>
       
       
     </footer>
@@ -654,7 +654,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/drf/" data-id="cjfvvjml800043z4jv7bpuukt" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/drf/" data-id="cjfvvorp800045o4jlac0829i" class="article-share-link">Teilen</a>
       
       
     </footer>
@@ -712,7 +712,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/01/linux_network_namespace/" data-id="cjfvvjmlz00093z4jsh9rlhd5" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/01/linux_network_namespace/" data-id="cjfvvorpd00095o4jd2or4it0" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux-namespace/">linux namespace</a></li></ul>

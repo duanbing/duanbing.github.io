@@ -14,7 +14,7 @@
 <meta property="og:url" content="http://yoursite.com/2018/04/11/eth/consensus/index.html">
 <meta property="og:site_name" content="Container based Platform as a Service">
 <meta property="og:description" content="共识算法面临的问题理想情况下，一个分布式算法包含下面3个特点：  可终止性： 一致性的结果可以在有限的时间算出； 共识性： 不同节点最终完成的结果应该相同 合法性：决策的结果应该是其他进程提出的提案  分布式系统尝尝面临以下问题：  节点处理事务的能力不同，网络节点的吞吐有差异； 节点间通信的信道可能不安全； 可能出现拜占庭错误节点 当天异步处理能力达到高度一致的时候，系统的可扩展性变得很差, 新">
-<meta property="og:updated_time" content="2018-04-12T01:53:50.834Z">
+<meta property="og:updated_time" content="2018-04-12T02:01:57.980Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="以太坊共识机制">
 <meta name="twitter:description" content="共识算法面临的问题理想情况下，一个分布式算法包含下面3个特点：  可终止性： 一致性的结果可以在有限的时间算出； 共识性： 不同节点最终完成的结果应该相同 合法性：决策的结果应该是其他进程提出的提案  分布式系统尝尝面临以下问题：  节点处理事务的能力不同，网络节点的吞吐有差异； 节点间通信的信道可能不安全； 可能出现拜占庭错误节点 当天异步处理能力达到高度一致的时候，系统的可扩展性变得很差, 新">
@@ -111,7 +111,7 @@
 <p>VerifyUncles: 判断区块是否有uncles，如果有的话，验证失败</p>
 <p>VerifySeal： 校验签发节点的难度值</p>
 <p>Prepare: 填充区块头信息,其中新区块的Coinbase是所有未处理的提议中，所有有效投票（认证变非认证，或者非认证变认证）中的一个随机的被投票地址；同时设置header.Time为min(当前时间,parent.Time+延迟产生时间(config.Period))。</p>
-<p>Finalize:  保证新节点没有Uncles，没有rewards，最后返回新区快</p>
+<p>Finalize:  保证新节点没有Uncles，没有rewards,全部的transaction执行完毕，最后生成root，TxHash等成员，返回新区快</p>
 <p>Authorize: 设置公钥和签名生成函数</p>
 <p>Seal: 尝试通过本地签名认证（权力签名与认证，找到有权力的结点）来创建一个已密封的区块</p>
 <h5 id="投票机制"><a href="#投票机制" class="headerlink" title="投票机制"></a>投票机制</h5><p>当需要更新认证节点(signer)的时候，需要使用投票机制。用户首先利用rpc发起一次Propose,指定<strong>某个结点地址</strong>的<strong>状态</strong>. 然后每个认证节点在签发新的区块的时候，会从pending的proposal里面随机挑选一个proposal，并且将对应的节点地址填充到CoinBase里面，将对应的是否认证状态填充到nonce字段，作为一次投票。</p>
@@ -120,7 +120,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/11/eth/consensus/" data-id="cjfvvjmmk000i3z4j4rs7utd1" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2018/04/11/eth/consensus/" data-id="cjfvvorqi000i5o4jsly5rysd" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li></ul>
