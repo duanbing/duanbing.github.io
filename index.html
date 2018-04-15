@@ -48,9 +48,9 @@
       </nav>
       <nav id="sub-nav">
         
-          <a id="nav-rss-link" class="nav-icon" href="/atom.html" title="RSS Feed"></a>
+          <a id="nav-rss-link" class="nav-icon" href="/atom.html" title="Flux RSS"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Rechercher"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
@@ -106,7 +106,89 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/15/eth/transactions/" data-id="cjg0i84ja000ijr4j305oq4vk" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2018/04/15/eth/transactions/" data-id="cjg0ibiwo000lkx4j4v3a2quc" class="article-share-link">Partager</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="blog-eth/encryption" class="article article-type-blog" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/11/eth/encryption/" class="article-date">
+  <time datetime="2018-04-11T14:25:47.000Z" itemprop="datePublished">2018-04-11</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/11/eth/encryption/">非对称加密算法简介以及以太坊account生成</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><ul>
+<li>秘钥(Private Key)：本地生成，例如ssh-keygen生成的<code>~/.ssh/id_rsa</code>文件等，需要严格保密托管；</li>
+<li>公钥(Public Key)： 本地生成，对外公开，例如<code>~/.ssh/id_rsa.pub</code>文件，并且公钥可以由私钥进行生成，但是反过来公钥几乎没法推导出私钥</li>
+<li>摘要(Digest)：对发送的消息内容进行Hash，可以是SHA256等； </li>
+<li>数字签名(Signature)：使用发送者私钥对摘要进行加密获得；</li>
+<li>数字证书(Digit Certificate)：公正机关用自己的私钥，对发送者的公钥和相关信息（姓名，公司名字，国家等）进行加密，获得的文件，例如ca证书</li>
+</ul>
+<h3 id="认证"><a href="#认证" class="headerlink" title="认证"></a>认证</h3><h4 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h4><p>简单说明：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Msg: 原始消息；</div><div class="line">发送方： A</div><div class="line">接收方: B</div></pre></td></tr></table></figure></p>
+<p>流程如下：</p>
+<ol>
+<li>A 携带自己的（使用B的公钥加密MSG后的内容，签名，数字证书)发送到网络，</li>
+<li>B接受到之后，使用CA(公正机关)的公钥解密数字证书，获得A的公钥，</li>
+<li>然后B使用A的公钥解密签名，获得摘要;</li>
+<li>B使用自己的私钥解开收到的消息内容，获得MSG,然后对MSG进行Hash，获得摘要，跟步骤三获得摘要进行对比</li>
+</ol>
+<h4 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h4><ol>
+<li><p>如何证明你是发送者？<br>使用认证机关的公钥解析数字证书，获得发送者的公钥,然后签名，或者摘要，然后进入流程4</p>
+</li>
+<li><p>如何证明你是接受者？<br>流程4</p>
+</li>
+<li><p>如何证明内容秘钥被篡改？<br>先使用A的公钥<br>只需要将内容进行hash，对比hash值是否是跟摘要相等</p>
+</li>
+</ol>
+<h3 id="以太坊accounts生成方法"><a href="#以太坊accounts生成方法" class="headerlink" title="以太坊accounts生成方法"></a>以太坊accounts生成方法</h3><p>以太坊的accounts生成可以通过<code>geth account new</code>。生成之后，会有一个keystone文件，内容如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">duanbing:build baidu$ cat chain/keystore/UTC--2018-04-08T12-37-57.713756000Z--3f67cfcf8de7c7704db21607cf48f705450264ce  | json_pretty</div><div class="line">&#123;</div><div class="line">    &quot;address&quot;: &quot;3f67cfcf8de7c7704db21607cf48f705450264ce&quot;,</div><div class="line">    &quot;crypto&quot;: &#123;</div><div class="line">        &quot;cipher&quot;: &quot;aes-128-ctr&quot;,</div><div class="line">        &quot;cipherparams&quot;: &#123;</div><div class="line">            &quot;iv&quot;: &quot;9a1e9f8538e2f0f211397b03bddab52e&quot;</div><div class="line">        &#125;,</div><div class="line">        &quot;ciphertext&quot;: &quot;a853729f5c2e041cce3a5aa962d4227d8623de88d91cbf6f3e9daa894a0e1b96&quot;,</div><div class="line">        &quot;kdf&quot;: &quot;scrypt&quot;,</div><div class="line">        &quot;kdfparams&quot;: &#123;</div><div class="line">            &quot;dklen&quot;: 32,</div><div class="line">            &quot;n&quot;: 262144,</div><div class="line">            &quot;p&quot;: 1,</div><div class="line">            &quot;r&quot;: 8,</div><div class="line">            &quot;salt&quot;: &quot;f2e69bf1a6d725e30ec7bf0672cec56d5dd39e90d36cad62dcb3394cd2ab8c00&quot;</div><div class="line">        &#125;,</div><div class="line">        &quot;mac&quot;: &quot;586be345a3a2bc5abd5f2f31528a582113912c90227464f7a4cf785f0956c816&quot;</div><div class="line">    &#125;,</div><div class="line">    &quot;id&quot;: &quot;04d1a245-9cbd-419f-b03f-d507fb2b6cbf&quot;,</div><div class="line">    &quot;version&quot;: 3</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>重点关注的是crypto这一段，其中：</p>
+<ul>
+<li>cipher: The name of a symmetric AES algorithm;</li>
+<li>cipherparams: The parameters required for the “cipher” algorithm above;</li>
+<li>ciphertext: Your Ethereum private key encrypted using the “cipher” algorithm above;</li>
+<li>kdf: A Key Derivation Function used to let you encrypt your keystore file with a password;</li>
+<li>kdfparams: The parameters required for the “kdf” algorithm above;</li>
+<li>mac: A code used to verify your password;</li>
+</ul>
+<p>生成过程如下：</p>
+<p><img src="2018/04/11/eth/encryption/1_jHfiOdfCKhyCq5V39vty-A.png" alt="Decrypted Ethereum private key"><br>大致过程如下（详细请参考文档1）：</p>
+<ol>
+<li>通过passphase(密码)和kdf加密算法生成decryption key</li>
+<li>通过decryption key和cipher指定的加密算法，生成最终的private key</li>
+<li>mac是用来验证密码的正确性，是decryption key，cipher加密得到的结果进行连接，进行hash之后获得的字符串，用于验证密码。</li>
+</ol>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><a href="https://medium.com/@julien.m./what-is-an-ethereum-keystore-file-86c8c5917b97" target="_blank" rel="external">What is an ethereum keystone file</a></li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/04/11/eth/encryption/" data-id="cjg0ibiwi000ikx4jxxdxvj2p" class="article-share-link">Partager</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
@@ -180,89 +262,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/11/eth/consensus/" data-id="cjg0i84jb000jjr4jhnllfd9l" class="article-share-link">Teilen</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="blog-eth/encryption" class="article article-type-blog" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/04/11/eth/encryption/" class="article-date">
-  <time datetime="2018-04-11T14:25:47.000Z" itemprop="datePublished">2018-04-11</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/11/eth/encryption/">非对称加密算法简介以及以太坊account生成</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><ul>
-<li>秘钥(Private Key)：本地生成，例如ssh-keygen生成的<code>~/.ssh/id_rsa</code>文件等，需要严格保密托管；</li>
-<li>公钥(Public Key)： 本地生成，对外公开，例如<code>~/.ssh/id_rsa.pub</code>文件，并且公钥可以由私钥进行生成，但是反过来公钥几乎没法推导出私钥</li>
-<li>摘要(Digest)：对发送的消息内容进行Hash，可以是SHA256等； </li>
-<li>数字签名(Signature)：使用发送者私钥对摘要进行加密获得；</li>
-<li>数字证书(Digit Certificate)：公正机关用自己的私钥，对发送者的公钥和相关信息（姓名，公司名字，国家等）进行加密，获得的文件，例如ca证书</li>
-</ul>
-<h3 id="认证"><a href="#认证" class="headerlink" title="认证"></a>认证</h3><h4 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h4><p>简单说明：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Msg: 原始消息；</div><div class="line">发送方： A</div><div class="line">接收方: B</div></pre></td></tr></table></figure></p>
-<p>流程如下：</p>
-<ol>
-<li>A 携带自己的（使用B的公钥加密MSG后的内容，签名，数字证书)发送到网络，</li>
-<li>B接受到之后，使用CA(公正机关)的公钥解密数字证书，获得A的公钥，</li>
-<li>然后B使用A的公钥解密签名，获得摘要;</li>
-<li>B使用自己的私钥解开收到的消息内容，获得MSG,然后对MSG进行Hash，获得摘要，跟步骤三获得摘要进行对比</li>
-</ol>
-<h4 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h4><ol>
-<li><p>如何证明你是发送者？<br>使用认证机关的公钥解析数字证书，获得发送者的公钥,然后签名，或者摘要，然后进入流程4</p>
-</li>
-<li><p>如何证明你是接受者？<br>流程4</p>
-</li>
-<li><p>如何证明内容秘钥被篡改？<br>先使用A的公钥<br>只需要将内容进行hash，对比hash值是否是跟摘要相等</p>
-</li>
-</ol>
-<h3 id="以太坊accounts生成方法"><a href="#以太坊accounts生成方法" class="headerlink" title="以太坊accounts生成方法"></a>以太坊accounts生成方法</h3><p>以太坊的accounts生成可以通过<code>geth account new</code>。生成之后，会有一个keystone文件，内容如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">duanbing:build baidu$ cat chain/keystore/UTC--2018-04-08T12-37-57.713756000Z--3f67cfcf8de7c7704db21607cf48f705450264ce  | json_pretty</div><div class="line">&#123;</div><div class="line">    &quot;address&quot;: &quot;3f67cfcf8de7c7704db21607cf48f705450264ce&quot;,</div><div class="line">    &quot;crypto&quot;: &#123;</div><div class="line">        &quot;cipher&quot;: &quot;aes-128-ctr&quot;,</div><div class="line">        &quot;cipherparams&quot;: &#123;</div><div class="line">            &quot;iv&quot;: &quot;9a1e9f8538e2f0f211397b03bddab52e&quot;</div><div class="line">        &#125;,</div><div class="line">        &quot;ciphertext&quot;: &quot;a853729f5c2e041cce3a5aa962d4227d8623de88d91cbf6f3e9daa894a0e1b96&quot;,</div><div class="line">        &quot;kdf&quot;: &quot;scrypt&quot;,</div><div class="line">        &quot;kdfparams&quot;: &#123;</div><div class="line">            &quot;dklen&quot;: 32,</div><div class="line">            &quot;n&quot;: 262144,</div><div class="line">            &quot;p&quot;: 1,</div><div class="line">            &quot;r&quot;: 8,</div><div class="line">            &quot;salt&quot;: &quot;f2e69bf1a6d725e30ec7bf0672cec56d5dd39e90d36cad62dcb3394cd2ab8c00&quot;</div><div class="line">        &#125;,</div><div class="line">        &quot;mac&quot;: &quot;586be345a3a2bc5abd5f2f31528a582113912c90227464f7a4cf785f0956c816&quot;</div><div class="line">    &#125;,</div><div class="line">    &quot;id&quot;: &quot;04d1a245-9cbd-419f-b03f-d507fb2b6cbf&quot;,</div><div class="line">    &quot;version&quot;: 3</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>重点关注的是crypto这一段，其中：</p>
-<ul>
-<li>cipher: The name of a symmetric AES algorithm;</li>
-<li>cipherparams: The parameters required for the “cipher” algorithm above;</li>
-<li>ciphertext: Your Ethereum private key encrypted using the “cipher” algorithm above;</li>
-<li>kdf: A Key Derivation Function used to let you encrypt your keystore file with a password;</li>
-<li>kdfparams: The parameters required for the “kdf” algorithm above;</li>
-<li>mac: A code used to verify your password;</li>
-</ul>
-<p>生成过程如下：</p>
-<p><img src="1_jHfiOdfCKhyCq5V39vty-A.png" alt="Decrypted Ethereum private key"><br>大致过程如下（详细请参考文档1）：</p>
-<ol>
-<li>通过passphase(密码)和kdf加密算法生成decryption key</li>
-<li>通过decryption key和cipher指定的加密算法，生成最终的private key</li>
-<li>mac是用来验证密码的正确性，是decryption key，cipher加密得到的结果进行连接，进行hash之后获得的字符串，用于验证密码。</li>
-</ol>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
-<li><a href="https://medium.com/@julien.m./what-is-an-ethereum-keystore-file-86c8c5917b97" target="_blank" rel="external">What is an ethereum keystone file</a></li>
-</ol>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/11/eth/encryption/" data-id="cjg0i84je000ljr4j4bp24tje" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2018/04/11/eth/consensus/" data-id="cjg0ibiwk000jkx4jd5qkn6k6" class="article-share-link">Partager</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
@@ -339,7 +339,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/faas/" data-id="cjg0i84hu0006jr4j8fml2yvz" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/faas/" data-id="cjg0ibisb0005kx4j95jimadz" class="article-share-link">Partager</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/faas/">faas</a></li></ul>
@@ -442,7 +442,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/azkaban/" data-id="cjg0i84hc0001jr4j83hl2irz" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/azkaban/" data-id="cjg0ibirg0001kx4jw0md9y36" class="article-share-link">Partager</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/job-flow/">job flow</a></li></ul>
@@ -489,7 +489,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/go1-5gc/" data-id="cjg0i84hy0009jr4jah6ydsav" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/go1-5gc/" data-id="cjg0ibiug000akx4jrbg3j66k" class="article-share-link">Partager</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/golang/">golang</a></li></ul>
@@ -563,7 +563,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/overlay/" data-id="cjg0i84hs0005jr4jhzgxtpih" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/overlay/" data-id="cjg0ibium000ckx4jq8z6g28m" class="article-share-link">Partager</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/overlayfs/">overlayfs</a></li></ul>
@@ -665,7 +665,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/cgroup-test/" data-id="cjg0i84hi0002jr4jue199ctt" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/cgroup-test/" data-id="cjg0ibirm0002kx4jrp9bwd8k" class="article-share-link">Partager</a>
       
       
     </footer>
@@ -738,7 +738,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/drf/" data-id="cjg0i84hq0004jr4j6jx2x5m7" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/drf/" data-id="cjg0ibis70004kx4j4mn4bc8r" class="article-share-link">Partager</a>
       
       
     </footer>
@@ -796,7 +796,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/01/linux_network_namespace/" data-id="cjg0i84i1000ajr4je1xaeaoi" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/01/linux_network_namespace/" data-id="cjg0ibiue0009kx4jdpyg215k" class="article-share-link">Partager</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux-namespace/">linux namespace</a></li></ul>
@@ -819,7 +819,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Tags</h3>
+    <h3 class="widget-title">Mot-clés</h3>
     <div class="widget">
       <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ethereum/">ethereum</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/faas/">faas</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/golang/">golang</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/job-flow/">job flow</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux-namespace/">linux namespace</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/overlayfs/">overlayfs</a></li></ul>
     </div>
@@ -829,7 +829,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Tag Cloud</h3>
+    <h3 class="widget-title">Nuage de mot-clés</h3>
     <div class="widget tagcloud">
       <a href="/tags/blockchain/" style="font-size: 20px;">blockchain</a> <a href="/tags/ethereum/" style="font-size: 20px;">ethereum</a> <a href="/tags/faas/" style="font-size: 10px;">faas</a> <a href="/tags/golang/" style="font-size: 10px;">golang</a> <a href="/tags/job-flow/" style="font-size: 10px;">job flow</a> <a href="/tags/linux-namespace/" style="font-size: 10px;">linux namespace</a> <a href="/tags/overlayfs/" style="font-size: 10px;">overlayfs</a>
     </div>
@@ -838,7 +838,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Archiv</h3>
+    <h3 class="widget-title">Archives</h3>
     <div class="widget">
       <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li></ul>
     </div>
@@ -848,7 +848,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">letzter Beitrag</h3>
+    <h3 class="widget-title">Articles récents</h3>
     <div class="widget">
       <ul>
         
@@ -857,11 +857,11 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
           </li>
         
           <li>
-            <a href="/2018/04/11/eth/consensus/">以太坊共识机制</a>
+            <a href="/2018/04/11/eth/encryption/">非对称加密算法简介以及以太坊account生成</a>
           </li>
         
           <li>
-            <a href="/2018/04/11/eth/encryption/">非对称加密算法简介以及以太坊account生成</a>
+            <a href="/2018/04/11/eth/consensus/">以太坊共识机制</a>
           </li>
         
           <li>
@@ -885,7 +885,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
   <div class="outer">
     <div id="footer-info" class="inner">
       &copy; 2018 Duan Bing<br>
-      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+      Propulsé par <a href="http://hexo.io/" target="_blank">Hexo</a>
     </div>
   </div>
 </footer>
