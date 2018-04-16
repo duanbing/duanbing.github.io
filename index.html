@@ -48,9 +48,9 @@
       </nav>
       <nav id="sub-nav">
         
-          <a id="nav-rss-link" class="nav-icon" href="/atom.html" title="Flux RSS"></a>
+          <a id="nav-rss-link" class="nav-icon" href="/atom.html" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Rechercher"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
@@ -60,6 +60,45 @@
 </header>
       <div class="outer">
         <section id="main">
+  
+    <article id="blog-eth/geth" class="article article-type-blog" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/16/eth/geth/" class="article-date">
+  <time datetime="2018-04-16T14:25:47.000Z" itemprop="datePublished">2018-04-16</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/16/eth/geth/">以太坊Ethereum的UML图</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><img src="2018/04/16/eth/geth/ethereum.png" alt="Ethereum"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/04/16/eth/geth/" data-id="cjg2024az000lhu4j3h6sqcre" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
   
     <article id="blog-eth/transactions" class="article article-type-blog" itemscope itemprop="blogPost">
   <div class="article-meta">
@@ -97,7 +136,7 @@
 <p>ApplyMessage依靠context中的状态，根据消息，计算出区块链的下一个状态.<br>执行过程：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">func ApplyMessage(evm *vm.EVM, msg Message, gp *GasPool) ([]byte, *big.Int, bool, error) &#123;</div><div class="line">    st := NewStateTransition(evm, msg, gp) </div><div class="line">    ret, _, gasUsed, failed, err := st.TransitionDb() //真正执行tx的地方</div><div class="line">    return ret, gasUsed, failed, err</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <p>TransitionDb<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">func (st *StateTransition) TransitionDb() (ret []byte, requiredGas, usedGas *big.Int, failed bool, err error) &#123;</div><div class="line">    ...</div><div class="line">    intrinsicGas := IntrinsicGas(st.data, contractCreation, homestead)  //计算创建合约区块(默认53000)以及携带Payload,或者说要执行的code，方式是(bytes_not_zero * TxDataNonZeroGas + bytes_is_zero * TxDataZeroGas  )需要消耗的gas</div><div class="line">    if intrinsicGas.BitLen() &gt; 64 &#123;</div><div class="line">        return nil, nil, nil, false, vm.ErrOutOfGas</div><div class="line">    &#125;</div><div class="line">    // st.gas -= intrinsicGas</div><div class="line">    if err = st.useGas(intrinsicGas.Uint64()); err != nil &#123;</div><div class="line">        return nil, nil, nil, false, err</div><div class="line">    &#125;</div><div class="line">    ...</div><div class="line">    //创建,并且合约</div><div class="line">    if contractCreation &#123;</div><div class="line">        ret, _, st.gas, vmerr = evm.Create(sender, st.data, st.gas, st.value)</div><div class="line">    &#125; else &#123;</div><div class="line">        // Increment the nonce for the next transaction</div><div class="line">        st.state.SetNonce(sender.Address(), st.state.GetNonce(sender.Address())+1)</div><div class="line">        ret, st.gas, vmerr = evm.Call(sender, st.to().Address(), st.data, st.gas, st.value)</div><div class="line">    &#125;</div><div class="line">    ...</div><div class="line">    requiredGas = new(big.Int).Set(st.gasUsed())</div><div class="line"></div><div class="line">    st.refundGas() //返回没有用完的gas</div><div class="line">    st.state.AddBalance(st.evm.Coinbase, new(big.Int).Mul(st.gasUsed(), st.gasPrice)) //返回给创建区块的coinbase执行合约的收益</div><div class="line"></div><div class="line">    return ret, requiredGas, st.gasUsed(), vmerr != nil, err</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <p>evm.Create</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div></pre></td><td class="code"><pre><div class="line">// Create creates a new contract using code as deployment code.</div><div class="line">func (evm *EVM) Create(caller ContractRef, code []byte, gas uint64, value *big.Int) (ret []byte, contractAddr common.Address, leftOverGas uint64, err error) &#123;</div><div class="line"></div><div class="line">    // Depth check execution. Fail if we&apos;re trying to execute above the</div><div class="line">    // limit.</div><div class="line">    if evm.depth &gt; int(params.CallCreateDepth) &#123;</div><div class="line">        return nil, common.Address&#123;&#125;, gas, ErrDepth</div><div class="line">    &#125;</div><div class="line">    if !evm.CanTransfer(evm.StateDB, caller.Address(), value) &#123;</div><div class="line">        return nil, common.Address&#123;&#125;, gas, ErrInsufficientBalance</div><div class="line">    &#125;</div><div class="line">    // Ensure there&apos;s no existing contract already at the designated address</div><div class="line">    // 要求订单号严格递增</div><div class="line">    nonce := evm.StateDB.GetNonce(caller.Address())</div><div class="line">    evm.StateDB.SetNonce(caller.Address(), nonce+1)</div><div class="line">    //生成合约地址，使用sender的address+nonce的rlp值，然后Keccak256加密</div><div class="line">    contractAddr = crypto.CreateAddress(caller.Address(), nonce)</div><div class="line">    contractHash := evm.StateDB.GetCodeHash(contractAddr)</div><div class="line">    //保证没有合约正在执行</div><div class="line">    if evm.StateDB.GetNonce(contractAddr) != 0 || (contractHash != (common.Hash&#123;&#125;) &amp;&amp; contractHash != emptyCodeHash) &#123;</div><div class="line">        return nil, common.Address&#123;&#125;, 0, ErrContractAddressCollision</div><div class="line">    &#125;</div><div class="line">    // end of ensuring no contract attached to the sender</div><div class="line"></div><div class="line">    // Create a new account on the state</div><div class="line">    snapshot := evm.StateDB.Snapshot()  //设置当前statedb的检查点,以便后续undo</div><div class="line">    evm.StateDB.CreateAccount(contractAddr)  //创建新的账单</div><div class="line">    if evm.ChainConfig().IsEIP158(evm.BlockNumber) &#123;</div><div class="line">        evm.StateDB.SetNonce(contractAddr, 1)</div><div class="line">    &#125;</div><div class="line">    //执行转账,最终调用的statedb的SubBalance（sender减去value）和AddBalance(recipient加上value),中间人是contractAddr</div><div class="line">    evm.Transfer(evm.StateDB, caller.Address(), contractAddr, value) // 这里后续单独开一篇介绍statedb的文章介绍具体的执行过程 </div><div class="line">    </div><div class="line">    //创建合约执行环境，并且执行合约的代码</div><div class="line">    contract := NewContract(caller, AccountRef(contractAddr), value, gas)</div><div class="line">    contract.SetCallCode(&amp;contractAddr, crypto.Keccak256Hash(code), code)</div><div class="line">    ...</div><div class="line">    ret, err = run(evm, snapshot, contract, nil) // 运行智能合约,返回消耗的gas量</div><div class="line"></div><div class="line">    // check whether the max code size has been exceeded</div><div class="line">    maxCodeSizeExceeded := evm.ChainConfig().IsEIP158(evm.BlockNumber) &amp;&amp; len(ret) &gt; params.MaxCodeSize</div><div class="line">    // if the contract creation ran successfully and no errors were returned</div><div class="line">    // calculate the gas required to store the code. If the code could not</div><div class="line">    // be stored due to not enough gas set an error and let it be handled</div><div class="line">    // by the error checking condition below.</div><div class="line">    if err == nil &amp;&amp; !maxCodeSizeExceeded &#123;</div><div class="line">        createDataGas := uint64(len(ret)) * params.CreateDataGas //对结果进行存储还需要消耗gas</div><div class="line">        if contract.UseGas(createDataGas) &#123;  </div><div class="line">            evm.StateDB.SetCode(contractAddr, ret)</div><div class="line">        &#125; else &#123;</div><div class="line">            err = ErrCodeStoreOutOfGas</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // When an error was returned by the EVM or when setting the creation code</div><div class="line">    // above we revert to the snapshot and consume any gas remaining. Additionally</div><div class="line">    // when we&apos;re in homestead this also counts for code storage gas errors.</div><div class="line">    if maxCodeSizeExceeded || (err != nil &amp;&amp; (evm.ChainConfig().IsHomestead(evm.BlockNumber) || err != ErrCodeStoreOutOfGas)) &#123;</div><div class="line">        evm.StateDB.RevertToSnapshot(snapshot)</div><div class="line">        if err != errExecutionReverted &#123;</div><div class="line">            contract.UseGas(contract.Gas)</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    // Assign err if contract code size exceeds the max while the err is still empty.</div><div class="line">    if maxCodeSizeExceeded &amp;&amp; err == nil &#123;</div><div class="line">        err = errMaxCodeSizeExceeded</div><div class="line">    &#125;</div><div class="line">    return ret, contractAddr, contract.Gas, err</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div></pre></td><td class="code"><pre><div class="line">// Create creates a new contract using code as deployment code.</div><div class="line">func (evm *EVM) Create(caller ContractRef, code []byte, gas uint64, value *big.Int) (ret []byte, contractAddr common.Address, leftOverGas uint64, err error) &#123;</div><div class="line"></div><div class="line">    // Depth check execution. Fail if we&apos;re trying to execute above the</div><div class="line">    // limit.</div><div class="line">    if evm.depth &gt; int(params.CallCreateDepth) &#123;</div><div class="line">        return nil, common.Address&#123;&#125;, gas, ErrDepth</div><div class="line">    &#125;</div><div class="line">    if !evm.CanTransfer(evm.StateDB, caller.Address(), value) &#123;</div><div class="line">        return nil, common.Address&#123;&#125;, gas, ErrInsufficientBalance</div><div class="line">    &#125;</div><div class="line">    // Ensure there&apos;s no existing contract already at the designated address</div><div class="line">    // 要求订单号严格递增</div><div class="line">    nonce := evm.StateDB.GetNonce(caller.Address())</div><div class="line">    evm.StateDB.SetNonce(caller.Address(), nonce+1)</div><div class="line">    //生成合约地址，使用sender的address+nonce的rlp值，然后Keccak256加密</div><div class="line">    contractAddr = crypto.CreateAddress(caller.Address(), nonce)</div><div class="line">    contractHash := evm.StateDB.GetCodeHash(contractAddr)</div><div class="line">    //保证没有合约正在执行</div><div class="line">    if evm.StateDB.GetNonce(contractAddr) != 0 || (contractHash != (common.Hash&#123;&#125;) &amp;&amp; contractHash != emptyCodeHash) &#123;</div><div class="line">        return nil, common.Address&#123;&#125;, 0, ErrContractAddressCollision</div><div class="line">    &#125;</div><div class="line">    // end of ensuring no contract attached to the sender</div><div class="line"></div><div class="line">    // Create a new account on the state</div><div class="line">    snapshot := evm.StateDB.Snapshot()  //设置当前statedb的检查点,以便后续undo</div><div class="line">    evm.StateDB.CreateAccount(contractAddr)  //创建新的账单</div><div class="line">    if evm.ChainConfig().IsEIP158(evm.BlockNumber) &#123;</div><div class="line">        evm.StateDB.SetNonce(contractAddr, 1)</div><div class="line">    &#125;</div><div class="line">    //执行转账,最终调用的statedb的SubBalance（sender减去value）和AddBalance(recipient加上value),中间人是contractAddr</div><div class="line">    evm.Transfer(evm.StateDB, caller.Address(), contractAddr, value) // 这里后续单独开一篇介绍statedb的文章介绍具体的执行过程 </div><div class="line">    </div><div class="line">    //创建合约执行环境，并且执行合约的代码</div><div class="line">    contract := NewContract(caller, AccountRef(contractAddr), value, gas)</div><div class="line">    contract.SetCallCode(&amp;contractAddr, crypto.Keccak256Hash(code), code)</div><div class="line">    ...</div><div class="line">    ret, err = run(evm, snapshot, contract, nil) // 运行智能合约,返回消耗的gas量</div><div class="line"></div><div class="line">    // check whether the max code size has been exceeded</div><div class="line">    maxCodeSizeExceeded := evm.ChainConfig().IsEIP158(evm.BlockNumber) &amp;&amp; len(ret) &gt; params.MaxCodeSize</div><div class="line">    // if the contract creation ran successfully and no errors were returned</div><div class="line">    // calculate the gas required to store the code. If the code could not</div><div class="line">    // be stored due to not enough gas set an error and let it be handled</div><div class="line">    // by the error checking condition below.</div><div class="line">    if err == nil &amp;&amp; !maxCodeSizeExceeded &#123;</div><div class="line">        createDataGas := uint64(len(ret)) * params.CreateDataGas //对结果进行存储还需要消耗gas</div><div class="line">        if contract.UseGas(createDataGas) &#123;  </div><div class="line">            evm.StateDB.SetCode(contractAddr, ret)</div><div class="line">        &#125; else &#123;</div><div class="line">            err = ErrCodeStoreOutOfGas</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // When an error was returned by the EVM or when setting the creation code</div><div class="line">    // above we revert to the snapshot and consume any gas remaining. Additionally</div><div class="line">    // when we&apos;re in homestead this also counts for code storage gas errors.</div><div class="line">    if maxCodeSizeExceeded || (err != nil &amp;&amp; (evm.ChainConfig().IsHomestead(evm.BlockNumber) || err != ErrCodeStoreOutOfGas)) &#123;</div><div class="line">        evm.StateDB.RevertToSnapshot(snapshot) //在statedb一篇里面详细介绍</div><div class="line">        if err != errExecutionReverted &#123;</div><div class="line">            contract.UseGas(contract.Gas)</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    // Assign err if contract code size exceeds the max while the err is still empty.</div><div class="line">    if maxCodeSizeExceeded &amp;&amp; err == nil &#123;</div><div class="line">        err = errMaxCodeSizeExceeded</div><div class="line">    &#125;</div><div class="line">    return ret, contractAddr, contract.Gas, err</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>run根据代码指令地址是否为空，判断是否采取已预编译好还是需要解释,然后执行对应的代码，最终返回[]bytes类型的执行结果。目前支持的已预编译合约包括：sha256hash,bigModExp,dataCopy等，这里还可以自己扩展。<br>这里会消耗gas,具体消耗量跟合约的类型有关系。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div></pre></td><td class="code"><pre><div class="line">//core/vm/evm.go</div><div class="line">func run(evm *EVM, snapshot int, contract *Contract, input []byte) ([]byte, error) &#123;</div><div class="line">    if contract.CodeAddr != nil &#123;</div><div class="line">        precompiles := PrecompiledContractsHomestead</div><div class="line">        ...</div><div class="line">        if p := precompiles[*contract.CodeAddr]; p != nil &#123;</div><div class="line">            return RunPrecompiledContract(p, input, contract)</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    return evm.interpreter.Run(snapshot, contract, input)</div><div class="line">&#125;</div><div class="line"></div><div class="line">...</div><div class="line">对于预编译好的contract，执行下面的函数，每个预编译好的contract</div><div class="line">//core/vm/contracts.go</div><div class="line">// RunPrecompiledContract runs and evaluates the output of a precompiled contract.</div><div class="line">func RunPrecompiledContract(p PrecompiledContract, input []byte, contract *Contract) (ret []byte, err error) &#123;</div><div class="line">    gas := p.RequiredGas(input)</div><div class="line">    if contract.UseGas(gas) &#123; //消耗gas</div><div class="line">        return p.Run(input)  //执行代码 </div><div class="line">    &#125;</div><div class="line">    return nil, ErrOutOfGas</div><div class="line">&#125;</div><div class="line"></div><div class="line">...</div><div class="line">//对于需要解释执行的合约:</div><div class="line">//core/vm/interpreter.go</div><div class="line">func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret []byte, err error) &#123;</div><div class="line">    ...</div><div class="line">    // The Interpreter main run loop (contextual). This loop runs until either an</div><div class="line">    // explicit STOP, RETURN or SELFDESTRUCT is executed, an error occurred during</div><div class="line">    // the execution of one of the operations or until the done flag is set by the</div><div class="line">    // parent context.</div><div class="line">    for atomic.LoadInt32(&amp;in.evm.abort) == 0 &#123;  //监听about信号</div><div class="line">        // Get the memory location of pc</div><div class="line">        op = contract.GetOp(pc) //pc是程序计数器，控制当前执行到的code位置, 正常情况下每次都会定位在操作码上</div><div class="line"></div><div class="line">        operation := in.cfg.JumpTable[op]</div><div class="line"></div><div class="line">        var memorySize uint64</div><div class="line">        // calculate the new memory size and expand the memory to fit</div><div class="line">        // the operation</div><div class="line">        if operation.memorySize != nil &#123;</div><div class="line">            memSize, overflow := bigUint64(operation.memorySize(stack))</div><div class="line">            if overflow &#123;</div><div class="line">                return nil, errGasUintOverflow</div><div class="line">            &#125;</div><div class="line">            // memory is expanded in words of 32 bytes. Gas</div><div class="line">            // is also calculated in words.</div><div class="line">            if memorySize, overflow = math.SafeMul(toWordSize(memSize), 32); overflow &#123;</div><div class="line">                return nil, errGasUintOverflow</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        if !in.cfg.DisableGasMetering &#123;</div><div class="line">            // consume the gas and return an error if not enough gas is available.</div><div class="line">            // cost is explicitly set so that the capture state defer method cas get the proper cost</div><div class="line">            cost, err = operation.gasCost(in.gasTable, in.evm, contract, stack, mem, memorySize)</div><div class="line">            if err != nil || !contract.UseGas(cost) &#123;</div><div class="line">                return nil, ErrOutOfGas</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        if memorySize &gt; 0 &#123;</div><div class="line">            mem.Resize(memorySize)</div><div class="line">        &#125;</div><div class="line">        ...</div><div class="line"></div><div class="line">        // execute the operation</div><div class="line">        res, err := operation.execute(&amp;pc, in.evm, contract, mem, stack)</div><div class="line">        // verifyPool is a build flag. Pool verification makes sure the integrity</div><div class="line">        // of the integer pool by comparing values to a default value.</div><div class="line">        if verifyPool &#123;</div><div class="line">            verifyIntegerPool(in.intPool)</div><div class="line">        &#125;</div><div class="line">        // if the operation clears the return data (e.g. it has returning data)</div><div class="line">        // set the last return to the result of the operation.</div><div class="line">        if operation.returns &#123;</div><div class="line">            in.returnData = res</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        switch &#123;</div><div class="line">        case err != nil:</div><div class="line">            return nil, err</div><div class="line">        case operation.reverts:</div><div class="line">            return res, errExecutionReverted</div><div class="line">        case operation.halts:</div><div class="line">            return res, nil</div><div class="line">        case !operation.jumps:</div><div class="line">            pc++</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    ...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>整个合约的执行过程到此就全部结束了。</p>
@@ -106,7 +145,81 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/15/eth/transactions/" data-id="cjg0ibiwo000lkx4j4v3a2quc" class="article-share-link">Partager</a>
+      <a data-url="http://yoursite.com/2018/04/15/eth/transactions/" data-id="cjg2024b0000mhu4jzna9av5x" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="blog-eth/consensus" class="article article-type-blog" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/11/eth/consensus/" class="article-date">
+  <time datetime="2018-04-11T14:25:47.000Z" itemprop="datePublished">2018-04-11</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/11/eth/consensus/">以太坊共识机制</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="共识算法面临的问题"><a href="#共识算法面临的问题" class="headerlink" title="共识算法面临的问题"></a>共识算法面临的问题</h3><p>理想情况下，一个分布式算法包含下面3个特点：</p>
+<ul>
+<li>可终止性： 一致性的结果可以在有限的时间算出；</li>
+<li>共识性： 不同节点最终完成的结果应该相同</li>
+<li>合法性：决策的结果应该是其他进程提出的提案</li>
+</ul>
+<p>分布式系统尝尝面临以下问题：</p>
+<ol>
+<li>节点处理事务的能力不同，网络节点的吞吐有差异；</li>
+<li>节点间通信的信道可能不安全；</li>
+<li>可能出现拜占庭错误节点</li>
+<li>当天异步处理能力达到高度一致的时候，系统的可扩展性变得很差, 新节点很难加入；</li>
+</ol>
+<h3 id="以太坊共识算法"><a href="#以太坊共识算法" class="headerlink" title="以太坊共识算法"></a>以太坊共识算法</h3><h4 id="Clique"><a href="#Clique" class="headerlink" title="Clique"></a>Clique</h4><p>Clique算法又称为POA(Proof-of-Authority),加密过程由一下公式计算得出：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">n = F(pr, h)</div></pre></td></tr></table></figure></p>
+<p>其中n是65bytes长的字符串，pr是common.Address(长度是20bytes)的地址，h是common.Hash(长度为32bytes)的哈希值，签名算法F就是ECDSA.</p>
+<h5 id="区块认证"><a href="#区块认证" class="headerlink" title="区块认证"></a>区块认证</h5><p>原理：认证节点使用ECDSA算法进行加密, 并且网络中的每一个区块是由于某一个认证节点进行认证的，其他节点仅仅需要验证认证信息来判断该区块是否合法</p>
+<ul>
+<li>认证节点： 具备区块签名的权利，可以对应POW算法中的miner节点</li>
+<li>非认证节点： 不具备签名的权利，是区块网络中的普通同步节点<br>同时这2类节点可以动态投票机制进行转换，后面介绍如何转换。</li>
+</ul>
+<p>Clique实现了consensus.Engine的接口，主要包括：<br>Author：从签名获取区块创建者的账户地址,是通过secp256k1算法从签名获取公钥,然后通过crypto.Keccak256获得以太坊账户地址</p>
+<p>VerifyHeaders: 校验一个区块头是否合法,包括字段合法性，parent的hash以及number等信息是否一致，，区块签名是否是来自认证节点，签发区块的节点是否是inturn节点（难度为2，否则为1);</p>
+<p>VerifyUncles: 判断区块是否有uncles，如果有的话，验证失败</p>
+<p>VerifySeal： 校验签发节点的难度值</p>
+<p>Prepare: 填充区块头信息,其中新区块的Coinbase是所有未处理的提议中，所有有效投票（认证变非认证，或者非认证变认证）中的一个随机的被投票地址；同时设置header.Time为min(当前时间,parent.Time+延迟产生时间(config.Period))。</p>
+<p>Finalize:  保证新节点没有Uncles，没有rewards,全部的transaction执行完毕，最后生成root，TxHash等成员，返回新区快</p>
+<p>Authorize: 设置公钥和签名生成函数</p>
+<p>Seal: 尝试通过本地签名认证（权力签名与认证，找到有权力的结点）来创建一个已密封的区块</p>
+<h5 id="投票机制"><a href="#投票机制" class="headerlink" title="投票机制"></a>投票机制</h5><p>当需要更新认证节点(signer)的时候，需要使用投票机制。用户首先利用rpc发起一次Propose,指定<strong>某个结点地址</strong>的<strong>状态</strong>. 然后每个认证节点在签发新的区块的时候，会从pending的proposal里面随机挑选一个proposal，并且将对应的节点地址填充到CoinBase里面，将对应的是否认证状态填充到nonce字段，作为一次投票。</p>
+<p>这个投票的区块也会作为新的区块加到区块链上去。同时，每个认证节点本地会维护一个投票结果计数器Tally，记录2个字段：1） Votes： 获得的票数； 2）认证状态（是否是认证节点. 当当前处理的区块获得的投票数大于认证节点个数一半的时候，节点就将被赋予新的状态。但是这里注意，如果是认证状态是真的，就将节点标记为认证节点，否则，还需要做一个特殊处理，因为这个时候少了一个认证节点的话，以为这很多区块都会立即获得超过半数的投票。这里采取的是只处理当前票指定的地址的状态变更,其余的则留到下次处理。</p>
+<h4 id="Ethash"><a href="#Ethash" class="headerlink" title="Ethash"></a>Ethash</h4><p>Ethash算法又称为PoW(Proof-of-Work),是基于计算能力的seal过程，基本原理简化为以下公式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Rand(h,n) &lt;= M/d</div></pre></td></tr></table></figure></p>
+<p>M是一个极大的数maxUint256,d是难度值，h是header.HashNoNonce，n是Nonce. 那么在这个算法里面，d越大，要求Rand的结果就越小，这样相对的计算量也就越大。</p>
+<p>真正的计算量是在hashimotoFull里面，最终调用的是hashimoto, 本质上是一个以非线性表查找方式进行的经过多次，多种Hash的计算。这种函数的性能取决于查找的逻辑，以及查找的表格的数据规模大小。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a href="https://blog.csdn.net/teaspring/article/details/78050274" target="_blank" rel="external">挖矿和共识算法的奥秘</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/04/11/eth/consensus/" data-id="cjg2024ax000jhu4j33wyzzoy" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
@@ -188,81 +301,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/11/eth/encryption/" data-id="cjg0ibiwi000ikx4jxxdxvj2p" class="article-share-link">Partager</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="blog-eth/consensus" class="article article-type-blog" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/04/11/eth/consensus/" class="article-date">
-  <time datetime="2018-04-11T14:25:47.000Z" itemprop="datePublished">2018-04-11</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/11/eth/consensus/">以太坊共识机制</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="共识算法面临的问题"><a href="#共识算法面临的问题" class="headerlink" title="共识算法面临的问题"></a>共识算法面临的问题</h3><p>理想情况下，一个分布式算法包含下面3个特点：</p>
-<ul>
-<li>可终止性： 一致性的结果可以在有限的时间算出；</li>
-<li>共识性： 不同节点最终完成的结果应该相同</li>
-<li>合法性：决策的结果应该是其他进程提出的提案</li>
-</ul>
-<p>分布式系统尝尝面临以下问题：</p>
-<ol>
-<li>节点处理事务的能力不同，网络节点的吞吐有差异；</li>
-<li>节点间通信的信道可能不安全；</li>
-<li>可能出现拜占庭错误节点</li>
-<li>当天异步处理能力达到高度一致的时候，系统的可扩展性变得很差, 新节点很难加入；</li>
-</ol>
-<h3 id="以太坊共识算法"><a href="#以太坊共识算法" class="headerlink" title="以太坊共识算法"></a>以太坊共识算法</h3><h4 id="Clique"><a href="#Clique" class="headerlink" title="Clique"></a>Clique</h4><p>Clique算法又称为POA(Proof-of-Authority),加密过程由一下公式计算得出：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">n = F(pr, h)</div></pre></td></tr></table></figure></p>
-<p>其中n是65bytes长的字符串，pr是common.Address(长度是20bytes)的地址，h是common.Hash(长度为32bytes)的哈希值，签名算法F就是ECDSA.</p>
-<h5 id="区块认证"><a href="#区块认证" class="headerlink" title="区块认证"></a>区块认证</h5><p>原理：认证节点使用ECDSA算法进行加密, 并且网络中的每一个区块是由于某一个认证节点进行认证的，其他节点仅仅需要验证认证信息来判断该区块是否合法</p>
-<ul>
-<li>认证节点： 具备区块签名的权利，可以对应POW算法中的miner节点</li>
-<li>非认证节点： 不具备签名的权利，是区块网络中的普通同步节点<br>同时这2类节点可以动态投票机制进行转换，后面介绍如何转换。</li>
-</ul>
-<p>Clique实现了consensus.Engine的接口，主要包括：<br>Author：从签名获取区块创建者的账户地址,是通过secp256k1算法从签名获取公钥,然后通过crypto.Keccak256获得以太坊账户地址</p>
-<p>VerifyHeaders: 校验一个区块头是否合法,包括字段合法性，parent的hash以及number等信息是否一致，，区块签名是否是来自认证节点，签发区块的节点是否是inturn节点（难度为2，否则为1);</p>
-<p>VerifyUncles: 判断区块是否有uncles，如果有的话，验证失败</p>
-<p>VerifySeal： 校验签发节点的难度值</p>
-<p>Prepare: 填充区块头信息,其中新区块的Coinbase是所有未处理的提议中，所有有效投票（认证变非认证，或者非认证变认证）中的一个随机的被投票地址；同时设置header.Time为min(当前时间,parent.Time+延迟产生时间(config.Period))。</p>
-<p>Finalize:  保证新节点没有Uncles，没有rewards,全部的transaction执行完毕，最后生成root，TxHash等成员，返回新区快</p>
-<p>Authorize: 设置公钥和签名生成函数</p>
-<p>Seal: 尝试通过本地签名认证（权力签名与认证，找到有权力的结点）来创建一个已密封的区块</p>
-<h5 id="投票机制"><a href="#投票机制" class="headerlink" title="投票机制"></a>投票机制</h5><p>当需要更新认证节点(signer)的时候，需要使用投票机制。用户首先利用rpc发起一次Propose,指定<strong>某个结点地址</strong>的<strong>状态</strong>. 然后每个认证节点在签发新的区块的时候，会从pending的proposal里面随机挑选一个proposal，并且将对应的节点地址填充到CoinBase里面，将对应的是否认证状态填充到nonce字段，作为一次投票。</p>
-<p>这个投票的区块也会作为新的区块加到区块链上去。同时，每个认证节点本地会维护一个投票结果计数器Tally，记录2个字段：1） Votes： 获得的票数； 2）认证状态（是否是认证节点. 当当前处理的区块获得的投票数大于认证节点个数一半的时候，节点就将被赋予新的状态。但是这里注意，如果是认证状态是真的，就将节点标记为认证节点，否则，还需要做一个特殊处理，因为这个时候少了一个认证节点的话，以为这很多区块都会立即获得超过半数的投票。这里采取的是只处理当前票指定的地址的状态变更,其余的则留到下次处理。</p>
-<h4 id="Ethash"><a href="#Ethash" class="headerlink" title="Ethash"></a>Ethash</h4><p>Ethash算法又称为PoW(Proof-of-Work),是基于计算能力的seal过程，基本原理简化为以下公式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Rand(h,n) &lt;= M/d</div></pre></td></tr></table></figure></p>
-<p>M是一个极大的数maxUint256,d是难度值，h是header.HashNoNonce，n是Nonce. 那么在这个算法里面，d越大，要求Rand的结果就越小，这样相对的计算量也就越大。</p>
-<p>真正的计算量是在hashimotoFull里面，最终调用的是hashimoto, 本质上是一个以非线性表查找方式进行的经过多次，多种Hash的计算。这种函数的性能取决于查找的逻辑，以及查找的表格的数据规模大小。</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
-<li><a href="https://blog.csdn.net/teaspring/article/details/78050274" target="_blank" rel="external">挖矿和共识算法的奥秘</a></li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/11/eth/consensus/" data-id="cjg0ibiwk000jkx4jd5qkn6k6" class="article-share-link">Partager</a>
+      <a data-url="http://yoursite.com/2018/04/11/eth/encryption/" data-id="cjg2024au000ihu4jerl5fi89" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
@@ -339,7 +378,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/faas/" data-id="cjg0ibisb0005kx4j95jimadz" class="article-share-link">Partager</a>
+      <a data-url="http://yoursite.com/2017/07/02/faas/" data-id="cjg20249h0006hu4jtrfwzoce" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/faas/">faas</a></li></ul>
@@ -442,7 +481,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/azkaban/" data-id="cjg0ibirg0001kx4jw0md9y36" class="article-share-link">Partager</a>
+      <a data-url="http://yoursite.com/2017/07/02/azkaban/" data-id="cjg20248w0001hu4jzrf5rwx9" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/job-flow/">job flow</a></li></ul>
@@ -489,7 +528,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/go1-5gc/" data-id="cjg0ibiug000akx4jrbg3j66k" class="article-share-link">Partager</a>
+      <a data-url="http://yoursite.com/2017/07/02/go1-5gc/" data-id="cjg20249e0005hu4j7k6tr7i9" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/golang/">golang</a></li></ul>
@@ -563,7 +602,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/overlay/" data-id="cjg0ibium000ckx4jq8z6g28m" class="article-share-link">Partager</a>
+      <a data-url="http://yoursite.com/2017/07/02/overlay/" data-id="cjg20249j0009hu4jr031tb8g" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/overlayfs/">overlayfs</a></li></ul>
@@ -665,7 +704,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/cgroup-test/" data-id="cjg0ibirm0002kx4jrp9bwd8k" class="article-share-link">Partager</a>
+      <a data-url="http://yoursite.com/2017/07/02/cgroup-test/" data-id="cjg2024940002hu4jkdvfrlty" class="article-share-link">Teilen</a>
       
       
     </footer>
@@ -738,7 +777,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/drf/" data-id="cjg0ibis70004kx4j4mn4bc8r" class="article-share-link">Partager</a>
+      <a data-url="http://yoursite.com/2017/07/02/drf/" data-id="cjg20249b0004hu4j1pk47sus" class="article-share-link">Teilen</a>
       
       
     </footer>
@@ -748,67 +787,12 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
 
 
   
-    <article id="post-linux_network_namespace" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2017/07/01/linux_network_namespace/" class="article-date">
-  <time datetime="2017-07-01T14:21:02.000Z" itemprop="datePublished">2017-07-01</time>
-</a>
+
+
+  <nav id="page-nav">
     
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/07/01/linux_network_namespace/">linux namespace学习</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Network Namespace可以实现网络的隔离，有点像路由器里的VRF。在虚拟化和LXC中有很重要的用处。</p>
-<p>创建Network Namespace<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ip netns add</div></pre></td></tr></table></figure></p>
-<p>例如：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ip netns add test</div></pre></td></tr></table></figure>
-<p>查看namespace</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ip netns list</div></pre></td></tr></table></figure>
-<p>给Namespace添加接口</p>
-<p>创建的Namespace不能添加真实的物理接口，只能添加虚拟接口veth（virtual Ethernet interface），它们经常成对出现并且像一个管道一样连在一起。<br>创建一对veth：veth0和veth1</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ip link add veth0 type veth peer name veth1</div></pre></td></tr></table></figure>
-<p>通过命令可以查看我们创建的veth</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">[root@controller0 ~]# ip link list</div><div class="line">1: lo:  mtu 16436 qdisc noqueue state UNKNOWN </div><div class="line">link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</div><div class="line">2: eth0:  mtu 1500 qdisc pfifo_fast state UNKNOWN qlen 1000</div><div class="line">link/ether 08:00:27:ec:3c:70 brd ff:ff:ff:ff:ff:ff</div><div class="line">3: eth1:  mtu 1500 qdisc pfifo_fast state UNKNOWN qlen 1000</div><div class="line">link/ether 08:00:27:d1:f2:b3 brd ff:ff:ff:ff:ff:ff</div><div class="line">4: eth2:  mtu 1500 qdisc pfifo_fast state UNKNOWN qlen 1000</div><div class="line">link/ether 08:00:27:ad:03:e8 brd ff:ff:ff:ff:ff:ff</div><div class="line">5: eth3:  mtu 1500 qdisc pfifo_fast state UP qlen 1000</div><div class="line">link/ether 08:00:27:b2:eb:13 brd ff:ff:ff:ff:ff:ff</div><div class="line">6: virbr0:  mtu 1500 qdisc noqueue state UNKNOWN </div><div class="line">link/ether 52:54:00:eb:0e:7e brd ff:ff:ff:ff:ff:ff</div><div class="line">7: virbr0-nic:  mtu 1500 qdisc noop state DOWN qlen 500</div><div class="line">link/ether 52:54:00:eb:0e:7e brd ff:ff:ff:ff:ff:ff</div><div class="line">10: veth1:  mtu 1500 qdisc noop state DOWN qlen 1000</div><div class="line">link/ether 86:e4:2c:b1:77:d0 brd ff:ff:ff:ff:ff:ff</div><div class="line">11: veth0:  mtu 1500 qdisc noop state DOWN qlen 1000</div><div class="line">link/ether 82:bf:54:c0:5c:a9 brd ff:ff:ff:ff:ff:ff</div></pre></td></tr></table></figure>
-<p>现在这两个veth都是属于默认（global）的Network Namespace，下面我们把veth0放到test的namespace里，veth1保留在global的namespace里。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">[root@controller0 ~]# ip link set veth0 netns test</div><div class="line">[root@controller0 ~]# ip netns exec test ip a</div><div class="line">9: lo:  mtu 16436 qdisc noop state DOWN </div><div class="line">link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</div><div class="line">11: veth0:  mtu 1500 qdisc noop state DOWN qlen 1000</div><div class="line">link/ether 82:bf:54:c0:5c:a9 brd ff:ff:ff:ff:ff:ff</div></pre></td></tr></table></figure>
-<p>发现veth0已经跑到test这个namespace里了，全局的network namespace里已没有了veth0.</p>
-<p>目前veth0和veth1时down的状态，下面我们为两个veth对配置IP地址</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">ip netns exec test ip addr add 192.168.10.2/24 dev veth0 </div><div class="line">ip netns exec test ip link set veth0 up</div><div class="line">[root@controller0 ~]# ip netns exec test ip a</div><div class="line">9: lo:  mtu 16436 qdisc noop state DOWN </div><div class="line">link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</div><div class="line">11: veth0:  mtu 1500 qdisc pfifo_fast state DOWN qlen 1000</div><div class="line">link/ether 82:bf:54:c0:5c:a9 brd ff:ff:ff:ff:ff:ff</div><div class="line">inet 192.168.10.2/24 scope global veth0</div><div class="line">[root@controller0 ~]#</div></pre></td></tr></table></figure>
-<p>给veth1配置IP地址，veth1在global的Network Namespace里</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">ip addr add 192.168.10.1/24 dev veth1 up</div><div class="line">[root@controller0 ~]# ip a</div><div class="line">10: veth1:  mtu 1500 qdisc pfifo_fast state UP qlen 1000</div><div class="line">link/ether 86:e4:2c:b1:77:d0 brd ff:ff:ff:ff:ff:ff</div><div class="line">inet 192.168.10.1/24 scope global veth1</div><div class="line">inet6 fe80::84e4:2cff:feb1:77d0/64 scope link </div><div class="line">valid_lft forever preferred_lft forever</div><div class="line">[root@controller0 ~]# ip netns exec test ip a</div><div class="line">9: lo:  mtu 16436 qdisc noop state DOWN </div><div class="line">link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</div><div class="line">11: veth0:  mtu 1500 qdisc pfifo_fast state UP qlen 1000</div><div class="line">link/ether 82:bf:54:c0:5c:a9 brd ff:ff:ff:ff:ff:ff</div><div class="line">inet 192.168.10.2/24 scope global veth0</div><div class="line">inet6 fe80::80bf:54ff:fec0:5ca9/64 scope link </div><div class="line">valid_lft forever preferred_lft forever</div></pre></td></tr></table></figure>
-<p>可以看到veth0和veth1都up了起来。验证一下连通性。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">[root@controller0 ~]# ping 192.168.10.2</div><div class="line">PING 192.168.10.2 (192.168.10.2) 56(84) bytes of data.</div><div class="line">64 bytes from 192.168.10.2: icmp_seq=1 ttl=64 time=0.084 ms</div><div class="line">64 bytes from 192.168.10.2: icmp_seq=2 ttl=64 time=0.102 ms</div><div class="line">--- 192.168.10.2 ping statistics ---</div><div class="line">2 packets transmitted, 2 received, 0% packet loss, time 1326ms</div><div class="line">rtt min/avg/max/mdev = 0.084/0.093/0.102/0.009 ms</div><div class="line">[root@controller0 ~]# ip netns exec test ping 192.168.10.1</div><div class="line">PING 192.168.10.1 (192.168.10.1) 56(84) bytes of data.</div><div class="line">64 bytes from 192.168.10.1: icmp_seq=1 ttl=64 time=0.076 ms</div><div class="line">64 bytes from 192.168.10.1: icmp_seq=2 ttl=64 time=0.076 ms</div><div class="line">^C</div><div class="line">--- 192.168.10.1 ping statistics ---</div><div class="line">2 packets transmitted, 2 received, 0% packet loss, time 1552ms</div><div class="line">rtt min/avg/max/mdev = 0.076/0.076/0.076/0.000 ms</div><div class="line">[root@controller0 ~]#</div></pre></td></tr></table></figure>
-<p>从外往里ping和从里往外ping都是通的。</p>
-<p>参考： <a href="https://github.com/yongluo2013/osf-openstack-training/blob/master/installation/How-to-connection-ns-outside.md" target="_blank" rel="external">https://github.com/yongluo2013/osf-openstack-training/blob/master/installation/How-to-connection-ns-outside.md</a> </p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/01/linux_network_namespace/" data-id="cjg0ibiue0009kx4jdpyg215k" class="article-share-link">Partager</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux-namespace/">linux namespace</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">weiter &raquo;</a>
+  </nav>
 
 </section>
         
@@ -819,7 +803,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Mot-clés</h3>
+    <h3 class="widget-title">Tags</h3>
     <div class="widget">
       <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ethereum/">ethereum</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/faas/">faas</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/golang/">golang</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/job-flow/">job flow</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux-namespace/">linux namespace</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/overlayfs/">overlayfs</a></li></ul>
     </div>
@@ -829,7 +813,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Nuage de mot-clés</h3>
+    <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
       <a href="/tags/blockchain/" style="font-size: 20px;">blockchain</a> <a href="/tags/ethereum/" style="font-size: 20px;">ethereum</a> <a href="/tags/faas/" style="font-size: 10px;">faas</a> <a href="/tags/golang/" style="font-size: 10px;">golang</a> <a href="/tags/job-flow/" style="font-size: 10px;">job flow</a> <a href="/tags/linux-namespace/" style="font-size: 10px;">linux namespace</a> <a href="/tags/overlayfs/" style="font-size: 10px;">overlayfs</a>
     </div>
@@ -838,7 +822,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Archives</h3>
+    <h3 class="widget-title">Archiv</h3>
     <div class="widget">
       <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li></ul>
     </div>
@@ -848,16 +832,16 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Articles récents</h3>
+    <h3 class="widget-title">letzter Beitrag</h3>
     <div class="widget">
       <ul>
         
           <li>
-            <a href="/2018/04/15/eth/transactions/">以太坊智能合约执行过程分析</a>
+            <a href="/2018/04/16/eth/geth/">以太坊Ethereum的UML图</a>
           </li>
         
           <li>
-            <a href="/2018/04/11/eth/encryption/">非对称加密算法简介以及以太坊account生成</a>
+            <a href="/2018/04/15/eth/transactions/">以太坊智能合约执行过程分析</a>
           </li>
         
           <li>
@@ -865,11 +849,11 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
           </li>
         
           <li>
-            <a href="/2017/07/02/faas/">faas介绍</a>
+            <a href="/2018/04/11/eth/encryption/">非对称加密算法简介以及以太坊account生成</a>
           </li>
         
           <li>
-            <a href="/2017/07/02/azkaban/">azkaban集群模式介绍</a>
+            <a href="/2017/07/02/faas/">faas介绍</a>
           </li>
         
       </ul>
@@ -885,7 +869,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
   <div class="outer">
     <div id="footer-info" class="inner">
       &copy; 2018 Duan Bing<br>
-      Propulsé par <a href="http://hexo.io/" target="_blank">Hexo</a>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
     </div>
   </div>
 </footer>
