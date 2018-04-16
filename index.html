@@ -48,9 +48,9 @@
       </nav>
       <nav id="sub-nav">
         
-          <a id="nav-rss-link" class="nav-icon" href="/atom.html" title="RSS"></a>
+          <a id="nav-rss-link" class="nav-icon" href="/atom.html" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Buscar"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
@@ -60,45 +60,6 @@
 </header>
       <div class="outer">
         <section id="main">
-  
-    <article id="blog-eth/geth" class="article article-type-blog" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/04/16/eth/geth/" class="article-date">
-  <time datetime="2018-04-16T14:25:47.000Z" itemprop="datePublished">2018-04-16</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/16/eth/geth/">以太坊Ethereum的UML图</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><img src="http://webpaas.com/usr/uploads/2018/04/16/eth/geth/ethereum.png" alt="Ethereum"></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/16/eth/geth/" data-id="cjg2p8i7l000ksh4j3gc8py1g" class="article-share-link">Compartir</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
   
     <article id="blog-eth/statedb" class="article article-type-blog" itemscope itemprop="blogPost">
   <div class="article-meta">
@@ -141,7 +102,7 @@
 <p>初始化的时候传递了，bc的stateCache，参考<a href="http://webpaas.com/2018/04/16/eth/geth/" target="_blank" rel="external">Ethereum UML图</a>可以知道，是一个ethdb.Database接口，具有memory和leveldb 2种实现。</p>
 <p>state.New 以parent.Root()为根，调用OpenTrie尝试先看是否缓存了这个Root为根的树，如果不在，从ethdb里面取出这个Root对应的RLP信息，然后递归找出所有Root的后代的数据，创建一个trie树，缓存当前chain的信息。</p>
 <p>接下来，就开始进入Process，进行交易了。交易过程，需要statedb全程保存交易的详细日志，这里面就需要Logs和Journal字段发挥重要作用了。</p>
-<p>在之前的<a href="http://webpaas.com/2018/04/15/eth/transactions/" target="_blank" rel="external">合约执行</a>一篇中介绍了2处重要的地方：</p>
+<p>在之前的<a href="http://webpaas.com/2018/04/15/eth/transactions/" target="_blank" rel="external">合约执行</a>一篇中介绍了3处重要的地方：</p>
 <ol>
 <li><code>snapshot := evm.StateDB.Snapshot()</code> </li>
 <li><code>evm.Transfer(evm.StateDB, caller.Address(), contractAddr, value)</code></li>
@@ -164,7 +125,46 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/16/eth/statedb/" data-id="cjg2p8i7f000gsh4jz3aj2z3v" class="article-share-link">Compartir</a>
+      <a data-url="http://yoursite.com/2018/04/16/eth/statedb/" data-id="cjg2pewpk000muq4j766mu3o5" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="blog-eth/geth" class="article article-type-blog" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/16/eth/geth/" class="article-date">
+  <time datetime="2018-04-16T14:25:47.000Z" itemprop="datePublished">2018-04-16</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/16/eth/geth/">以太坊Ethereum的UML图</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><img src="http://webpaas.com/usr/uploads/2018/04/16/eth/geth/ethereum.png" alt="Ethereum"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/04/16/eth/geth/" data-id="cjg2pewph000luq4ja03ept01" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
@@ -228,7 +228,81 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/15/eth/transactions/" data-id="cjg2p8i7n000nsh4jp2duxdb2" class="article-share-link">Compartir</a>
+      <a data-url="http://yoursite.com/2018/04/15/eth/transactions/" data-id="cjg2pewpm000nuq4juxzisco8" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="blog-eth/consensus" class="article article-type-blog" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/11/eth/consensus/" class="article-date">
+  <time datetime="2018-04-11T14:25:47.000Z" itemprop="datePublished">2018-04-11</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/11/eth/consensus/">以太坊共识机制</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="共识算法面临的问题"><a href="#共识算法面临的问题" class="headerlink" title="共识算法面临的问题"></a>共识算法面临的问题</h3><p>理想情况下，一个分布式算法包含下面3个特点：</p>
+<ul>
+<li>可终止性： 一致性的结果可以在有限的时间算出；</li>
+<li>共识性： 不同节点最终完成的结果应该相同</li>
+<li>合法性：决策的结果应该是其他进程提出的提案</li>
+</ul>
+<p>分布式系统尝尝面临以下问题：</p>
+<ol>
+<li>节点处理事务的能力不同，网络节点的吞吐有差异；</li>
+<li>节点间通信的信道可能不安全；</li>
+<li>可能出现拜占庭错误节点</li>
+<li>当天异步处理能力达到高度一致的时候，系统的可扩展性变得很差, 新节点很难加入；</li>
+</ol>
+<h3 id="以太坊共识算法"><a href="#以太坊共识算法" class="headerlink" title="以太坊共识算法"></a>以太坊共识算法</h3><h4 id="Clique"><a href="#Clique" class="headerlink" title="Clique"></a>Clique</h4><p>Clique算法又称为POA(Proof-of-Authority),加密过程由一下公式计算得出：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">n = F(pr, h)</div></pre></td></tr></table></figure></p>
+<p>其中n是65bytes长的字符串，pr是common.Address(长度是20bytes)的地址，h是common.Hash(长度为32bytes)的哈希值，签名算法F就是ECDSA.</p>
+<h5 id="区块认证"><a href="#区块认证" class="headerlink" title="区块认证"></a>区块认证</h5><p>原理：认证节点使用ECDSA算法进行加密, 并且网络中的每一个区块是由于某一个认证节点进行认证的，其他节点仅仅需要验证认证信息来判断该区块是否合法</p>
+<ul>
+<li>认证节点： 具备区块签名的权利，可以对应POW算法中的miner节点</li>
+<li>非认证节点： 不具备签名的权利，是区块网络中的普通同步节点<br>同时这2类节点可以动态投票机制进行转换，后面介绍如何转换。</li>
+</ul>
+<p>Clique实现了consensus.Engine的接口，主要包括：<br>Author：从签名获取区块创建者的账户地址,是通过secp256k1算法从签名获取公钥,然后通过crypto.Keccak256获得以太坊账户地址</p>
+<p>VerifyHeaders: 校验一个区块头是否合法,包括字段合法性，parent的hash以及number等信息是否一致，，区块签名是否是来自认证节点，签发区块的节点是否是inturn节点（难度为2，否则为1);</p>
+<p>VerifyUncles: 判断区块是否有uncles，如果有的话，验证失败</p>
+<p>VerifySeal： 校验签发节点的难度值</p>
+<p>Prepare: 填充区块头信息,其中新区块的Coinbase是所有未处理的提议中，所有有效投票（认证变非认证，或者非认证变认证）中的一个随机的被投票地址；同时设置header.Time为min(当前时间,parent.Time+延迟产生时间(config.Period))。</p>
+<p>Finalize:  保证新节点没有Uncles，没有rewards,全部的transaction执行完毕，最后生成root，TxHash等成员，返回新区快</p>
+<p>Authorize: 设置公钥和签名生成函数</p>
+<p>Seal: 尝试通过本地签名认证（权力签名与认证，找到有权力的结点）来创建一个已密封的区块</p>
+<h5 id="投票机制"><a href="#投票机制" class="headerlink" title="投票机制"></a>投票机制</h5><p>当需要更新认证节点(signer)的时候，需要使用投票机制。用户首先利用rpc发起一次Propose,指定<strong>某个结点地址</strong>的<strong>状态</strong>. 然后每个认证节点在签发新的区块的时候，会从pending的proposal里面随机挑选一个proposal，并且将对应的节点地址填充到CoinBase里面，将对应的是否认证状态填充到nonce字段，作为一次投票。</p>
+<p>这个投票的区块也会作为新的区块加到区块链上去。同时，每个认证节点本地会维护一个投票结果计数器Tally，记录2个字段：1） Votes： 获得的票数； 2）认证状态（是否是认证节点. 当当前处理的区块获得的投票数大于认证节点个数一半的时候，节点就将被赋予新的状态。但是这里注意，如果是认证状态是真的，就将节点标记为认证节点，否则，还需要做一个特殊处理，因为这个时候少了一个认证节点的话，以为这很多区块都会立即获得超过半数的投票。这里采取的是只处理当前票指定的地址的状态变更,其余的则留到下次处理。</p>
+<h4 id="Ethash"><a href="#Ethash" class="headerlink" title="Ethash"></a>Ethash</h4><p>Ethash算法又称为PoW(Proof-of-Work),是基于计算能力的seal过程，基本原理简化为以下公式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Rand(h,n) &lt;= M/d</div></pre></td></tr></table></figure></p>
+<p>M是一个极大的数maxUint256,d是难度值，h是header.HashNoNonce，n是Nonce. 那么在这个算法里面，d越大，要求Rand的结果就越小，这样相对的计算量也就越大。</p>
+<p>真正的计算量是在hashimotoFull里面，最终调用的是hashimoto, 本质上是一个以非线性表查找方式进行的经过多次，多种Hash的计算。这种函数的性能取决于查找的逻辑，以及查找的表格的数据规模大小。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a href="https://blog.csdn.net/teaspring/article/details/78050274" target="_blank" rel="external">挖矿和共识算法的奥秘</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/04/11/eth/consensus/" data-id="cjg2pewpf000juq4j3l2wuo2n" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
@@ -310,81 +384,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/11/eth/encryption/" data-id="cjg2p8i7k000jsh4j0q418puh" class="article-share-link">Compartir</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="blog-eth/consensus" class="article article-type-blog" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/04/11/eth/consensus/" class="article-date">
-  <time datetime="2018-04-11T14:25:47.000Z" itemprop="datePublished">2018-04-11</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/11/eth/consensus/">以太坊共识机制</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="共识算法面临的问题"><a href="#共识算法面临的问题" class="headerlink" title="共识算法面临的问题"></a>共识算法面临的问题</h3><p>理想情况下，一个分布式算法包含下面3个特点：</p>
-<ul>
-<li>可终止性： 一致性的结果可以在有限的时间算出；</li>
-<li>共识性： 不同节点最终完成的结果应该相同</li>
-<li>合法性：决策的结果应该是其他进程提出的提案</li>
-</ul>
-<p>分布式系统尝尝面临以下问题：</p>
-<ol>
-<li>节点处理事务的能力不同，网络节点的吞吐有差异；</li>
-<li>节点间通信的信道可能不安全；</li>
-<li>可能出现拜占庭错误节点</li>
-<li>当天异步处理能力达到高度一致的时候，系统的可扩展性变得很差, 新节点很难加入；</li>
-</ol>
-<h3 id="以太坊共识算法"><a href="#以太坊共识算法" class="headerlink" title="以太坊共识算法"></a>以太坊共识算法</h3><h4 id="Clique"><a href="#Clique" class="headerlink" title="Clique"></a>Clique</h4><p>Clique算法又称为POA(Proof-of-Authority),加密过程由一下公式计算得出：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">n = F(pr, h)</div></pre></td></tr></table></figure></p>
-<p>其中n是65bytes长的字符串，pr是common.Address(长度是20bytes)的地址，h是common.Hash(长度为32bytes)的哈希值，签名算法F就是ECDSA.</p>
-<h5 id="区块认证"><a href="#区块认证" class="headerlink" title="区块认证"></a>区块认证</h5><p>原理：认证节点使用ECDSA算法进行加密, 并且网络中的每一个区块是由于某一个认证节点进行认证的，其他节点仅仅需要验证认证信息来判断该区块是否合法</p>
-<ul>
-<li>认证节点： 具备区块签名的权利，可以对应POW算法中的miner节点</li>
-<li>非认证节点： 不具备签名的权利，是区块网络中的普通同步节点<br>同时这2类节点可以动态投票机制进行转换，后面介绍如何转换。</li>
-</ul>
-<p>Clique实现了consensus.Engine的接口，主要包括：<br>Author：从签名获取区块创建者的账户地址,是通过secp256k1算法从签名获取公钥,然后通过crypto.Keccak256获得以太坊账户地址</p>
-<p>VerifyHeaders: 校验一个区块头是否合法,包括字段合法性，parent的hash以及number等信息是否一致，，区块签名是否是来自认证节点，签发区块的节点是否是inturn节点（难度为2，否则为1);</p>
-<p>VerifyUncles: 判断区块是否有uncles，如果有的话，验证失败</p>
-<p>VerifySeal： 校验签发节点的难度值</p>
-<p>Prepare: 填充区块头信息,其中新区块的Coinbase是所有未处理的提议中，所有有效投票（认证变非认证，或者非认证变认证）中的一个随机的被投票地址；同时设置header.Time为min(当前时间,parent.Time+延迟产生时间(config.Period))。</p>
-<p>Finalize:  保证新节点没有Uncles，没有rewards,全部的transaction执行完毕，最后生成root，TxHash等成员，返回新区快</p>
-<p>Authorize: 设置公钥和签名生成函数</p>
-<p>Seal: 尝试通过本地签名认证（权力签名与认证，找到有权力的结点）来创建一个已密封的区块</p>
-<h5 id="投票机制"><a href="#投票机制" class="headerlink" title="投票机制"></a>投票机制</h5><p>当需要更新认证节点(signer)的时候，需要使用投票机制。用户首先利用rpc发起一次Propose,指定<strong>某个结点地址</strong>的<strong>状态</strong>. 然后每个认证节点在签发新的区块的时候，会从pending的proposal里面随机挑选一个proposal，并且将对应的节点地址填充到CoinBase里面，将对应的是否认证状态填充到nonce字段，作为一次投票。</p>
-<p>这个投票的区块也会作为新的区块加到区块链上去。同时，每个认证节点本地会维护一个投票结果计数器Tally，记录2个字段：1） Votes： 获得的票数； 2）认证状态（是否是认证节点. 当当前处理的区块获得的投票数大于认证节点个数一半的时候，节点就将被赋予新的状态。但是这里注意，如果是认证状态是真的，就将节点标记为认证节点，否则，还需要做一个特殊处理，因为这个时候少了一个认证节点的话，以为这很多区块都会立即获得超过半数的投票。这里采取的是只处理当前票指定的地址的状态变更,其余的则留到下次处理。</p>
-<h4 id="Ethash"><a href="#Ethash" class="headerlink" title="Ethash"></a>Ethash</h4><p>Ethash算法又称为PoW(Proof-of-Work),是基于计算能力的seal过程，基本原理简化为以下公式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Rand(h,n) &lt;= M/d</div></pre></td></tr></table></figure></p>
-<p>M是一个极大的数maxUint256,d是难度值，h是header.HashNoNonce，n是Nonce. 那么在这个算法里面，d越大，要求Rand的结果就越小，这样相对的计算量也就越大。</p>
-<p>真正的计算量是在hashimotoFull里面，最终调用的是hashimoto, 本质上是一个以非线性表查找方式进行的经过多次，多种Hash的计算。这种函数的性能取决于查找的逻辑，以及查找的表格的数据规模大小。</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
-<li><a href="https://blog.csdn.net/teaspring/article/details/78050274" target="_blank" rel="external">挖矿和共识算法的奥秘</a></li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/11/eth/consensus/" data-id="cjg2p8i7g000ish4j7rhmbnni" class="article-share-link">Compartir</a>
+      <a data-url="http://yoursite.com/2018/04/11/eth/encryption/" data-id="cjg2pewpe000iuq4jdlbwm8ri" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
@@ -461,7 +461,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/faas/" data-id="cjg2p8i620005sh4jj08ra2w3" class="article-share-link">Compartir</a>
+      <a data-url="http://yoursite.com/2017/07/02/faas/" data-id="cjg2pewo40005uq4jj315znlk" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/faas/">faas</a></li></ul>
@@ -564,7 +564,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/azkaban/" data-id="cjg2p8i5o0001sh4jka5e22jz" class="article-share-link">Compartir</a>
+      <a data-url="http://yoursite.com/2017/07/02/azkaban/" data-id="cjg2pewnq0001uq4ji0dxhv3d" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/job-flow/">job flow</a></li></ul>
@@ -611,7 +611,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/go1-5gc/" data-id="cjg2p8i650006sh4jiu4n2tx9" class="article-share-link">Compartir</a>
+      <a data-url="http://yoursite.com/2017/07/02/go1-5gc/" data-id="cjg2pewo80009uq4j8yp2gy8i" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/golang/">golang</a></li></ul>
@@ -685,7 +685,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/overlay/" data-id="cjg2p8i7c000fsh4j81jygabr" class="article-share-link">Compartir</a>
+      <a data-url="http://yoursite.com/2017/07/02/overlay/" data-id="cjg2pewob000auq4jlhq21i3n" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/overlayfs/">overlayfs</a></li></ul>
@@ -787,7 +787,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/cgroup-test/" data-id="cjg2p8i5t0002sh4jcbhsrldz" class="article-share-link">Compartir</a>
+      <a data-url="http://yoursite.com/2017/07/02/cgroup-test/" data-id="cjg2pewnv0002uq4jmtd1swsq" class="article-share-link">Teilen</a>
       
       
     </footer>
@@ -801,7 +801,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
 
   <nav id="page-nav">
     
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Siguiente &raquo;</a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">weiter &raquo;</a>
   </nav>
 
 </section>
@@ -823,7 +823,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Nube de Tags</h3>
+    <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
       <a href="/tags/blockchain/" style="font-size: 20px;">blockchain</a> <a href="/tags/ethereum/" style="font-size: 20px;">ethereum</a> <a href="/tags/faas/" style="font-size: 10px;">faas</a> <a href="/tags/golang/" style="font-size: 10px;">golang</a> <a href="/tags/job-flow/" style="font-size: 10px;">job flow</a> <a href="/tags/linux-namespace/" style="font-size: 10px;">linux namespace</a> <a href="/tags/overlayfs/" style="font-size: 10px;">overlayfs</a>
     </div>
@@ -832,7 +832,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Archivos</h3>
+    <h3 class="widget-title">Archiv</h3>
     <div class="widget">
       <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li></ul>
     </div>
@@ -842,16 +842,16 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Posts recientes</h3>
+    <h3 class="widget-title">letzter Beitrag</h3>
     <div class="widget">
       <ul>
         
           <li>
-            <a href="/2018/04/16/eth/geth/">以太坊Ethereum的UML图</a>
+            <a href="/2018/04/16/eth/statedb/">以太坊StateDB介绍</a>
           </li>
         
           <li>
-            <a href="/2018/04/16/eth/statedb/">以太坊StateDB介绍</a>
+            <a href="/2018/04/16/eth/geth/">以太坊Ethereum的UML图</a>
           </li>
         
           <li>
@@ -859,11 +859,11 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
           </li>
         
           <li>
-            <a href="/2018/04/11/eth/encryption/">非对称加密算法简介以及以太坊account生成</a>
+            <a href="/2018/04/11/eth/consensus/">以太坊共识机制</a>
           </li>
         
           <li>
-            <a href="/2018/04/11/eth/consensus/">以太坊共识机制</a>
+            <a href="/2018/04/11/eth/encryption/">非对称加密算法简介以及以太坊account生成</a>
           </li>
         
       </ul>
@@ -879,7 +879,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
   <div class="outer">
     <div id="footer-info" class="inner">
       &copy; 2018 Duan Bing<br>
-      Construido por <a href="http://hexo.io/" target="_blank">Hexo</a>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
     </div>
   </div>
 </footer>
