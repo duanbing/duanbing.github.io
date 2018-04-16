@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>以太坊StateDB介绍 | Container based Platform as a Service</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="StateDb是以太坊里面存储交易的全部状态的数据结构，是通过Merkle Patricia Tree的形式，保存一个chain的状态（因为chain可能出现分叉）。同时通过Log和Journal来记录状态变化信息，并且提供revert操作。 Merkle是一颗hash数，除了叶子节点存储了数据，树枝节点全部都是hash值，要么是叶子节点的数据的hash值，要么是子节点的hash值进行连接之后进行">
+<meta name="keywords" content="ethereum,blockchain">
+<meta property="og:type" content="article">
+<meta property="og:title" content="以太坊StateDB介绍">
+<meta property="og:url" content="http://yoursite.com/2018/04/16/eth/statedb/index.html">
+<meta property="og:site_name" content="Container based Platform as a Service">
+<meta property="og:description" content="StateDb是以太坊里面存储交易的全部状态的数据结构，是通过Merkle Patricia Tree的形式，保存一个chain的状态（因为chain可能出现分叉）。同时通过Log和Journal来记录状态变化信息，并且提供revert操作。 Merkle是一颗hash数，除了叶子节点存储了数据，树枝节点全部都是hash值，要么是叶子节点的数据的hash值，要么是子节点的hash值进行连接之后进行">
+<meta property="og:image" content="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/mpt.png">
+<meta property="og:image" content="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/trie.png">
+<meta property="og:image" content="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/change.png">
+<meta property="og:updated_time" content="2018-04-16T20:35:39.917Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="以太坊StateDB介绍">
+<meta name="twitter:description" content="StateDb是以太坊里面存储交易的全部状态的数据结构，是通过Merkle Patricia Tree的形式，保存一个chain的状态（因为chain可能出现分叉）。同时通过Log和Journal来记录状态变化信息，并且提供revert操作。 Merkle是一颗hash数，除了叶子节点存储了数据，树枝节点全部都是hash值，要么是叶子节点的数据的hash值，要么是子节点的hash值进行连接之后进行">
+<meta name="twitter:image" content="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/mpt.png">
+  
+    <link rel="alternate" href="/atom.html" title="Container based Platform as a Service" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Container based Platform as a Service</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.html" title="RSS"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Buscar"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="blog-eth/statedb" class="article article-type-blog" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/16/eth/statedb/" class="article-date">
+  <time datetime="2018-04-16T14:25:47.000Z" itemprop="datePublished">2018-04-16</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      以太坊StateDB介绍
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>StateDb是以太坊里面存储交易的全部状态的数据结构，是通过Merkle Patricia Tree的形式，保存一个chain的状态（因为chain可能出现分叉）。同时通过Log和Journal来记录状态变化信息，并且提供revert操作。</p>
+<p>Merkle是一颗hash数，除了叶子节点存储了数据，树枝节点全部都是hash值，要么是叶子节点的数据的hash值，要么是子节点的hash值进行连接之后进行hash获得的值。<br>Patricia是一颗编译的trie数，对于trie树的每个节点，如果该节点是唯一的儿子的话，就和父节点合并.</p>
+<p>合并在一起，成为MPT树，通过下面一张图理解下MPT树：<br><img src="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/mpt.png" alt="MP Tree"><br>MPT树中的节点包括空节点、叶子节点、扩展节点和分支节点:</p>
+<ul>
+<li>空节点，简单的表示空，在代码中是一个空串。</li>
+<li>叶子节点（leaf），表示为[key,value]的一个键值对，其中key是key的一种特殊十六进制编码，value是value的RLP编码</li>
+<li>扩展节点（extension），也是[key，value]的一个键值对，但是这里的value是其他节点的hash值，这个hash可以被用来查询数据库中的节点。也就是说通过hash链接到其他节点。</li>
+<li>分支节点（branch），因为MPT树中的key被编码成一种特殊的16进制的表示，再加上最后的value，所以分支节点是一个长度为17的list，前16个元素对应着key中的16个可能的十六进制字符，如果有一个[key,value]对在这个分支节点终止，最后一个元素代表一个值，即分支节点既可以搜索路径的终止也可以是路径的中间节点。</li>
+</ul>
+<p>详细操作可以参考<a href="https://blog.csdn.net/qq_33935254/article/details/55505472" target="_blank" rel="external">深入浅出以太坊MPT</a></p>
+<p>开始正式进入statedb的介绍。  UML图如下：<br><img src="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/trie.png" alt="statedb"></p>
+<p>可以看到，在go的这个版本里面，跟上面介绍的表达方式有所区别。这里包含fullNode（16个子节点加上1个value节点）和shortNode（1个子节点，1个value节点)。 </p>
+<p>对于shortNode，如果子节点的key hasTerm，那么解析出value作为valueNode返回；否则进一步判断value部分是fullNode还是hashNode(长度为256bit,也就是上面所说的叶子节点)，或者是emptyNode.</p>
+<p>对于fullNode，遍历16个子节点，判断是fullNode还是hashNode,以进一步递归遍历；然后将剩余部分作为valueNode返回</p>
+<p>从statedb最开始初始化的时候分析。调用BlockChain的Process的接口的时候，需要传递statedb参数，statedb的初始化如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">state, err := state.New(parent.Root(), bc.stateCache)</div><div class="line">if err != nil &#123;</div><div class="line">    return i, events, coalescedLogs, err</div><div class="line">&#125;</div><div class="line">// Process block using the parent state as reference point.</div><div class="line">receipts, logs, usedGas, err := bc.processor.Process(block, state, bc.vmConfig)</div></pre></td></tr></table></figure>
+<p>初始化的时候传递了，bc的stateCache，参考<a href="http://webpaas.com/2018/04/16/eth/geth/" target="_blank" rel="external">Ethereum UML图</a>可以知道，是一个ethdb.Database接口，具有memory和leveldb 2种实现。</p>
+<p>state.New 以parent.Root()为根，调用OpenTrie尝试先看是否缓存了这个Root为根的树，如果不在，从ethdb里面取出这个Root对应的RLP信息，然后递归找出所有Root的后代的数据，创建一个trie树，缓存当前chain的信息。</p>
+<p>接下来，就开始进入Process，进行交易了。交易过程，需要statedb全程保存交易的详细日志，这里面就需要Logs和Journal字段发挥重要作用了。</p>
+<p>在之前的<a href="http://webpaas.com/2018/04/15/eth/transactions/" target="_blank" rel="external">合约执行</a>一篇中介绍了2处重要的地方：</p>
+<ol>
+<li><code>snapshot := evm.StateDB.Snapshot()</code> </li>
+<li><code>evm.Transfer(evm.StateDB, caller.Address(), contractAddr, value)</code></li>
+<li><code>evm.StateDB.RevertToSnapshot(snapshot)</code><br>接下来就重点statedb在这3个步骤里面发挥着什么作用？</li>
+</ol>
+<h4 id="Snapshot以及RevertToSnapshot"><a href="#Snapshot以及RevertToSnapshot" class="headerlink" title="Snapshot以及RevertToSnapshot"></a>Snapshot以及RevertToSnapshot</h4><p>一个是做快照，一个是回滚快照，是一个do和undo的过程。放在一起更好理解。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">// Snapshot returns an identifier for the current revision of the state.</div><div class="line">func (self *StateDB) Snapshot() int &#123;</div><div class="line">    id := self.nextRevisionId  //记录当前快照ID</div><div class="line">    self.nextRevisionId++</div><div class="line">    //将journal的当前的尾部指针保存起来</div><div class="line">    self.validRevisions = append(self.validRevisions, revision&#123;id, len(self.journal)&#125;)</div><div class="line">    return id</div><div class="line">&#125;</div><div class="line"></div><div class="line">// RevertToSnapshot reverts all state changes made since the given revision.</div><div class="line">func (self *StateDB) RevertToSnapshot(revid int) &#123;</div><div class="line">    // Find the snapshot in the stack of valid snapshots.</div><div class="line">    // 因为self.validRevisions的id是有序的，直接用二分查找到第一个不小于revid的reversion</div><div class="line">    idx := sort.Search(len(self.validRevisions), func(i int) bool &#123;</div><div class="line">        return self.validRevisions[i].id &gt;= revid</div><div class="line">    &#125;)</div><div class="line">    if idx == len(self.validRevisions) || self.validRevisions[idx].id != revid &#123;</div><div class="line">        panic(fmt.Errorf(&quot;revision id %v cannot be reverted&quot;, revid))</div><div class="line">    &#125;</div><div class="line">    //找到journal的下标</div><div class="line">    snapshot := self.validRevisions[idx].journalIndex</div><div class="line"></div><div class="line">    // Replay the journal to undo changes.</div><div class="line">    // 执行变更的undo操作</div><div class="line">    for i := len(self.journal) - 1; i &gt;= snapshot; i-- &#123;</div><div class="line">        self.journal[i].undo(self)</div><div class="line">    &#125;</div><div class="line">    self.journal = self.journal[:snapshot]</div><div class="line"></div><div class="line">    // Remove invalidated snapshots from the stack.</div><div class="line">    self.validRevisions = self.validRevisions[:idx]</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>关键字段解释：</p>
+<ul>
+<li>nextRevisionId : 自增健，永远向前走</li>
+<li>validRevisions : 真实记录snapshot的地方，一个snapshot实际上是记录的journal列表的长度，因为journal永远是递增的，所以记录当前journal的尾部指针，就意味着在回滚的时候，只需要将validRevisions回退到当前的指针位置即可,下标后续的journal记录，都是本次执行合约产生的changes,然后从后往前，依此undo.</li>
+</ul>
+<p>大概流程如下：<br><img src="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/change.png" alt="changes"></p>
+<h4 id="evm-Transfer"><a href="#evm-Transfer" class="headerlink" title="evm.Transfer"></a>evm.Transfer</h4><p>实际上是执行了:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">db.SubBalance(sender, amount)</div><div class="line">db.AddBalance(recipient, amount)</div></pre></td></tr></table></figure></p>
+<p>从Sender这个account减去acmount，给recipient加上amount。<br>于是回到了statedb里面的SubBalance和AddBalance操作。我们分析下Add的操作，源码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">// AddBalance adds amount to the account associated with addr</div><div class="line">func (self *StateDB) AddBalance(addr common.Address, amount *big.Int) &#123;</div><div class="line">    stateObject := self.GetOrNewStateObject(addr)</div><div class="line">    if stateObject != nil &#123;</div><div class="line">        stateObject.AddBalance(amount)</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这里首先是通过GetOrNewStateObject获得Sender的账户状态，然后将其balance加上account。<br>GetOrNewStateObject首先判断当前的stateObjects里面是否缓存了对应的Account信息，如果没有的话，就从MPT里面去取。<br>Account代表一个账户，支持转账和合约执行,在创建Transaction阶段创建。结构体如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">// Account is the Ethereum consensus representation of accounts.</div><div class="line">// These objects are stored in the main account trie.</div><div class="line">type Account struct &#123;</div><div class="line">    Nonce    uint64</div><div class="line">    Balance  *big.Int</div><div class="line">    Root     common.Hash // merkle root of the storage trie</div><div class="line">    CodeHash []byte</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>取到了stateObject之后，调用其AddBalance，并且最终调用c.SetBalance，设置其balance为计算的结果（+account），然后并将这个stateObject的onDirty方法。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">func (self *stateObject) SetBalance(amount *big.Int) &#123;</div><div class="line">    self.db.journal = append(self.db.journal, balanceChange&#123;</div><div class="line">        account: &amp;self.address,</div><div class="line">        prev:    new(big.Int).Set(self.data.Balance),</div><div class="line">    &#125;)</div><div class="line">    self.setBalance(amount)  //实际设置balance，并且调用onDirty方法</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>在这里可以看到了，每次SetBalance的时候，就会插入一条journal。插入的是一个balanceChange对象，其实现了journal的undo接口。进一步，在core/state/journal.go，我们还能看到更多的表示变更的对象,包含几乎所有账户变更相关的事件。</p>
+<p>以上操作，其实不是立即生效，而是在真正插入Block到BlockChain的时候，statedb才执行CommitTrie，最终调用Trie.CommitTo提交到本地的数据库中。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/04/16/eth/statedb/" data-id="cjg2p8i7f000gsh4jz3aj2z3v" class="article-share-link">Compartir</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2018/04/16/eth/geth/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Nuevo</strong>
+      <div class="article-nav-title">
+        
+          以太坊Ethereum的UML图
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/04/15/eth/transactions/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Viejo</strong>
+      <div class="article-nav-title">以太坊智能合约执行过程分析</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ethereum/">ethereum</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/faas/">faas</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/golang/">golang</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/job-flow/">job flow</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux-namespace/">linux namespace</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/overlayfs/">overlayfs</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Nube de Tags</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/blockchain/" style="font-size: 20px;">blockchain</a> <a href="/tags/ethereum/" style="font-size: 20px;">ethereum</a> <a href="/tags/faas/" style="font-size: 10px;">faas</a> <a href="/tags/golang/" style="font-size: 10px;">golang</a> <a href="/tags/job-flow/" style="font-size: 10px;">job flow</a> <a href="/tags/linux-namespace/" style="font-size: 10px;">linux namespace</a> <a href="/tags/overlayfs/" style="font-size: 10px;">overlayfs</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archivos</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Posts recientes</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/04/16/eth/geth/">以太坊Ethereum的UML图</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/16/eth/statedb/">以太坊StateDB介绍</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/15/eth/transactions/">以太坊智能合约执行过程分析</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/11/eth/encryption/">非对称加密算法简介以及以太坊account生成</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/11/eth/consensus/">以太坊共识机制</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 Duan Bing<br>
+      Construido por <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

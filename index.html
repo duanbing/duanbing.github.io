@@ -48,9 +48,9 @@
       </nav>
       <nav id="sub-nav">
         
-          <a id="nav-rss-link" class="nav-icon" href="/atom.html" title="RSS Feed"></a>
+          <a id="nav-rss-link" class="nav-icon" href="/atom.html" title="RSS"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Buscar"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
@@ -88,7 +88,83 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/16/eth/geth/" data-id="cjg2b2way000iah4jdrc5asrp" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2018/04/16/eth/geth/" data-id="cjg2p8i7l000ksh4j3gc8py1g" class="article-share-link">Compartir</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="blog-eth/statedb" class="article article-type-blog" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/16/eth/statedb/" class="article-date">
+  <time datetime="2018-04-16T14:25:47.000Z" itemprop="datePublished">2018-04-16</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/16/eth/statedb/">以太坊StateDB介绍</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>StateDb是以太坊里面存储交易的全部状态的数据结构，是通过Merkle Patricia Tree的形式，保存一个chain的状态（因为chain可能出现分叉）。同时通过Log和Journal来记录状态变化信息，并且提供revert操作。</p>
+<p>Merkle是一颗hash数，除了叶子节点存储了数据，树枝节点全部都是hash值，要么是叶子节点的数据的hash值，要么是子节点的hash值进行连接之后进行hash获得的值。<br>Patricia是一颗编译的trie数，对于trie树的每个节点，如果该节点是唯一的儿子的话，就和父节点合并.</p>
+<p>合并在一起，成为MPT树，通过下面一张图理解下MPT树：<br><img src="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/mpt.png" alt="MP Tree"><br>MPT树中的节点包括空节点、叶子节点、扩展节点和分支节点:</p>
+<ul>
+<li>空节点，简单的表示空，在代码中是一个空串。</li>
+<li>叶子节点（leaf），表示为[key,value]的一个键值对，其中key是key的一种特殊十六进制编码，value是value的RLP编码</li>
+<li>扩展节点（extension），也是[key，value]的一个键值对，但是这里的value是其他节点的hash值，这个hash可以被用来查询数据库中的节点。也就是说通过hash链接到其他节点。</li>
+<li>分支节点（branch），因为MPT树中的key被编码成一种特殊的16进制的表示，再加上最后的value，所以分支节点是一个长度为17的list，前16个元素对应着key中的16个可能的十六进制字符，如果有一个[key,value]对在这个分支节点终止，最后一个元素代表一个值，即分支节点既可以搜索路径的终止也可以是路径的中间节点。</li>
+</ul>
+<p>详细操作可以参考<a href="https://blog.csdn.net/qq_33935254/article/details/55505472" target="_blank" rel="external">深入浅出以太坊MPT</a></p>
+<p>开始正式进入statedb的介绍。  UML图如下：<br><img src="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/trie.png" alt="statedb"></p>
+<p>可以看到，在go的这个版本里面，跟上面介绍的表达方式有所区别。这里包含fullNode（16个子节点加上1个value节点）和shortNode（1个子节点，1个value节点)。 </p>
+<p>对于shortNode，如果子节点的key hasTerm，那么解析出value作为valueNode返回；否则进一步判断value部分是fullNode还是hashNode(长度为256bit,也就是上面所说的叶子节点)，或者是emptyNode.</p>
+<p>对于fullNode，遍历16个子节点，判断是fullNode还是hashNode,以进一步递归遍历；然后将剩余部分作为valueNode返回</p>
+<p>从statedb最开始初始化的时候分析。调用BlockChain的Process的接口的时候，需要传递statedb参数，statedb的初始化如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">state, err := state.New(parent.Root(), bc.stateCache)</div><div class="line">if err != nil &#123;</div><div class="line">    return i, events, coalescedLogs, err</div><div class="line">&#125;</div><div class="line">// Process block using the parent state as reference point.</div><div class="line">receipts, logs, usedGas, err := bc.processor.Process(block, state, bc.vmConfig)</div></pre></td></tr></table></figure>
+<p>初始化的时候传递了，bc的stateCache，参考<a href="http://webpaas.com/2018/04/16/eth/geth/" target="_blank" rel="external">Ethereum UML图</a>可以知道，是一个ethdb.Database接口，具有memory和leveldb 2种实现。</p>
+<p>state.New 以parent.Root()为根，调用OpenTrie尝试先看是否缓存了这个Root为根的树，如果不在，从ethdb里面取出这个Root对应的RLP信息，然后递归找出所有Root的后代的数据，创建一个trie树，缓存当前chain的信息。</p>
+<p>接下来，就开始进入Process，进行交易了。交易过程，需要statedb全程保存交易的详细日志，这里面就需要Logs和Journal字段发挥重要作用了。</p>
+<p>在之前的<a href="http://webpaas.com/2018/04/15/eth/transactions/" target="_blank" rel="external">合约执行</a>一篇中介绍了2处重要的地方：</p>
+<ol>
+<li><code>snapshot := evm.StateDB.Snapshot()</code> </li>
+<li><code>evm.Transfer(evm.StateDB, caller.Address(), contractAddr, value)</code></li>
+<li><code>evm.StateDB.RevertToSnapshot(snapshot)</code><br>接下来就重点statedb在这3个步骤里面发挥着什么作用？</li>
+</ol>
+<h4 id="Snapshot以及RevertToSnapshot"><a href="#Snapshot以及RevertToSnapshot" class="headerlink" title="Snapshot以及RevertToSnapshot"></a>Snapshot以及RevertToSnapshot</h4><p>一个是做快照，一个是回滚快照，是一个do和undo的过程。放在一起更好理解。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">// Snapshot returns an identifier for the current revision of the state.</div><div class="line">func (self *StateDB) Snapshot() int &#123;</div><div class="line">    id := self.nextRevisionId  //记录当前快照ID</div><div class="line">    self.nextRevisionId++</div><div class="line">    //将journal的当前的尾部指针保存起来</div><div class="line">    self.validRevisions = append(self.validRevisions, revision&#123;id, len(self.journal)&#125;)</div><div class="line">    return id</div><div class="line">&#125;</div><div class="line"></div><div class="line">// RevertToSnapshot reverts all state changes made since the given revision.</div><div class="line">func (self *StateDB) RevertToSnapshot(revid int) &#123;</div><div class="line">    // Find the snapshot in the stack of valid snapshots.</div><div class="line">    // 因为self.validRevisions的id是有序的，直接用二分查找到第一个不小于revid的reversion</div><div class="line">    idx := sort.Search(len(self.validRevisions), func(i int) bool &#123;</div><div class="line">        return self.validRevisions[i].id &gt;= revid</div><div class="line">    &#125;)</div><div class="line">    if idx == len(self.validRevisions) || self.validRevisions[idx].id != revid &#123;</div><div class="line">        panic(fmt.Errorf(&quot;revision id %v cannot be reverted&quot;, revid))</div><div class="line">    &#125;</div><div class="line">    //找到journal的下标</div><div class="line">    snapshot := self.validRevisions[idx].journalIndex</div><div class="line"></div><div class="line">    // Replay the journal to undo changes.</div><div class="line">    // 执行变更的undo操作</div><div class="line">    for i := len(self.journal) - 1; i &gt;= snapshot; i-- &#123;</div><div class="line">        self.journal[i].undo(self)</div><div class="line">    &#125;</div><div class="line">    self.journal = self.journal[:snapshot]</div><div class="line"></div><div class="line">    // Remove invalidated snapshots from the stack.</div><div class="line">    self.validRevisions = self.validRevisions[:idx]</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>关键字段解释：</p>
+<ul>
+<li>nextRevisionId : 自增健，永远向前走</li>
+<li>validRevisions : 真实记录snapshot的地方，一个snapshot实际上是记录的journal列表的长度，因为journal永远是递增的，所以记录当前journal的尾部指针，就意味着在回滚的时候，只需要将validRevisions回退到当前的指针位置即可,下标后续的journal记录，都是本次执行合约产生的changes,然后从后往前，依此undo.</li>
+</ul>
+<p>大概流程如下：<br><img src="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/change.png" alt="changes"></p>
+<h4 id="evm-Transfer"><a href="#evm-Transfer" class="headerlink" title="evm.Transfer"></a>evm.Transfer</h4><p>实际上是执行了:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">db.SubBalance(sender, amount)</div><div class="line">db.AddBalance(recipient, amount)</div></pre></td></tr></table></figure></p>
+<p>从Sender这个account减去acmount，给recipient加上amount。<br>于是回到了statedb里面的SubBalance和AddBalance操作。我们分析下Add的操作，源码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">// AddBalance adds amount to the account associated with addr</div><div class="line">func (self *StateDB) AddBalance(addr common.Address, amount *big.Int) &#123;</div><div class="line">    stateObject := self.GetOrNewStateObject(addr)</div><div class="line">    if stateObject != nil &#123;</div><div class="line">        stateObject.AddBalance(amount)</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这里首先是通过GetOrNewStateObject获得Sender的账户状态，然后将其balance加上account。<br>GetOrNewStateObject首先判断当前的stateObjects里面是否缓存了对应的Account信息，如果没有的话，就从MPT里面去取。<br>Account代表一个账户，支持转账和合约执行,在创建Transaction阶段创建。结构体如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">// Account is the Ethereum consensus representation of accounts.</div><div class="line">// These objects are stored in the main account trie.</div><div class="line">type Account struct &#123;</div><div class="line">    Nonce    uint64</div><div class="line">    Balance  *big.Int</div><div class="line">    Root     common.Hash // merkle root of the storage trie</div><div class="line">    CodeHash []byte</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>取到了stateObject之后，调用其AddBalance，并且最终调用c.SetBalance，设置其balance为计算的结果（+account），然后并将这个stateObject的onDirty方法。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">func (self *stateObject) SetBalance(amount *big.Int) &#123;</div><div class="line">    self.db.journal = append(self.db.journal, balanceChange&#123;</div><div class="line">        account: &amp;self.address,</div><div class="line">        prev:    new(big.Int).Set(self.data.Balance),</div><div class="line">    &#125;)</div><div class="line">    self.setBalance(amount)  //实际设置balance，并且调用onDirty方法</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>在这里可以看到了，每次SetBalance的时候，就会插入一条journal。插入的是一个balanceChange对象，其实现了journal的undo接口。进一步，在core/state/journal.go，我们还能看到更多的表示变更的对象,包含几乎所有账户变更相关的事件。</p>
+<p>以上操作，其实不是立即生效，而是在真正插入Block到BlockChain的时候，statedb才执行CommitTrie，最终调用Trie.CommitTo提交到本地的数据库中。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/04/16/eth/statedb/" data-id="cjg2p8i7f000gsh4jz3aj2z3v" class="article-share-link">Compartir</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
@@ -152,81 +228,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/15/eth/transactions/" data-id="cjg2b2wb4000mah4j0659g1g2" class="article-share-link">Teilen</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="blog-eth/consensus" class="article article-type-blog" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/04/11/eth/consensus/" class="article-date">
-  <time datetime="2018-04-11T14:25:47.000Z" itemprop="datePublished">2018-04-11</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/11/eth/consensus/">以太坊共识机制</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="共识算法面临的问题"><a href="#共识算法面临的问题" class="headerlink" title="共识算法面临的问题"></a>共识算法面临的问题</h3><p>理想情况下，一个分布式算法包含下面3个特点：</p>
-<ul>
-<li>可终止性： 一致性的结果可以在有限的时间算出；</li>
-<li>共识性： 不同节点最终完成的结果应该相同</li>
-<li>合法性：决策的结果应该是其他进程提出的提案</li>
-</ul>
-<p>分布式系统尝尝面临以下问题：</p>
-<ol>
-<li>节点处理事务的能力不同，网络节点的吞吐有差异；</li>
-<li>节点间通信的信道可能不安全；</li>
-<li>可能出现拜占庭错误节点</li>
-<li>当天异步处理能力达到高度一致的时候，系统的可扩展性变得很差, 新节点很难加入；</li>
-</ol>
-<h3 id="以太坊共识算法"><a href="#以太坊共识算法" class="headerlink" title="以太坊共识算法"></a>以太坊共识算法</h3><h4 id="Clique"><a href="#Clique" class="headerlink" title="Clique"></a>Clique</h4><p>Clique算法又称为POA(Proof-of-Authority),加密过程由一下公式计算得出：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">n = F(pr, h)</div></pre></td></tr></table></figure></p>
-<p>其中n是65bytes长的字符串，pr是common.Address(长度是20bytes)的地址，h是common.Hash(长度为32bytes)的哈希值，签名算法F就是ECDSA.</p>
-<h5 id="区块认证"><a href="#区块认证" class="headerlink" title="区块认证"></a>区块认证</h5><p>原理：认证节点使用ECDSA算法进行加密, 并且网络中的每一个区块是由于某一个认证节点进行认证的，其他节点仅仅需要验证认证信息来判断该区块是否合法</p>
-<ul>
-<li>认证节点： 具备区块签名的权利，可以对应POW算法中的miner节点</li>
-<li>非认证节点： 不具备签名的权利，是区块网络中的普通同步节点<br>同时这2类节点可以动态投票机制进行转换，后面介绍如何转换。</li>
-</ul>
-<p>Clique实现了consensus.Engine的接口，主要包括：<br>Author：从签名获取区块创建者的账户地址,是通过secp256k1算法从签名获取公钥,然后通过crypto.Keccak256获得以太坊账户地址</p>
-<p>VerifyHeaders: 校验一个区块头是否合法,包括字段合法性，parent的hash以及number等信息是否一致，，区块签名是否是来自认证节点，签发区块的节点是否是inturn节点（难度为2，否则为1);</p>
-<p>VerifyUncles: 判断区块是否有uncles，如果有的话，验证失败</p>
-<p>VerifySeal： 校验签发节点的难度值</p>
-<p>Prepare: 填充区块头信息,其中新区块的Coinbase是所有未处理的提议中，所有有效投票（认证变非认证，或者非认证变认证）中的一个随机的被投票地址；同时设置header.Time为min(当前时间,parent.Time+延迟产生时间(config.Period))。</p>
-<p>Finalize:  保证新节点没有Uncles，没有rewards,全部的transaction执行完毕，最后生成root，TxHash等成员，返回新区快</p>
-<p>Authorize: 设置公钥和签名生成函数</p>
-<p>Seal: 尝试通过本地签名认证（权力签名与认证，找到有权力的结点）来创建一个已密封的区块</p>
-<h5 id="投票机制"><a href="#投票机制" class="headerlink" title="投票机制"></a>投票机制</h5><p>当需要更新认证节点(signer)的时候，需要使用投票机制。用户首先利用rpc发起一次Propose,指定<strong>某个结点地址</strong>的<strong>状态</strong>. 然后每个认证节点在签发新的区块的时候，会从pending的proposal里面随机挑选一个proposal，并且将对应的节点地址填充到CoinBase里面，将对应的是否认证状态填充到nonce字段，作为一次投票。</p>
-<p>这个投票的区块也会作为新的区块加到区块链上去。同时，每个认证节点本地会维护一个投票结果计数器Tally，记录2个字段：1） Votes： 获得的票数； 2）认证状态（是否是认证节点. 当当前处理的区块获得的投票数大于认证节点个数一半的时候，节点就将被赋予新的状态。但是这里注意，如果是认证状态是真的，就将节点标记为认证节点，否则，还需要做一个特殊处理，因为这个时候少了一个认证节点的话，以为这很多区块都会立即获得超过半数的投票。这里采取的是只处理当前票指定的地址的状态变更,其余的则留到下次处理。</p>
-<h4 id="Ethash"><a href="#Ethash" class="headerlink" title="Ethash"></a>Ethash</h4><p>Ethash算法又称为PoW(Proof-of-Work),是基于计算能力的seal过程，基本原理简化为以下公式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Rand(h,n) &lt;= M/d</div></pre></td></tr></table></figure></p>
-<p>M是一个极大的数maxUint256,d是难度值，h是header.HashNoNonce，n是Nonce. 那么在这个算法里面，d越大，要求Rand的结果就越小，这样相对的计算量也就越大。</p>
-<p>真正的计算量是在hashimotoFull里面，最终调用的是hashimoto, 本质上是一个以非线性表查找方式进行的经过多次，多种Hash的计算。这种函数的性能取决于查找的逻辑，以及查找的表格的数据规模大小。</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
-<li><a href="https://blog.csdn.net/teaspring/article/details/78050274" target="_blank" rel="external">挖矿和共识算法的奥秘</a></li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/11/eth/consensus/" data-id="cjg2b2wb2000lah4jcipzkvvo" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2018/04/15/eth/transactions/" data-id="cjg2p8i7n000nsh4jp2duxdb2" class="article-share-link">Compartir</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
@@ -308,7 +310,81 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/11/eth/encryption/" data-id="cjg2b2wb0000jah4jlyhxajt0" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2018/04/11/eth/encryption/" data-id="cjg2p8i7k000jsh4j0q418puh" class="article-share-link">Compartir</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="blog-eth/consensus" class="article article-type-blog" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/11/eth/consensus/" class="article-date">
+  <time datetime="2018-04-11T14:25:47.000Z" itemprop="datePublished">2018-04-11</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/11/eth/consensus/">以太坊共识机制</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="共识算法面临的问题"><a href="#共识算法面临的问题" class="headerlink" title="共识算法面临的问题"></a>共识算法面临的问题</h3><p>理想情况下，一个分布式算法包含下面3个特点：</p>
+<ul>
+<li>可终止性： 一致性的结果可以在有限的时间算出；</li>
+<li>共识性： 不同节点最终完成的结果应该相同</li>
+<li>合法性：决策的结果应该是其他进程提出的提案</li>
+</ul>
+<p>分布式系统尝尝面临以下问题：</p>
+<ol>
+<li>节点处理事务的能力不同，网络节点的吞吐有差异；</li>
+<li>节点间通信的信道可能不安全；</li>
+<li>可能出现拜占庭错误节点</li>
+<li>当天异步处理能力达到高度一致的时候，系统的可扩展性变得很差, 新节点很难加入；</li>
+</ol>
+<h3 id="以太坊共识算法"><a href="#以太坊共识算法" class="headerlink" title="以太坊共识算法"></a>以太坊共识算法</h3><h4 id="Clique"><a href="#Clique" class="headerlink" title="Clique"></a>Clique</h4><p>Clique算法又称为POA(Proof-of-Authority),加密过程由一下公式计算得出：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">n = F(pr, h)</div></pre></td></tr></table></figure></p>
+<p>其中n是65bytes长的字符串，pr是common.Address(长度是20bytes)的地址，h是common.Hash(长度为32bytes)的哈希值，签名算法F就是ECDSA.</p>
+<h5 id="区块认证"><a href="#区块认证" class="headerlink" title="区块认证"></a>区块认证</h5><p>原理：认证节点使用ECDSA算法进行加密, 并且网络中的每一个区块是由于某一个认证节点进行认证的，其他节点仅仅需要验证认证信息来判断该区块是否合法</p>
+<ul>
+<li>认证节点： 具备区块签名的权利，可以对应POW算法中的miner节点</li>
+<li>非认证节点： 不具备签名的权利，是区块网络中的普通同步节点<br>同时这2类节点可以动态投票机制进行转换，后面介绍如何转换。</li>
+</ul>
+<p>Clique实现了consensus.Engine的接口，主要包括：<br>Author：从签名获取区块创建者的账户地址,是通过secp256k1算法从签名获取公钥,然后通过crypto.Keccak256获得以太坊账户地址</p>
+<p>VerifyHeaders: 校验一个区块头是否合法,包括字段合法性，parent的hash以及number等信息是否一致，，区块签名是否是来自认证节点，签发区块的节点是否是inturn节点（难度为2，否则为1);</p>
+<p>VerifyUncles: 判断区块是否有uncles，如果有的话，验证失败</p>
+<p>VerifySeal： 校验签发节点的难度值</p>
+<p>Prepare: 填充区块头信息,其中新区块的Coinbase是所有未处理的提议中，所有有效投票（认证变非认证，或者非认证变认证）中的一个随机的被投票地址；同时设置header.Time为min(当前时间,parent.Time+延迟产生时间(config.Period))。</p>
+<p>Finalize:  保证新节点没有Uncles，没有rewards,全部的transaction执行完毕，最后生成root，TxHash等成员，返回新区快</p>
+<p>Authorize: 设置公钥和签名生成函数</p>
+<p>Seal: 尝试通过本地签名认证（权力签名与认证，找到有权力的结点）来创建一个已密封的区块</p>
+<h5 id="投票机制"><a href="#投票机制" class="headerlink" title="投票机制"></a>投票机制</h5><p>当需要更新认证节点(signer)的时候，需要使用投票机制。用户首先利用rpc发起一次Propose,指定<strong>某个结点地址</strong>的<strong>状态</strong>. 然后每个认证节点在签发新的区块的时候，会从pending的proposal里面随机挑选一个proposal，并且将对应的节点地址填充到CoinBase里面，将对应的是否认证状态填充到nonce字段，作为一次投票。</p>
+<p>这个投票的区块也会作为新的区块加到区块链上去。同时，每个认证节点本地会维护一个投票结果计数器Tally，记录2个字段：1） Votes： 获得的票数； 2）认证状态（是否是认证节点. 当当前处理的区块获得的投票数大于认证节点个数一半的时候，节点就将被赋予新的状态。但是这里注意，如果是认证状态是真的，就将节点标记为认证节点，否则，还需要做一个特殊处理，因为这个时候少了一个认证节点的话，以为这很多区块都会立即获得超过半数的投票。这里采取的是只处理当前票指定的地址的状态变更,其余的则留到下次处理。</p>
+<h4 id="Ethash"><a href="#Ethash" class="headerlink" title="Ethash"></a>Ethash</h4><p>Ethash算法又称为PoW(Proof-of-Work),是基于计算能力的seal过程，基本原理简化为以下公式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Rand(h,n) &lt;= M/d</div></pre></td></tr></table></figure></p>
+<p>M是一个极大的数maxUint256,d是难度值，h是header.HashNoNonce，n是Nonce. 那么在这个算法里面，d越大，要求Rand的结果就越小，这样相对的计算量也就越大。</p>
+<p>真正的计算量是在hashimotoFull里面，最终调用的是hashimoto, 本质上是一个以非线性表查找方式进行的经过多次，多种Hash的计算。这种函数的性能取决于查找的逻辑，以及查找的表格的数据规模大小。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a href="https://blog.csdn.net/teaspring/article/details/78050274" target="_blank" rel="external">挖矿和共识算法的奥秘</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/04/11/eth/consensus/" data-id="cjg2p8i7g000ish4j7rhmbnni" class="article-share-link">Compartir</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
@@ -385,7 +461,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/faas/" data-id="cjg2b2w9l0005ah4j8zlis2m6" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/faas/" data-id="cjg2p8i620005sh4jj08ra2w3" class="article-share-link">Compartir</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/faas/">faas</a></li></ul>
@@ -488,7 +564,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/azkaban/" data-id="cjg2b2w980001ah4jf0jn61nf" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/azkaban/" data-id="cjg2p8i5o0001sh4jka5e22jz" class="article-share-link">Compartir</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/job-flow/">job flow</a></li></ul>
@@ -535,7 +611,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/go1-5gc/" data-id="cjg2b2w9i0004ah4jiu2s7hke" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/go1-5gc/" data-id="cjg2p8i650006sh4jiu4n2tx9" class="article-share-link">Compartir</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/golang/">golang</a></li></ul>
@@ -609,7 +685,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/overlay/" data-id="cjg2b2w9u000aah4ji5pxmkw9" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/overlay/" data-id="cjg2p8i7c000fsh4j81jygabr" class="article-share-link">Compartir</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/overlayfs/">overlayfs</a></li></ul>
@@ -711,80 +787,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/cgroup-test/" data-id="cjg2b2w9o0006ah4jlf6xwtt0" class="article-share-link">Teilen</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-drf" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2017/07/02/drf/" class="article-date">
-  <time datetime="2017-07-01T16:00:35.000Z" itemprop="datePublished">2017-07-02</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/07/02/drf/">drf算法分析</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="最大最小算法"><a href="#最大最小算法" class="headerlink" title="最大最小算法"></a>最大最小算法</h3><p>最大最小算法的形式化定义：</p>
-<ul>
-<li>资源按照需求递增的顺序进行分配</li>
-<li>不存在用户得到的资源超过自己的需求</li>
-<li>未得到满足的用户等价的分享资源</li>
-</ul>
-<p>与之对应的可执行定义：</p>
-<p>考虑用户集合1, …, n分别有资源需求x1, x2, …, xn.不失一般性,令资源需求满足x1 &lt;= x2 &lt;= … &lt;= xn.令服务器具有能力C.那么,我们初始把C/n资源给需求最小的用户.这可能会超过用户1的需求,继续处理.该过程结束时，每个用户得到的没有比自己要求更多，而且，如果其需求得不到满足，得到的资源也不会比其他用户得到的最多的资源还少.我们之所以称之为最大最小公平分配是因为我们最大化了资源得不到满足的用户最小分配的资源.</p>
-<p>举一个例子：<br>有一四个用户的集合,资源需求分别是2,2.6,4,5,其资源总能力为10,为其计算最大最小公平分配<br>解决方法:我们通过几轮的计算来计算最大最小公平分配.第一轮,我们暂时将资源划分成4个大小为2.5的.由于这超过了用户1的需求,这使得剩了0.5个均匀的分配给剩下的3个人资源,给予他们每个2.66.这又超过了用户2的需求,所以我们拥有额外的0.066…来分配给剩下的两个用户,给予每个用户2.5+0.66…+0.033…=2.7.因此公平分配是:用户1得到2,用户2得到2.6,用户3和用户4每个都得到2.7.</p>
-<h3 id="带权最大最小算法"><a href="#带权最大最小算法" class="headerlink" title="带权最大最小算法"></a>带权最大最小算法</h3><p>到目前为止,我们假设所有的用户拥有相同的权利来获取资源.有时候我们需要给予一些用户更大的配额.特别的,我们可能会给不同的用户1, …, n关联权重w1, w2, …, wn,这反映了他们间的资源配额.<br>我们通过定义带权的最大最小公平分配来扩展最大最小公平分配的概念以使其包含这样的权重:</p>
-<ul>
-<li>资源按照需求递增的顺序进行分配,通过权重来标准化</li>
-<li>不存在用户得到的资源超过自己的需求</li>
-<li>未得到满足的用户按照权重分享资源</li>
-</ul>
-<p>举一个例子</p>
-<p>有一四个用户的集合,资源需求分别是4,2,10,4,权重分别是2.5,4,0.5,1,资源总能力是16,为其计算最大最小公平分配.<br>解决方法:第一步是标准化权重,将最小的权重设置为1.这样权重集合更新为5,8,1,2.这样我们就假装需要的资源不是4份而是5+8+1+2=16份.因此将资源划分成16份.在资源分配的每一轮,我们按照权重的比例来划分资源,因此,在第一轮,我们计算C/n为16/16=1.在这一轮,用户分别获得5,8,1,2单元的资源,用户1得到了5个资源,但是只需要4,所以多了1个资源,同样的,用户2多了6个资源.用户3和用户4拖欠了,因为他们的配额低于需求.现在我们有7个单元的资源可以分配给用户3和用户4.他们的权重分别是1和2,最小的权重是1,因此不需要对权重进行标准化.给予用户3额外的7 × 1/3单元资源和用户4额外的7 × 2/3单元.这会导致用户4的配额达到了2 + 7 × 2/3 = 6.666,超过了需求.所以我们将额外的2.666单元给用户3,最终获得1 + 7/3 + 2.666 = 6单元.最终的分配是,4,2,6,4,这就是带权的最大最小公平分配.</p>
-<h3 id="DRF算法"><a href="#DRF算法" class="headerlink" title="DRF算法"></a>DRF算法</h3><p>Dominant Resource Fairness（DRF），一种通用的多资源的max-min fairness分配策略。DRF背后的直观想法是在多环境下一个用户的资源分配应该由用户的dominant share（主导份额的资源）决定，dominant share是在所有已经分配给用户的多种资源中，占据最大份额的一种资源。简而言之，DRF试图最大化所有用户中最小的dominant share（一句话表达了DRF的思想）。举个例子，假如用户A运行CPU密集的任务而用户B运行内存密集的任务，DRF会试图均衡用户A的CPU资源份额和用户B的内存资源份额。在单个资源的情形下，那么DRF就会退化为max-min fairness。</p>
-<p>DRF有四种主要特性，分别是：sharing incentive、strategy-proofness、Pareto efficiency和envy-freeness。</p>
-<p>DRF是通过确保系统的资源在用户之间是静态和均衡地进行分配来提供sharing incentive，用户不能获得比其他用户更多的资源，共享集群，而不是创建自己的专有集群。此外，DRF是strategy-proof，用户不能通过谎报其资源需求来获得更多的资源。DRF是Pareto-efficient，在满足其他特性的同时，分配所有可以利用的资源，不用取代现有的资源分配。最后，DRF是envy-free，用户不会更喜欢其他用户的资源分配。</p>
-<p>举一个例子：</p>
-<p>考虑一个9CPU、18GBRAM的系统，拥有两个用户，其中用户A运行的任务的需求向量为{1CPU, 4GB}，用户B运行的任务的需求向量为{3CPU，1GB}。</p>
-<p><img src="http://www.webpaas.com/usr/uploads/2015/04/3699732504.png" alt="12212737\_xXnW.png"></p>
-<p>在这个方案里面， A的每个任务的消耗总CPU的1/9和内存的4/18,所以A的dominant resource就是内存， 任务B的doninant就是cpu。如上图所示， 三个A任务总共消耗了{3CPU，12GB}，两个B任务总共消耗了{6CPU，2GB}。在这个分配中，每个用户的dominant resource是相等的。用户A获得了2/3的内存，B获得了2/3的CPU。</p>
-<p>以上的这个分配可以用如下方式计算出来：x和y分别是用户A和用户B的分配任务的数目，那么用户A消耗了{xCPU，4xGB}，用户B消耗了{3yCPU，yGB}，在图三中用户A和用户B消耗了同等dominant resource；用户A的dominant share为4x/18，用户B的dominant share为3y/9。所以DRF分配可以通过求解以下的优化问题来得到：</p>
-<p><img src="http://www.webpaas.com/usr/uploads/2015/04/1850794973.png" alt="12212738\_llIF.png"></p>
-<p>求解以上问题，可以得出x = 3以及y = 2。因而用户A获得{3CPU，12GB}，B得到{6CPU， 2GB}。</p>
-<p>需要注意的是，DRF并不是总需要使用户的dominant shares相等。当一个用户总的需求是被满足，用户不会需要更多的任务，因此多余的资源可以在其他用户之间进行分配，就好像max-min fairness。此外，如果一种资源被耗尽，那些不需要此种资源的用户仍然可以继续接收到更多其他类型的资源。</p>
-<p><img src="http://www.webpaas.com/usr/uploads/2015/04/2315095933.png" alt="12212740\_H81D.png"></p>
-<p>这是DRF算法的伪代码，算法会跟踪分配给每个用户的总资源，以及用户的dominant share：si。每一步，DRF都会从用户最低的dominant share里面选择一个任务来运行。假设用户的需求被满足，即系统中有足够可用的资源，那么用户的任务就会被加载启动。我们考虑一般情况，即一个用户拥有不用需求向量的任务，我们使用变量Di来表示用户i下一个要运行加载的任务。为了简单起见，伪码没有捕获任务结束事件，在这种情况下，用户会释放任务的资源，DRF会再一次选择拥有最低dominant share的用户去运行它的任务。</p>
-<p><img src="http://www.webpaas.com/usr/uploads/2015/04/3503420442.png" alt="12212743\_BDro.png"><br>考虑4.1的两个用户的简单例子，table1说明了DRF对这个简单例子的分配过程。DRF首先选择B来运行一个任务，结果B的资源占用率变为{3/9,1/18}，B的dominant share变成了max{3/9，1/18} = 1/3。接下来DRF选择A，因为此时A的dominant share为0。这个过程持续进行，直到不再可能运行任务新任务，在这种情况下，一般会出现CPU饱和。</p>
-<p>在以上分配过程的最后，用户A会得到{3CPU, 12GB}，同事B得到了{6CPU， 2GB}，每一个用户都获得了2/3的dominant resource。</p>
-<p>注意到，在这个例子中，一旦任何资源达到饱和，那么分配过程就会终止。然而通常情况下，它可以在某些资源已经饱和的情况下继续分配任务，因为有些任务对已经饱和的资源没有任何要求。</p>
-<p>以上这个算法在实现的时候可以用二叉堆来存储每一个用户的dominant share。对于n个用户，每一次调度决定都消耗了O(logn)时间。</p>
-<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p><a href="https://www.cs.berkeley.edu/~alig/papers/drf.pdf" target="_blank" rel="external">Dominant Resource Fairness: Fair Allocation of Multiple Resource Types
-</a></p>
-<p><a href="http://blog.csdn.net/pelick/article/details/19326865" target="_blank" rel="external">DRF算法</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/drf/" data-id="cjg2b2w9c0002ah4j1h8mnpa4" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/cgroup-test/" data-id="cjg2p8i5t0002sh4jcbhsrldz" class="article-share-link">Compartir</a>
       
       
     </footer>
@@ -798,7 +801,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
 
   <nav id="page-nav">
     
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">weiter &raquo;</a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Siguiente &raquo;</a>
   </nav>
 
 </section>
@@ -820,7 +823,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Tag Cloud</h3>
+    <h3 class="widget-title">Nube de Tags</h3>
     <div class="widget tagcloud">
       <a href="/tags/blockchain/" style="font-size: 20px;">blockchain</a> <a href="/tags/ethereum/" style="font-size: 20px;">ethereum</a> <a href="/tags/faas/" style="font-size: 10px;">faas</a> <a href="/tags/golang/" style="font-size: 10px;">golang</a> <a href="/tags/job-flow/" style="font-size: 10px;">job flow</a> <a href="/tags/linux-namespace/" style="font-size: 10px;">linux namespace</a> <a href="/tags/overlayfs/" style="font-size: 10px;">overlayfs</a>
     </div>
@@ -829,7 +832,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Archiv</h3>
+    <h3 class="widget-title">Archivos</h3>
     <div class="widget">
       <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li></ul>
     </div>
@@ -839,7 +842,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">letzter Beitrag</h3>
+    <h3 class="widget-title">Posts recientes</h3>
     <div class="widget">
       <ul>
         
@@ -848,11 +851,11 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
           </li>
         
           <li>
-            <a href="/2018/04/15/eth/transactions/">以太坊智能合约执行过程分析</a>
+            <a href="/2018/04/16/eth/statedb/">以太坊StateDB介绍</a>
           </li>
         
           <li>
-            <a href="/2018/04/11/eth/consensus/">以太坊共识机制</a>
+            <a href="/2018/04/15/eth/transactions/">以太坊智能合约执行过程分析</a>
           </li>
         
           <li>
@@ -860,7 +863,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
           </li>
         
           <li>
-            <a href="/2017/07/02/faas/">faas介绍</a>
+            <a href="/2018/04/11/eth/consensus/">以太坊共识机制</a>
           </li>
         
       </ul>
@@ -876,7 +879,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
   <div class="outer">
     <div id="footer-info" class="inner">
       &copy; 2018 Duan Bing<br>
-      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+      Construido por <a href="http://hexo.io/" target="_blank">Hexo</a>
     </div>
   </div>
 </footer>
