@@ -5,21 +5,21 @@
   
 
   
-  <title>以太坊StateDB介绍 | Container based Platform as a Service</title>
+  <title>以太坊StateDB以及Snapshot机制介绍 | Container based Platform as a Service</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="StateDb是以太坊里面存储交易的全部状态的数据结构，是通过Merkle Patricia Tree的形式，保存一个chain的状态（因为chain可能出现分叉）。同时通过Journal来记录状态变化信息，并且提供revert操作。 Merkle是一颗hash数，除了叶子节点存储了数据，树枝节点全部都是hash值，要么是叶子节点的数据的hash值，要么是子节点的hash值进行连接之后进行hash">
 <meta name="keywords" content="ethereum,blockchain">
 <meta property="og:type" content="article">
-<meta property="og:title" content="以太坊StateDB介绍">
+<meta property="og:title" content="以太坊StateDB以及Snapshot机制介绍">
 <meta property="og:url" content="http://yoursite.com/2018/04/16/eth/statedb/index.html">
 <meta property="og:site_name" content="Container based Platform as a Service">
 <meta property="og:description" content="StateDb是以太坊里面存储交易的全部状态的数据结构，是通过Merkle Patricia Tree的形式，保存一个chain的状态（因为chain可能出现分叉）。同时通过Journal来记录状态变化信息，并且提供revert操作。 Merkle是一颗hash数，除了叶子节点存储了数据，树枝节点全部都是hash值，要么是叶子节点的数据的hash值，要么是子节点的hash值进行连接之后进行hash">
 <meta property="og:image" content="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/mpt.png">
 <meta property="og:image" content="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/trie.png">
 <meta property="og:image" content="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/change.png">
-<meta property="og:updated_time" content="2018-04-17T01:45:20.672Z">
+<meta property="og:updated_time" content="2018-04-17T03:26:10.239Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="以太坊StateDB介绍">
+<meta name="twitter:title" content="以太坊StateDB以及Snapshot机制介绍">
 <meta name="twitter:description" content="StateDb是以太坊里面存储交易的全部状态的数据结构，是通过Merkle Patricia Tree的形式，保存一个chain的状态（因为chain可能出现分叉）。同时通过Journal来记录状态变化信息，并且提供revert操作。 Merkle是一颗hash数，除了叶子节点存储了数据，树枝节点全部都是hash值，要么是叶子节点的数据的hash值，要么是子节点的hash值进行连接之后进行hash">
 <meta name="twitter:image" content="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/mpt.png">
   
@@ -82,7 +82,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      以太坊StateDB介绍
+      以太坊StateDB以及Snapshot机制介绍
     </h1>
   
 
@@ -132,7 +132,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/16/eth/statedb/" data-id="cjg33qol3000n9q4j9a70fgxc" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2018/04/16/eth/statedb/" data-id="cjg33w6tr000jbf4j3i5jzpdz" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
@@ -143,10 +143,19 @@
     
 <nav id="article-nav">
   
+    <a href="/2018/04/16/eth/geth/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Neuer</strong>
+      <div class="article-nav-title">
+        
+          以太坊Ethereum的UML图
+        
+      </div>
+    </a>
   
-    <a href="/2018/04/16/eth/geth/" id="article-nav-older" class="article-nav-link-wrap">
+  
+    <a href="/2018/04/15/eth/transactions/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Älter</strong>
-      <div class="article-nav-title">以太坊Ethereum的UML图</div>
+      <div class="article-nav-title">以太坊智能合约执行过程分析</div>
     </a>
   
 </nav>
@@ -197,11 +206,11 @@
       <ul>
         
           <li>
-            <a href="/2018/04/16/eth/statedb/">以太坊StateDB介绍</a>
+            <a href="/2018/04/16/eth/geth/">以太坊Ethereum的UML图</a>
           </li>
         
           <li>
-            <a href="/2018/04/16/eth/geth/">以太坊Ethereum的UML图</a>
+            <a href="/2018/04/16/eth/statedb/">以太坊StateDB以及Snapshot机制介绍</a>
           </li>
         
           <li>
