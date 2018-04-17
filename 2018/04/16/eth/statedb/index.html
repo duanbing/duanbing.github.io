@@ -17,7 +17,7 @@
 <meta property="og:image" content="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/mpt.png">
 <meta property="og:image" content="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/trie.png">
 <meta property="og:image" content="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/change.png">
-<meta property="og:updated_time" content="2018-04-17T03:26:10.239Z">
+<meta property="og:updated_time" content="2018-04-17T15:33:26.234Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="以太坊StateDB以及Snapshot机制介绍">
 <meta name="twitter:description" content="StateDb是以太坊里面存储交易的全部状态的数据结构，是通过Merkle Patricia Tree的形式，保存一个chain的状态（因为chain可能出现分叉）。同时通过Journal来记录状态变化信息，并且提供revert操作。 Merkle是一颗hash数，除了叶子节点存储了数据，树枝节点全部都是hash值，要么是叶子节点的数据的hash值，要么是子节点的hash值进行连接之后进行hash">
@@ -59,7 +59,7 @@
         
           <a id="nav-rss-link" class="nav-icon" href="/atom.html" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
@@ -124,15 +124,15 @@
 <p>大概流程如下：<br><img src="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/change.png" alt="changes"></p>
 <h4 id="evm-Transfer"><a href="#evm-Transfer" class="headerlink" title="evm.Transfer"></a>evm.Transfer</h4><p>实际上是执行了:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">db.SubBalance(sender, amount)</div><div class="line">db.AddBalance(recipient, amount)</div></pre></td></tr></table></figure></p>
 <p>从Sender这个account减去acmount，给recipient加上amount。<br>于是回到了statedb里面的SubBalance和AddBalance操作。我们分析下Add的操作，源码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">// AddBalance adds amount to the account associated with addr</div><div class="line">func (self *StateDB) AddBalance(addr common.Address, amount *big.Int) &#123;</div><div class="line">    stateObject := self.GetOrNewStateObject(addr)</div><div class="line">    if stateObject != nil &#123;</div><div class="line">        stateObject.AddBalance(amount)</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>这里首先是通过GetOrNewStateObject获得Sender的账户状态，然后将其balance加上account。<br>GetOrNewStateObject首先判断当前的stateObjects里面是否缓存了对应的Account信息，如果没有的话，就从MPT里面去取。<br>Account代表一个账户，支持转账和合约执行,在创建Transaction阶段创建。结构体如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">// Account is the Ethereum consensus representation of accounts.</div><div class="line">// These objects are stored in the main account trie.</div><div class="line">type Account struct &#123;</div><div class="line">    Nonce    uint64</div><div class="line">    Balance  *big.Int</div><div class="line">    Root     common.Hash // merkle root of the storage trie</div><div class="line">    CodeHash []byte</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>取到了stateObject之后，调用其AddBalance，并且最终调用c.SetBalance，设置其balance为计算的结果（+account），然后并将这个stateObject的onDirty方法。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">func (self *stateObject) SetBalance(amount *big.Int) &#123;</div><div class="line">    self.db.journal = append(self.db.journal, balanceChange&#123;</div><div class="line">        account: &amp;self.address,</div><div class="line">        prev:    new(big.Int).Set(self.data.Balance),</div><div class="line">    &#125;)</div><div class="line">    self.setBalance(amount)  //实际设置balance，并且调用onDirty方法</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这里首先是通过GetOrNewStateObject获得Sender的账户状态，然后将其balance加上amount。<br>GetOrNewStateObject首先判断当前的stateObjects里面是否缓存了对应的Account信息，如果没有的话，就从MPT里面去取。<br>Account代表一个账户，支持转账和合约执行,在创建Transaction阶段创建。结构体如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">// Account is the Ethereum consensus representation of accounts.</div><div class="line">// These objects are stored in the main account trie.</div><div class="line">type Account struct &#123;</div><div class="line">    Nonce    uint64</div><div class="line">    Balance  *big.Int</div><div class="line">    Root     common.Hash // merkle root of the storage trie</div><div class="line">    CodeHash []byte</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>取到了stateObject之后，调用其AddBalance，并且最终调用c.SetBalance，设置其balance为计算的结果（+amount），然后并将这个stateObject的onDirty方法。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">func (self *stateObject) SetBalance(amount *big.Int) &#123;</div><div class="line">    self.db.journal = append(self.db.journal, balanceChange&#123;</div><div class="line">        account: &amp;self.address,</div><div class="line">        prev:    new(big.Int).Set(self.data.Balance),</div><div class="line">    &#125;)</div><div class="line">    self.setBalance(amount)  //实际设置balance，并且调用onDirty方法</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <p>在这里可以看到了，每次SetBalance的时候，就会插入一条journal。插入的是一个balanceChange对象，其实现了journal的undo接口。进一步，在core/state/journal.go，我们还能看到更多的表示变更的对象,包含几乎所有账户变更相关的事件。</p>
 <p>以上操作，其实不是立即生效，而是在真正插入Block到BlockChain的时候，statedb才执行CommitTrie，最终调用Trie.CommitTo提交到本地的数据库中。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/16/eth/statedb/" data-id="cjg33xtmv000mc54jvnu9olf5" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/16/eth/statedb/" data-id="cjg3txhxt000lj14jx5enuois" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
@@ -143,10 +143,19 @@
     
 <nav id="article-nav">
   
+    <a href="/2018/04/16/eth/geth/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Neuer</strong>
+      <div class="article-nav-title">
+        
+          以太坊Ethereum的UML图
+        
+      </div>
+    </a>
   
-    <a href="/2018/04/16/eth/geth/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">以太坊Ethereum的UML图</div>
+  
+    <a href="/2018/04/15/eth/transactions/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">以太坊智能合约执行过程分析</div>
     </a>
   
 </nav>
@@ -182,7 +191,7 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Archives</h3>
+    <h3 class="widget-title">Archiv</h3>
     <div class="widget">
       <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li></ul>
     </div>
@@ -192,16 +201,16 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Recent Posts</h3>
+    <h3 class="widget-title">letzter Beitrag</h3>
     <div class="widget">
       <ul>
         
           <li>
-            <a href="/2018/04/16/eth/statedb/">以太坊StateDB以及Snapshot机制介绍</a>
+            <a href="/2018/04/16/eth/geth/">以太坊Ethereum的UML图</a>
           </li>
         
           <li>
-            <a href="/2018/04/16/eth/geth/">以太坊Ethereum的UML图</a>
+            <a href="/2018/04/16/eth/statedb/">以太坊StateDB以及Snapshot机制介绍</a>
           </li>
         
           <li>
@@ -209,11 +218,11 @@
           </li>
         
           <li>
-            <a href="/2018/04/11/eth/consensus/">以太坊共识机制</a>
+            <a href="/2018/04/11/eth/encryption/">非对称加密算法简介以及以太坊account生成</a>
           </li>
         
           <li>
-            <a href="/2018/04/11/eth/encryption/">非对称加密算法简介以及以太坊account生成</a>
+            <a href="/2018/04/11/eth/consensus/">以太坊共识机制</a>
           </li>
         
       </ul>
