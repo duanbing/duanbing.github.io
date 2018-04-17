@@ -15,7 +15,7 @@
 <meta property="og:site_name" content="Container based Platform as a Service">
 <meta property="og:description" content="在以太坊里面，智能合约就是一段在区块链上执行的代码。这里主要分析下一次transaction的具体过程。 Transaction的入口，也就是改变整个区块链状态地方：123456789101112131415//根据以太坊的规则计算statedb的变化，并且将对应的收益转给coinbase和uncles，返回转账的收据，对应的日志和是否成功func (p *StateProcessor) Proc">
 <meta property="og:image" content="http://webpaas.com/usr/uploads/2018/04/15/eth/transactions/431779E9-86BD-43EB-A3E7-9CF2AD6CDA5A.png">
-<meta property="og:updated_time" content="2018-04-16T10:27:14.381Z">
+<meta property="og:updated_time" content="2018-04-17T03:21:47.918Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="以太坊智能合约执行过程分析">
 <meta name="twitter:description" content="在以太坊里面，智能合约就是一段在区块链上执行的代码。这里主要分析下一次transaction的具体过程。 Transaction的入口，也就是改变整个区块链状态地方：123456789101112131415//根据以太坊的规则计算statedb的变化，并且将对应的收益转给coinbase和uncles，返回转账的收据，对应的日志和是否成功func (p *StateProcessor) Proc">
@@ -90,7 +90,7 @@
       
         <p>在以太坊里面，智能合约就是一段在区块链上执行的代码。这里主要分析下一次transaction的具体过程。</p>
 <p>Transaction的入口，也就是改变整个区块链状态地方：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">//根据以太坊的规则计算statedb的变化，并且将对应的收益转给coinbase和uncles，返回转账的收据，对应的日志和是否成功</div><div class="line">func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB, cfg vm.Config) (types.Receipts, []*types.Log, *big.Int, error) &#123;</div><div class="line">    ...</div><div class="line">    for i, tx := range block.Transactions() &#123;</div><div class="line">        statedb.Prepare(tx.Hash(), block.Hash(), i) //设置当前statedb状态,以便后面evm创建交易日志</div><div class="line">        receipt, _, err := ApplyTransaction(p.config, p.bc, nil, gp, statedb, header, tx, totalUsedGas, cfg)  //执行转账</div><div class="line">        if err != nil &#123;</div><div class="line">            return nil, nil, nil, err</div><div class="line">        &#125;</div><div class="line">        receipts = append(receipts, receipt)</div><div class="line">        allLogs = append(allLogs, receipt.Logs...)</div><div class="line">    &#125;</div><div class="line">    p.engine.Finalize(p.bc, header, statedb, block.Transactions(), block.Uncles(), receipts) //计算收益,生效新的区块</div><div class="line">    return receipts, allLogs, totalUsedGas, nil</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>什么是收据？ 其实跟生活中的收据的意思一样,代表着一次交易产生的结果，数据结构如下：<br><img src="http://webpaas.com/usr/uploads/2018/04/15/eth/transactions/431779E9-86BD-43EB-A3E7-9CF2AD6CDA5A.png" alt="recepts"><br>其中最终要的数据结构Log记录了每次交易过程中的细节。</p>
+<p>什么是收据？ 其实跟生活中的收据的意思一样,代表着一次交易产生的结果，数据结构如下：<br><img src="http://webpaas.com/usr/uploads/2018/04/15/eth/transactions/431779E9-86BD-43EB-A3E7-9CF2AD6CDA5A.png" alt="recepts"><br>Log是在执行用户的LOG指令（也就是智能合约里面的event）的时候将数据写入到区块链中，所有的Logs会跟Recipts一起，生成一个ReciptsRoot存储在区块的头部。<br>有了LOG，我们可以通过回调的方式获取合约执行的结果，同时可以缓存执行结果，方便进一步处理合约。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">//执行单个交易，返回交易是否成功，以及交易产生的收据</div><div class="line">func ApplyTransaction(config *params.ChainConfig, bc *BlockChain, author *common.Address, gp *GasPool, statedb *state.StateDB, header *types.Header, tx *types.Transaction, usedGas *big.Int, cfg vm.Config) (*types.Receipt, *big.Int, error) &#123;</div><div class="line">    msg, err := tx.AsMessage(types.MakeSigner(config, header.Number))  //创建签名器(有NewEIP155Signer,HomesteadSigner,FrontierSigner 3种实现，实现Sender，SignatureValues，Hash，Equal方法)， 调用Sender, Sender 通过rlpHash得到交易的Hash值，然后使用secp256k1椭圆曲线,结合其signature (V, R, S)推出公钥，进而推算出地址，最后将这个地址缓存起来</div><div class="line">    ...</div><div class="line">    context := NewEVMContext(msg, header, bc, author) //初始化EVM上下文,过程见下文</div><div class="line">    vmenv := vm.NewEVM(context, statedb, config, cfg) //初始化EVM,初始化解释器</div><div class="line">    _, gas, failed, err := ApplyMessage(vmenv, msg, gp)  //执行状态转换, 过程见下文</div><div class="line">    ...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>Hash过程就是如下,以FrontierSigner为例：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">func (fs FrontierSigner) Hash(tx *Transaction) common.Hash &#123;</div><div class="line">    return rlpHash([]interface&#123;&#125;&#123;</div><div class="line">        tx.data.AccountNonce,</div><div class="line">        tx.data.Price,</div><div class="line">        tx.data.GasLimit,</div><div class="line">        tx.data.Recipient,</div><div class="line">        tx.data.Amount,</div><div class="line">        tx.data.Payload,</div><div class="line">    &#125;)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <p>创建上下文的过程:</p>
@@ -118,7 +118,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/15/eth/transactions/" data-id="cjg30aor1000nh24jmigr3ubz" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2018/04/15/eth/transactions/" data-id="cjg33qokv000j9q4jwve69rhh" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
@@ -139,9 +139,9 @@
     </a>
   
   
-    <a href="/2018/04/11/eth/consensus/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2018/04/11/eth/encryption/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Älter</strong>
-      <div class="article-nav-title">以太坊共识机制</div>
+      <div class="article-nav-title">非对称加密算法简介以及以太坊account生成</div>
     </a>
   
 </nav>
@@ -204,11 +204,11 @@
           </li>
         
           <li>
-            <a href="/2018/04/11/eth/consensus/">以太坊共识机制</a>
+            <a href="/2018/04/11/eth/encryption/">非对称加密算法简介以及以太坊account生成</a>
           </li>
         
           <li>
-            <a href="/2018/04/11/eth/encryption/">非对称加密算法简介以及以太坊account生成</a>
+            <a href="/2018/04/11/eth/consensus/">以太坊共识机制</a>
           </li>
         
       </ul>

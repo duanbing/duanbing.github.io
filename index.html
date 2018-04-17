@@ -125,7 +125,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/16/eth/statedb/" data-id="cjg30aoqz000mh24jmj1f3sz8" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2018/04/16/eth/statedb/" data-id="cjg33qol3000n9q4j9a70fgxc" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
@@ -164,7 +164,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/16/eth/geth/" data-id="cjg30aoqw000lh24j0iex6hy1" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2018/04/16/eth/geth/" data-id="cjg33qol1000m9q4js4haw24b" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
@@ -200,7 +200,7 @@
       
         <p>在以太坊里面，智能合约就是一段在区块链上执行的代码。这里主要分析下一次transaction的具体过程。</p>
 <p>Transaction的入口，也就是改变整个区块链状态地方：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">//根据以太坊的规则计算statedb的变化，并且将对应的收益转给coinbase和uncles，返回转账的收据，对应的日志和是否成功</div><div class="line">func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB, cfg vm.Config) (types.Receipts, []*types.Log, *big.Int, error) &#123;</div><div class="line">    ...</div><div class="line">    for i, tx := range block.Transactions() &#123;</div><div class="line">        statedb.Prepare(tx.Hash(), block.Hash(), i) //设置当前statedb状态,以便后面evm创建交易日志</div><div class="line">        receipt, _, err := ApplyTransaction(p.config, p.bc, nil, gp, statedb, header, tx, totalUsedGas, cfg)  //执行转账</div><div class="line">        if err != nil &#123;</div><div class="line">            return nil, nil, nil, err</div><div class="line">        &#125;</div><div class="line">        receipts = append(receipts, receipt)</div><div class="line">        allLogs = append(allLogs, receipt.Logs...)</div><div class="line">    &#125;</div><div class="line">    p.engine.Finalize(p.bc, header, statedb, block.Transactions(), block.Uncles(), receipts) //计算收益,生效新的区块</div><div class="line">    return receipts, allLogs, totalUsedGas, nil</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>什么是收据？ 其实跟生活中的收据的意思一样,代表着一次交易产生的结果，数据结构如下：<br><img src="http://webpaas.com/usr/uploads/2018/04/15/eth/transactions/431779E9-86BD-43EB-A3E7-9CF2AD6CDA5A.png" alt="recepts"><br>其中最终要的数据结构Log记录了每次交易过程中的细节。</p>
+<p>什么是收据？ 其实跟生活中的收据的意思一样,代表着一次交易产生的结果，数据结构如下：<br><img src="http://webpaas.com/usr/uploads/2018/04/15/eth/transactions/431779E9-86BD-43EB-A3E7-9CF2AD6CDA5A.png" alt="recepts"><br>Log是在执行用户的LOG指令（也就是智能合约里面的event）的时候将数据写入到区块链中，所有的Logs会跟Recipts一起，生成一个ReciptsRoot存储在区块的头部。<br>有了LOG，我们可以通过回调的方式获取合约执行的结果，同时可以缓存执行结果，方便进一步处理合约。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">//执行单个交易，返回交易是否成功，以及交易产生的收据</div><div class="line">func ApplyTransaction(config *params.ChainConfig, bc *BlockChain, author *common.Address, gp *GasPool, statedb *state.StateDB, header *types.Header, tx *types.Transaction, usedGas *big.Int, cfg vm.Config) (*types.Receipt, *big.Int, error) &#123;</div><div class="line">    msg, err := tx.AsMessage(types.MakeSigner(config, header.Number))  //创建签名器(有NewEIP155Signer,HomesteadSigner,FrontierSigner 3种实现，实现Sender，SignatureValues，Hash，Equal方法)， 调用Sender, Sender 通过rlpHash得到交易的Hash值，然后使用secp256k1椭圆曲线,结合其signature (V, R, S)推出公钥，进而推算出地址，最后将这个地址缓存起来</div><div class="line">    ...</div><div class="line">    context := NewEVMContext(msg, header, bc, author) //初始化EVM上下文,过程见下文</div><div class="line">    vmenv := vm.NewEVM(context, statedb, config, cfg) //初始化EVM,初始化解释器</div><div class="line">    _, gas, failed, err := ApplyMessage(vmenv, msg, gp)  //执行状态转换, 过程见下文</div><div class="line">    ...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>Hash过程就是如下,以FrontierSigner为例：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">func (fs FrontierSigner) Hash(tx *Transaction) common.Hash &#123;</div><div class="line">    return rlpHash([]interface&#123;&#125;&#123;</div><div class="line">        tx.data.AccountNonce,</div><div class="line">        tx.data.Price,</div><div class="line">        tx.data.GasLimit,</div><div class="line">        tx.data.Recipient,</div><div class="line">        tx.data.Amount,</div><div class="line">        tx.data.Payload,</div><div class="line">    &#125;)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <p>创建上下文的过程:</p>
@@ -228,81 +228,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/15/eth/transactions/" data-id="cjg30aor1000nh24jmigr3ubz" class="article-share-link">Teilen</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="blog-eth/consensus" class="article article-type-blog" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/04/11/eth/consensus/" class="article-date">
-  <time datetime="2018-04-11T14:25:47.000Z" itemprop="datePublished">2018-04-11</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/11/eth/consensus/">以太坊共识机制</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="共识算法面临的问题"><a href="#共识算法面临的问题" class="headerlink" title="共识算法面临的问题"></a>共识算法面临的问题</h3><p>理想情况下，一个分布式算法包含下面3个特点：</p>
-<ul>
-<li>可终止性： 一致性的结果可以在有限的时间算出；</li>
-<li>共识性： 不同节点最终完成的结果应该相同</li>
-<li>合法性：决策的结果应该是其他进程提出的提案</li>
-</ul>
-<p>分布式系统尝尝面临以下问题：</p>
-<ol>
-<li>节点处理事务的能力不同，网络节点的吞吐有差异；</li>
-<li>节点间通信的信道可能不安全；</li>
-<li>可能出现拜占庭错误节点</li>
-<li>当天异步处理能力达到高度一致的时候，系统的可扩展性变得很差, 新节点很难加入；</li>
-</ol>
-<h3 id="以太坊共识算法"><a href="#以太坊共识算法" class="headerlink" title="以太坊共识算法"></a>以太坊共识算法</h3><h4 id="Clique"><a href="#Clique" class="headerlink" title="Clique"></a>Clique</h4><p>Clique算法又称为POA(Proof-of-Authority),加密过程由一下公式计算得出：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">n = F(pr, h)</div></pre></td></tr></table></figure></p>
-<p>其中n是65bytes长的字符串，pr是common.Address(长度是20bytes)的地址，h是common.Hash(长度为32bytes)的哈希值，签名算法F就是ECDSA.</p>
-<h5 id="区块认证"><a href="#区块认证" class="headerlink" title="区块认证"></a>区块认证</h5><p>原理：认证节点使用ECDSA算法进行加密, 并且网络中的每一个区块是由于某一个认证节点进行认证的，其他节点仅仅需要验证认证信息来判断该区块是否合法</p>
-<ul>
-<li>认证节点： 具备区块签名的权利，可以对应POW算法中的miner节点</li>
-<li>非认证节点： 不具备签名的权利，是区块网络中的普通同步节点<br>同时这2类节点可以动态投票机制进行转换，后面介绍如何转换。</li>
-</ul>
-<p>Clique实现了consensus.Engine的接口，主要包括：<br>Author：从签名获取区块创建者的账户地址,是通过secp256k1算法从签名获取公钥,然后通过crypto.Keccak256获得以太坊账户地址</p>
-<p>VerifyHeaders: 校验一个区块头是否合法,包括字段合法性，parent的hash以及number等信息是否一致，，区块签名是否是来自认证节点，签发区块的节点是否是inturn节点（难度为2，否则为1);</p>
-<p>VerifyUncles: 判断区块是否有uncles，如果有的话，验证失败</p>
-<p>VerifySeal： 校验签发节点的难度值</p>
-<p>Prepare: 填充区块头信息,其中新区块的Coinbase是所有未处理的提议中，所有有效投票（认证变非认证，或者非认证变认证）中的一个随机的被投票地址；同时设置header.Time为min(当前时间,parent.Time+延迟产生时间(config.Period))。</p>
-<p>Finalize:  保证新节点没有Uncles，没有rewards,全部的transaction执行完毕，最后生成root，TxHash等成员，返回新区快</p>
-<p>Authorize: 设置公钥和签名生成函数</p>
-<p>Seal: 尝试通过本地签名认证（权力签名与认证，找到有权力的结点）来创建一个已密封的区块</p>
-<h5 id="投票机制"><a href="#投票机制" class="headerlink" title="投票机制"></a>投票机制</h5><p>当需要更新认证节点(signer)的时候，需要使用投票机制。用户首先利用rpc发起一次Propose,指定<strong>某个结点地址</strong>的<strong>状态</strong>. 然后每个认证节点在签发新的区块的时候，会从pending的proposal里面随机挑选一个proposal，并且将对应的节点地址填充到CoinBase里面，将对应的是否认证状态填充到nonce字段，作为一次投票。</p>
-<p>这个投票的区块也会作为新的区块加到区块链上去。同时，每个认证节点本地会维护一个投票结果计数器Tally，记录2个字段：1） Votes： 获得的票数； 2）认证状态（是否是认证节点. 当当前处理的区块获得的投票数大于认证节点个数一半的时候，节点就将被赋予新的状态。但是这里注意，如果是认证状态是真的，就将节点标记为认证节点，否则，还需要做一个特殊处理，因为这个时候少了一个认证节点的话，以为这很多区块都会立即获得超过半数的投票。这里采取的是只处理当前票指定的地址的状态变更,其余的则留到下次处理。</p>
-<h4 id="Ethash"><a href="#Ethash" class="headerlink" title="Ethash"></a>Ethash</h4><p>Ethash算法又称为PoW(Proof-of-Work),是基于计算能力的seal过程，基本原理简化为以下公式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Rand(h,n) &lt;= M/d</div></pre></td></tr></table></figure></p>
-<p>M是一个极大的数maxUint256,d是难度值，h是header.HashNoNonce，n是Nonce. 那么在这个算法里面，d越大，要求Rand的结果就越小，这样相对的计算量也就越大。</p>
-<p>真正的计算量是在hashimotoFull里面，最终调用的是hashimoto, 本质上是一个以非线性表查找方式进行的经过多次，多种Hash的计算。这种函数的性能取决于查找的逻辑，以及查找的表格的数据规模大小。</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
-<li><a href="https://blog.csdn.net/teaspring/article/details/78050274" target="_blank" rel="external">挖矿和共识算法的奥秘</a></li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/11/eth/consensus/" data-id="cjg30aoqs000jh24jl10kpknd" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2018/04/15/eth/transactions/" data-id="cjg33qokv000j9q4jwve69rhh" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
@@ -384,7 +310,81 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/11/eth/encryption/" data-id="cjg30aoqr000ih24jp9spzhf2" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2018/04/11/eth/encryption/" data-id="cjg33qoky000l9q4j71fqtuqx" class="article-share-link">Teilen</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="blog-eth/consensus" class="article article-type-blog" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/11/eth/consensus/" class="article-date">
+  <time datetime="2018-04-11T14:25:47.000Z" itemprop="datePublished">2018-04-11</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/11/eth/consensus/">以太坊共识机制</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="共识算法面临的问题"><a href="#共识算法面临的问题" class="headerlink" title="共识算法面临的问题"></a>共识算法面临的问题</h3><p>理想情况下，一个分布式算法包含下面3个特点：</p>
+<ul>
+<li>可终止性： 一致性的结果可以在有限的时间算出；</li>
+<li>共识性： 不同节点最终完成的结果应该相同</li>
+<li>合法性：决策的结果应该是其他进程提出的提案</li>
+</ul>
+<p>分布式系统尝尝面临以下问题：</p>
+<ol>
+<li>节点处理事务的能力不同，网络节点的吞吐有差异；</li>
+<li>节点间通信的信道可能不安全；</li>
+<li>可能出现拜占庭错误节点</li>
+<li>当天异步处理能力达到高度一致的时候，系统的可扩展性变得很差, 新节点很难加入；</li>
+</ol>
+<h3 id="以太坊共识算法"><a href="#以太坊共识算法" class="headerlink" title="以太坊共识算法"></a>以太坊共识算法</h3><h4 id="Clique"><a href="#Clique" class="headerlink" title="Clique"></a>Clique</h4><p>Clique算法又称为POA(Proof-of-Authority),加密过程由一下公式计算得出：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">n = F(pr, h)</div></pre></td></tr></table></figure></p>
+<p>其中n是65bytes长的字符串，pr是common.Address(长度是20bytes)的地址，h是common.Hash(长度为32bytes)的哈希值，签名算法F就是ECDSA.</p>
+<h5 id="区块认证"><a href="#区块认证" class="headerlink" title="区块认证"></a>区块认证</h5><p>原理：认证节点使用ECDSA算法进行加密, 并且网络中的每一个区块是由于某一个认证节点进行认证的，其他节点仅仅需要验证认证信息来判断该区块是否合法</p>
+<ul>
+<li>认证节点： 具备区块签名的权利，可以对应POW算法中的miner节点</li>
+<li>非认证节点： 不具备签名的权利，是区块网络中的普通同步节点<br>同时这2类节点可以动态投票机制进行转换，后面介绍如何转换。</li>
+</ul>
+<p>Clique实现了consensus.Engine的接口，主要包括：<br>Author：从签名获取区块创建者的账户地址,是通过secp256k1算法从签名获取公钥,然后通过crypto.Keccak256获得以太坊账户地址</p>
+<p>VerifyHeaders: 校验一个区块头是否合法,包括字段合法性，parent的hash以及number等信息是否一致，，区块签名是否是来自认证节点，签发区块的节点是否是inturn节点（难度为2，否则为1);</p>
+<p>VerifyUncles: 判断区块是否有uncles，如果有的话，验证失败</p>
+<p>VerifySeal： 校验签发节点的难度值</p>
+<p>Prepare: 填充区块头信息,其中新区块的Coinbase是所有未处理的提议中，所有有效投票（认证变非认证，或者非认证变认证）中的一个随机的被投票地址；同时设置header.Time为min(当前时间,parent.Time+延迟产生时间(config.Period))。</p>
+<p>Finalize:  保证新节点没有Uncles，没有rewards,全部的transaction执行完毕，最后生成root，TxHash等成员，返回新区快</p>
+<p>Authorize: 设置公钥和签名生成函数</p>
+<p>Seal: 尝试通过本地签名认证（权力签名与认证，找到有权力的结点）来创建一个已密封的区块</p>
+<h5 id="投票机制"><a href="#投票机制" class="headerlink" title="投票机制"></a>投票机制</h5><p>当需要更新认证节点(signer)的时候，需要使用投票机制。用户首先利用rpc发起一次Propose,指定<strong>某个结点地址</strong>的<strong>状态</strong>. 然后每个认证节点在签发新的区块的时候，会从pending的proposal里面随机挑选一个proposal，并且将对应的节点地址填充到CoinBase里面，将对应的是否认证状态填充到nonce字段，作为一次投票。</p>
+<p>这个投票的区块也会作为新的区块加到区块链上去。同时，每个认证节点本地会维护一个投票结果计数器Tally，记录2个字段：1） Votes： 获得的票数； 2）认证状态（是否是认证节点. 当当前处理的区块获得的投票数大于认证节点个数一半的时候，节点就将被赋予新的状态。但是这里注意，如果是认证状态是真的，就将节点标记为认证节点，否则，还需要做一个特殊处理，因为这个时候少了一个认证节点的话，以为这很多区块都会立即获得超过半数的投票。这里采取的是只处理当前票指定的地址的状态变更,其余的则留到下次处理。</p>
+<h4 id="Ethash"><a href="#Ethash" class="headerlink" title="Ethash"></a>Ethash</h4><p>Ethash算法又称为PoW(Proof-of-Work),是基于计算能力的seal过程，基本原理简化为以下公式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Rand(h,n) &lt;= M/d</div></pre></td></tr></table></figure></p>
+<p>M是一个极大的数maxUint256,d是难度值，h是header.HashNoNonce，n是Nonce. 那么在这个算法里面，d越大，要求Rand的结果就越小，这样相对的计算量也就越大。</p>
+<p>真正的计算量是在hashimotoFull里面，最终调用的是hashimoto, 本质上是一个以非线性表查找方式进行的经过多次，多种Hash的计算。这种函数的性能取决于查找的逻辑，以及查找的表格的数据规模大小。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a href="https://blog.csdn.net/teaspring/article/details/78050274" target="_blank" rel="external">挖矿和共识算法的奥秘</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/04/11/eth/consensus/" data-id="cjg33qokt000i9q4j6cdj7et9" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
@@ -461,7 +461,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/faas/" data-id="cjg30aoo90005h24j8wxetls6" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/faas/" data-id="cjg33qojv000c9q4jtebmfww9" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/faas/">faas</a></li></ul>
@@ -564,7 +564,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/azkaban/" data-id="cjg30aonm0001h24jm60jtzu9" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/azkaban/" data-id="cjg33qois00019q4j5dc5oei3" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/job-flow/">job flow</a></li></ul>
@@ -611,7 +611,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/go1-5gc/" data-id="cjg30aooe0009h24j8fm14jjh" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/go1-5gc/" data-id="cjg33qoj200049q4j73f3gz59" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/golang/">golang</a></li></ul>
@@ -685,7 +685,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/overlay/" data-id="cjg30aoou000ah24jzxwuven0" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/overlay/" data-id="cjg33qojz000d9q4jc15dziom" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/overlayfs/">overlayfs</a></li></ul>
@@ -787,7 +787,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/cgroup-test/" data-id="cjg30aonv0002h24jvkad48cl" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2017/07/02/cgroup-test/" data-id="cjg33qoj600059q4j8kj27p91" class="article-share-link">Teilen</a>
       
       
     </footer>
@@ -859,11 +859,11 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
           </li>
         
           <li>
-            <a href="/2018/04/11/eth/consensus/">以太坊共识机制</a>
+            <a href="/2018/04/11/eth/encryption/">非对称加密算法简介以及以太坊account生成</a>
           </li>
         
           <li>
-            <a href="/2018/04/11/eth/encryption/">非对称加密算法简介以及以太坊account生成</a>
+            <a href="/2018/04/11/eth/consensus/">以太坊共识机制</a>
           </li>
         
       </ul>
