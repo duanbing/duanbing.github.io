@@ -50,7 +50,7 @@
         
           <a id="nav-rss-link" class="nav-icon" href="/atom.html" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
@@ -83,7 +83,7 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>StateDb是以太坊里面存储交易的全部状态的数据结构，是通过Merkle Patricia Tree的形式，保存一个chain的状态（因为chain可能出现分叉）。同时通过Log和Journal来记录状态变化信息，并且提供revert操作。</p>
+        <p>StateDb是以太坊里面存储交易的全部状态的数据结构，是通过Merkle Patricia Tree的形式，保存一个chain的状态（因为chain可能出现分叉）。同时通过Journal来记录状态变化信息，并且提供revert操作。</p>
 <p>Merkle是一颗hash数，除了叶子节点存储了数据，树枝节点全部都是hash值，要么是叶子节点的数据的hash值，要么是子节点的hash值进行连接之后进行hash获得的值。<br>Patricia是一颗编译的trie数，对于trie树的每个节点，如果该节点是唯一的儿子的话，就和父节点合并.</p>
 <p>合并在一起，成为MPT树，通过下面一张图理解下MPT树：<br><img src="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/mpt.png" alt="MP Tree"><br>MPT树中的节点包括空节点、叶子节点、扩展节点和分支节点:</p>
 <ul>
@@ -101,7 +101,7 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">state, err := state.New(parent.Root(), bc.stateCache)</div><div class="line">if err != nil &#123;</div><div class="line">    return i, events, coalescedLogs, err</div><div class="line">&#125;</div><div class="line">// Process block using the parent state as reference point.</div><div class="line">receipts, logs, usedGas, err := bc.processor.Process(block, state, bc.vmConfig)</div></pre></td></tr></table></figure>
 <p>初始化的时候传递了，bc的stateCache，参考<a href="http://webpaas.com/2018/04/16/eth/geth/" target="_blank" rel="external">Ethereum UML图</a>可以知道，是一个ethdb.Database接口，具有memory和leveldb 2种实现。</p>
 <p>state.New 以parent.Root()为根，调用OpenTrie尝试先看是否缓存了这个Root为根的树，如果不在，从ethdb里面取出这个Root对应的RLP信息，然后递归找出所有Root的后代的数据，创建一个trie树，缓存当前chain的信息。</p>
-<p>接下来，就开始进入Process，进行交易了。交易过程，需要statedb全程保存交易的详细日志，这里面就需要Logs和Journal字段发挥重要作用了。</p>
+<p>接下来，就开始进入Process，交易过程，需要statedb全程保存交易的详细日志，这里面就需要Journal字段发挥重要作用了。</p>
 <p>在之前的<a href="http://webpaas.com/2018/04/15/eth/transactions/" target="_blank" rel="external">合约执行</a>一篇中介绍了3处重要的地方：</p>
 <ol>
 <li><code>snapshot := evm.StateDB.Snapshot()</code> </li>
@@ -125,7 +125,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/16/eth/statedb/" data-id="cjg306mb4000sfb4jeulqbgqn" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/16/eth/statedb/" data-id="cjg30aoqz000mh24jmj1f3sz8" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
@@ -164,7 +164,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/16/eth/geth/" data-id="cjg306ma5000ifb4js5s6jmfx" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/16/eth/geth/" data-id="cjg30aoqw000lh24j0iex6hy1" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
@@ -228,7 +228,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/15/eth/transactions/" data-id="cjg306mb6000tfb4j248unqxk" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/15/eth/transactions/" data-id="cjg30aor1000nh24jmigr3ubz" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
@@ -302,7 +302,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/11/eth/consensus/" data-id="cjg306mb9000vfb4jkzo7y4bx" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/11/eth/consensus/" data-id="cjg30aoqs000jh24jl10kpknd" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
@@ -384,7 +384,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/11/eth/encryption/" data-id="cjg306ma8000jfb4j6l0nexmd" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/11/eth/encryption/" data-id="cjg30aoqr000ih24jp9spzhf2" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
@@ -461,7 +461,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/faas/" data-id="cjg306m8p0005fb4jltnuafn7" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/07/02/faas/" data-id="cjg30aoo90005h24j8wxetls6" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/faas/">faas</a></li></ul>
@@ -564,7 +564,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/azkaban/" data-id="cjg306m880001fb4jt43td2js" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/07/02/azkaban/" data-id="cjg30aonm0001h24jm60jtzu9" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/job-flow/">job flow</a></li></ul>
@@ -611,7 +611,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/go1-5gc/" data-id="cjg306m8w0009fb4jm6hfekld" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/07/02/go1-5gc/" data-id="cjg30aooe0009h24j8fm14jjh" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/golang/">golang</a></li></ul>
@@ -685,7 +685,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/overlay/" data-id="cjg306m91000afb4j65ajnq41" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/07/02/overlay/" data-id="cjg30aoou000ah24jzxwuven0" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/overlayfs/">overlayfs</a></li></ul>
@@ -787,7 +787,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/02/cgroup-test/" data-id="cjg306m8e0002fb4jby19hvkq" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/07/02/cgroup-test/" data-id="cjg30aonv0002h24jvkad48cl" class="article-share-link">Teilen</a>
       
       
     </footer>
@@ -801,7 +801,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
 
   <nav id="page-nav">
     
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">weiter &raquo;</a>
   </nav>
 
 </section>
@@ -832,7 +832,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Archives</h3>
+    <h3 class="widget-title">Archiv</h3>
     <div class="widget">
       <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li></ul>
     </div>
@@ -842,7 +842,7 @@ for (FactorComparator&lt;T&gt; comparator :comparatorList){
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Recent Posts</h3>
+    <h3 class="widget-title">letzter Beitrag</h3>
     <div class="widget">
       <ul>
         

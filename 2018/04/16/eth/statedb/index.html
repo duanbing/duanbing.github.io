@@ -7,20 +7,20 @@
   
   <title>以太坊StateDB介绍 | Container based Platform as a Service</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="StateDb是以太坊里面存储交易的全部状态的数据结构，是通过Merkle Patricia Tree的形式，保存一个chain的状态（因为chain可能出现分叉）。同时通过Log和Journal来记录状态变化信息，并且提供revert操作。 Merkle是一颗hash数，除了叶子节点存储了数据，树枝节点全部都是hash值，要么是叶子节点的数据的hash值，要么是子节点的hash值进行连接之后进行">
+  <meta name="description" content="StateDb是以太坊里面存储交易的全部状态的数据结构，是通过Merkle Patricia Tree的形式，保存一个chain的状态（因为chain可能出现分叉）。同时通过Journal来记录状态变化信息，并且提供revert操作。 Merkle是一颗hash数，除了叶子节点存储了数据，树枝节点全部都是hash值，要么是叶子节点的数据的hash值，要么是子节点的hash值进行连接之后进行hash">
 <meta name="keywords" content="ethereum,blockchain">
 <meta property="og:type" content="article">
 <meta property="og:title" content="以太坊StateDB介绍">
 <meta property="og:url" content="http://yoursite.com/2018/04/16/eth/statedb/index.html">
 <meta property="og:site_name" content="Container based Platform as a Service">
-<meta property="og:description" content="StateDb是以太坊里面存储交易的全部状态的数据结构，是通过Merkle Patricia Tree的形式，保存一个chain的状态（因为chain可能出现分叉）。同时通过Log和Journal来记录状态变化信息，并且提供revert操作。 Merkle是一颗hash数，除了叶子节点存储了数据，树枝节点全部都是hash值，要么是叶子节点的数据的hash值，要么是子节点的hash值进行连接之后进行">
+<meta property="og:description" content="StateDb是以太坊里面存储交易的全部状态的数据结构，是通过Merkle Patricia Tree的形式，保存一个chain的状态（因为chain可能出现分叉）。同时通过Journal来记录状态变化信息，并且提供revert操作。 Merkle是一颗hash数，除了叶子节点存储了数据，树枝节点全部都是hash值，要么是叶子节点的数据的hash值，要么是子节点的hash值进行连接之后进行hash">
 <meta property="og:image" content="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/mpt.png">
 <meta property="og:image" content="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/trie.png">
 <meta property="og:image" content="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/change.png">
-<meta property="og:updated_time" content="2018-04-16T20:38:09.270Z">
+<meta property="og:updated_time" content="2018-04-17T01:45:20.672Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="以太坊StateDB介绍">
-<meta name="twitter:description" content="StateDb是以太坊里面存储交易的全部状态的数据结构，是通过Merkle Patricia Tree的形式，保存一个chain的状态（因为chain可能出现分叉）。同时通过Log和Journal来记录状态变化信息，并且提供revert操作。 Merkle是一颗hash数，除了叶子节点存储了数据，树枝节点全部都是hash值，要么是叶子节点的数据的hash值，要么是子节点的hash值进行连接之后进行">
+<meta name="twitter:description" content="StateDb是以太坊里面存储交易的全部状态的数据结构，是通过Merkle Patricia Tree的形式，保存一个chain的状态（因为chain可能出现分叉）。同时通过Journal来记录状态变化信息，并且提供revert操作。 Merkle是一颗hash数，除了叶子节点存储了数据，树枝节点全部都是hash值，要么是叶子节点的数据的hash值，要么是子节点的hash值进行连接之后进行hash">
 <meta name="twitter:image" content="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/mpt.png">
   
     <link rel="alternate" href="/atom.html" title="Container based Platform as a Service" type="application/atom+xml">
@@ -59,7 +59,7 @@
         
           <a id="nav-rss-link" class="nav-icon" href="/atom.html" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
@@ -90,7 +90,7 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>StateDb是以太坊里面存储交易的全部状态的数据结构，是通过Merkle Patricia Tree的形式，保存一个chain的状态（因为chain可能出现分叉）。同时通过Log和Journal来记录状态变化信息，并且提供revert操作。</p>
+        <p>StateDb是以太坊里面存储交易的全部状态的数据结构，是通过Merkle Patricia Tree的形式，保存一个chain的状态（因为chain可能出现分叉）。同时通过Journal来记录状态变化信息，并且提供revert操作。</p>
 <p>Merkle是一颗hash数，除了叶子节点存储了数据，树枝节点全部都是hash值，要么是叶子节点的数据的hash值，要么是子节点的hash值进行连接之后进行hash获得的值。<br>Patricia是一颗编译的trie数，对于trie树的每个节点，如果该节点是唯一的儿子的话，就和父节点合并.</p>
 <p>合并在一起，成为MPT树，通过下面一张图理解下MPT树：<br><img src="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/mpt.png" alt="MP Tree"><br>MPT树中的节点包括空节点、叶子节点、扩展节点和分支节点:</p>
 <ul>
@@ -108,7 +108,7 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">state, err := state.New(parent.Root(), bc.stateCache)</div><div class="line">if err != nil &#123;</div><div class="line">    return i, events, coalescedLogs, err</div><div class="line">&#125;</div><div class="line">// Process block using the parent state as reference point.</div><div class="line">receipts, logs, usedGas, err := bc.processor.Process(block, state, bc.vmConfig)</div></pre></td></tr></table></figure>
 <p>初始化的时候传递了，bc的stateCache，参考<a href="http://webpaas.com/2018/04/16/eth/geth/" target="_blank" rel="external">Ethereum UML图</a>可以知道，是一个ethdb.Database接口，具有memory和leveldb 2种实现。</p>
 <p>state.New 以parent.Root()为根，调用OpenTrie尝试先看是否缓存了这个Root为根的树，如果不在，从ethdb里面取出这个Root对应的RLP信息，然后递归找出所有Root的后代的数据，创建一个trie树，缓存当前chain的信息。</p>
-<p>接下来，就开始进入Process，进行交易了。交易过程，需要statedb全程保存交易的详细日志，这里面就需要Logs和Journal字段发挥重要作用了。</p>
+<p>接下来，就开始进入Process，交易过程，需要statedb全程保存交易的详细日志，这里面就需要Journal字段发挥重要作用了。</p>
 <p>在之前的<a href="http://webpaas.com/2018/04/15/eth/transactions/" target="_blank" rel="external">合约执行</a>一篇中介绍了3处重要的地方：</p>
 <ol>
 <li><code>snapshot := evm.StateDB.Snapshot()</code> </li>
@@ -132,7 +132,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/16/eth/statedb/" data-id="cjg306mb4000sfb4jeulqbgqn" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/16/eth/statedb/" data-id="cjg30aoqz000mh24jmj1f3sz8" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
@@ -145,7 +145,7 @@
   
   
     <a href="/2018/04/16/eth/geth/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Older</strong>
+      <strong class="article-nav-caption">Älter</strong>
       <div class="article-nav-title">以太坊Ethereum的UML图</div>
     </a>
   
@@ -182,7 +182,7 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Archives</h3>
+    <h3 class="widget-title">Archiv</h3>
     <div class="widget">
       <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">July 2017</a></li></ul>
     </div>
@@ -192,7 +192,7 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Recent Posts</h3>
+    <h3 class="widget-title">letzter Beitrag</h3>
     <div class="widget">
       <ul>
         
