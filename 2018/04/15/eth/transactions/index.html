@@ -15,7 +15,7 @@
 <meta property="og:site_name" content="Container based Platform as a Service">
 <meta property="og:description" content="在以太坊里面，智能合约就是一段在区块链上执行的代码。这里主要分析下一次transaction的具体过程。 Transaction的入口，也就是改变整个区块链状态地方：123456789101112131415//根据以太坊的规则计算statedb的变化，并且将对应的收益转给coinbase和uncles，返回转账的收据，对应的日志和是否成功func (p *StateProcessor) Proc">
 <meta property="og:image" content="http://webpaas.com/usr/uploads/2018/04/15/eth/transactions/431779E9-86BD-43EB-A3E7-9CF2AD6CDA5A.png">
-<meta property="og:updated_time" content="2018-04-18T07:37:48.989Z">
+<meta property="og:updated_time" content="2018-04-23T09:46:47.044Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="以太坊智能合约执行过程分析">
 <meta name="twitter:description" content="在以太坊里面，智能合约就是一段在区块链上执行的代码。这里主要分析下一次transaction的具体过程。 Transaction的入口，也就是改变整个区块链状态地方：123456789101112131415//根据以太坊的规则计算statedb的变化，并且将对应的收益转给coinbase和uncles，返回转账的收据，对应的日志和是否成功func (p *StateProcessor) Proc">
@@ -90,7 +90,7 @@
       
         <p>在以太坊里面，智能合约就是一段在区块链上执行的代码。这里主要分析下一次transaction的具体过程。</p>
 <p>Transaction的入口，也就是改变整个区块链状态地方：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">//根据以太坊的规则计算statedb的变化，并且将对应的收益转给coinbase和uncles，返回转账的收据，对应的日志和是否成功</div><div class="line">func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB, cfg vm.Config) (types.Receipts, []*types.Log, *big.Int, error) &#123;</div><div class="line">    ...</div><div class="line">    for i, tx := range block.Transactions() &#123;</div><div class="line">        statedb.Prepare(tx.Hash(), block.Hash(), i) //设置当前statedb状态,以便后面evm创建交易日志</div><div class="line">        receipt, _, err := ApplyTransaction(p.config, p.bc, nil, gp, statedb, header, tx, totalUsedGas, cfg)  //执行转账</div><div class="line">        if err != nil &#123;</div><div class="line">            return nil, nil, nil, err</div><div class="line">        &#125;</div><div class="line">        receipts = append(receipts, receipt)</div><div class="line">        allLogs = append(allLogs, receipt.Logs...)</div><div class="line">    &#125;</div><div class="line">    p.engine.Finalize(p.bc, header, statedb, block.Transactions(), block.Uncles(), receipts) //计算收益,生效新的区块</div><div class="line">    return receipts, allLogs, totalUsedGas, nil</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>什么是收据？ 其实跟生活中的收据的意思一样,是收付款原始凭证，数据结构如下：<br><img src="http://webpaas.com/usr/uploads/2018/04/15/eth/transactions/431779E9-86BD-43EB-A3E7-9CF2AD6CDA5A.png" alt="receipts"><br>Log是在执行用户的LOG指令（也就是智能合约里面的event）的时候将数据写入到区块链中，所有的Logs会跟Receipts一起，生成一个ReceiptsRoot存储在区块的头部。<br>有了LOG，我们可以通过回调的方式获取合约执行的结果，同时可以缓存执行结果，方便进一步处理合约。</p>
+<p>什么是收据？ 其实跟生活中的收据的意思一样,是收付款原始凭证，数据结构如下：<br><img src="http://webpaas.com/usr/uploads/2018/04/15/eth/transactions/431779E9-86BD-43EB-A3E7-9CF2AD6CDA5A.png" alt="receipts"><br>Log是在执行用户的LOG指令（也就是智能合约里面的event）的时候将数据写入到区块链中，所有的Logs会跟Receipts一起，生成一个ReceiptsRoot存储在区块的头部。<br>Logi指令接受i+1个参数，第一个参数放在Data字段，后面分别放在Topics字段。<br>有了LOG，我们可以通过回调的方式获取合约执行的结果，同时可以缓存执行结果，方便进一步处理合约。</p>
 <p>提到receipts，我们需要考虑到其具备的几个特点：</p>
 <ol>
 <li>最基本的能体现款项数量; 这个问题是通过TxHash记录的stateObject的地址，在stateObject里面存储了balance。</li>
@@ -123,7 +123,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/15/eth/transactions/" data-id="cjgc20ul5000qfr4jurpcg4wz" class="article-share-link">Teilen</a>
+      <a data-url="http://yoursite.com/2018/04/15/eth/transactions/" data-id="cjgc24uqz000ph34jdtcfyvi0" class="article-share-link">Teilen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/blockchain/">blockchain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ethereum/">ethereum</a></li></ul>
@@ -144,9 +144,9 @@
     </a>
   
   
-    <a href="/2018/04/11/eth/encryption/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2018/04/11/eth/consensus/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Älter</strong>
-      <div class="article-nav-title">非对称加密算法简介以及以太坊account生成</div>
+      <div class="article-nav-title">以太坊共识机制</div>
     </a>
   
 </nav>
@@ -197,11 +197,11 @@
       <ul>
         
           <li>
-            <a href="/2018/04/19/eth/blockchain_uml/">以太坊BlockChain UML图</a>
+            <a href="/2018/04/19/eth/submit_tx/">以太坊提交Transaction过程</a>
           </li>
         
           <li>
-            <a href="/2018/04/19/eth/submit_tx/">以太坊提交Transaction过程</a>
+            <a href="/2018/04/19/eth/blockchain_uml/">以太坊BlockChain UML图</a>
           </li>
         
           <li>
