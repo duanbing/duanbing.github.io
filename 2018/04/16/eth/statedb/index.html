@@ -14,14 +14,14 @@
 <meta property="og:url" content="http://yoursite.com/2018/04/16/eth/statedb/index.html">
 <meta property="og:site_name" content="Container based Platform as a Service">
 <meta property="og:description" content="StateDb是以太坊里面存储交易的全部状态的数据结构，是通过Merkle Patricia Tree的形式，保存一个chain的状态（因为chain可能出现分叉）。同时通过Journal来记录状态变化信息，并且提供revert操作。 Merkle是一颗hash数，除了叶子节点存储了数据，树枝节点全部都是hash值，要么是叶子节点的数据的hash值，要么是子节点的hash值进行连接之后进行hash">
-<meta property="og:image" content="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/mpt.png">
-<meta property="og:image" content="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/trie.png">
-<meta property="og:image" content="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/change.png">
+<meta property="og:image" content="http://raw.githubusercontent.com/duanbing/duanbing.github.io/master/usr/uploads/2018/04/16/eth/statedb/mpt.png">
+<meta property="og:image" content="http://raw.githubusercontent.com/duanbing/duanbing.github.io/master/usr/uploads/2018/04/16/eth/statedb/trie.png">
+<meta property="og:image" content="http://raw.githubusercontent.com/duanbing/duanbing.github.io/master/usr/uploads/2018/04/16/eth/statedb/change.png">
 <meta property="og:updated_time" content="2018-04-17T15:33:26.234Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="以太坊StateDB以及Snapshot机制介绍">
 <meta name="twitter:description" content="StateDb是以太坊里面存储交易的全部状态的数据结构，是通过Merkle Patricia Tree的形式，保存一个chain的状态（因为chain可能出现分叉）。同时通过Journal来记录状态变化信息，并且提供revert操作。 Merkle是一颗hash数，除了叶子节点存储了数据，树枝节点全部都是hash值，要么是叶子节点的数据的hash值，要么是子节点的hash值进行连接之后进行hash">
-<meta name="twitter:image" content="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/mpt.png">
+<meta name="twitter:image" content="http://raw.githubusercontent.com/duanbing/duanbing.github.io/master/usr/uploads/2018/04/16/eth/statedb/mpt.png">
   
     <link rel="alternate" href="/atom.html" title="Container based Platform as a Service" type="application/atom+xml">
   
@@ -92,7 +92,7 @@
       
         <p>StateDb是以太坊里面存储交易的全部状态的数据结构，是通过Merkle Patricia Tree的形式，保存一个chain的状态（因为chain可能出现分叉）。同时通过Journal来记录状态变化信息，并且提供revert操作。</p>
 <p>Merkle是一颗hash数，除了叶子节点存储了数据，树枝节点全部都是hash值，要么是叶子节点的数据的hash值，要么是子节点的hash值进行连接之后进行hash获得的值。<br>Patricia是一颗编译的trie数，对于trie树的每个节点，如果该节点是唯一的儿子的话，就和父节点合并.</p>
-<p>合并在一起，成为MPT树，通过下面一张图理解下MPT树：<br><img src="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/mpt.png" alt="MP Tree"><br>MPT树中的节点包括空节点、叶子节点、扩展节点和分支节点:</p>
+<p>合并在一起，成为MPT树，通过下面一张图理解下MPT树：<br><img src="http://raw.githubusercontent.com/duanbing/duanbing.github.io/master/usr/uploads/2018/04/16/eth/statedb/mpt.png" alt="MP Tree"><br>MPT树中的节点包括空节点、叶子节点、扩展节点和分支节点:</p>
 <ul>
 <li>空节点，简单的表示空，在代码中是一个空串。</li>
 <li>叶子节点（leaf），表示为[key,value]的一个键值对，其中key是key的一种特殊十六进制编码，value是value的RLP编码</li>
@@ -100,16 +100,16 @@
 <li>分支节点（branch），因为MPT树中的key被编码成一种特殊的16进制的表示，再加上最后的value，所以分支节点是一个长度为17的list，前16个元素对应着key中的16个可能的十六进制字符，如果有一个[key,value]对在这个分支节点终止，最后一个元素代表一个值，即分支节点既可以搜索路径的终止也可以是路径的中间节点。</li>
 </ul>
 <p>详细操作可以参考<a href="https://blog.csdn.net/qq_33935254/article/details/55505472" target="_blank" rel="external">深入浅出以太坊MPT</a></p>
-<p>开始正式进入statedb的介绍。  UML图如下：<br><img src="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/trie.png" alt="statedb"></p>
+<p>开始正式进入statedb的介绍。  UML图如下：<br><img src="http://raw.githubusercontent.com/duanbing/duanbing.github.io/master/usr/uploads/2018/04/16/eth/statedb/trie.png" alt="statedb"></p>
 <p>可以看到，在go的这个版本里面，跟上面介绍的表达方式有所区别。这里包含fullNode（16个子节点加上1个value节点）和shortNode（1个子节点，1个value节点)。 </p>
 <p>对于shortNode，如果子节点的key hasTerm，那么解析出value作为valueNode返回；否则进一步判断value部分是fullNode还是hashNode(长度为256bit,也就是上面所说的叶子节点)，或者是emptyNode.</p>
 <p>对于fullNode，遍历16个子节点，判断是fullNode还是hashNode,以进一步递归遍历；然后将剩余部分作为valueNode返回</p>
 <p>从statedb最开始初始化的时候分析。调用BlockChain的Process的接口的时候，需要传递statedb参数，statedb的初始化如下：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">state, err := state.New(parent.Root(), bc.stateCache)</div><div class="line">if err != nil &#123;</div><div class="line">    return i, events, coalescedLogs, err</div><div class="line">&#125;</div><div class="line">// Process block using the parent state as reference point.</div><div class="line">receipts, logs, usedGas, err := bc.processor.Process(block, state, bc.vmConfig)</div></pre></td></tr></table></figure>
-<p>初始化的时候传递了，bc的stateCache，参考<a href="http://webpaas.com/2018/04/16/eth/geth/" target="_blank" rel="external">Ethereum UML图</a>可以知道，是一个ethdb.Database接口，具有memory和leveldb 2种实现。</p>
+<p>初始化的时候传递了，bc的stateCache，参考<a href="http://raw.githubusercontent.com/duanbing/duanbing.github.io/master/2018/04/16/eth/geth/" target="_blank" rel="external">Ethereum UML图</a>可以知道，是一个ethdb.Database接口，具有memory和leveldb 2种实现。</p>
 <p>state.New 以parent.Root()为根，调用OpenTrie尝试先看是否缓存了这个Root为根的树，如果不在，从ethdb里面取出这个Root对应的RLP信息，然后递归找出所有Root的后代的数据，创建一个trie树，缓存当前chain的信息。</p>
 <p>接下来，就开始进入Process，交易过程，需要statedb全程保存交易的详细日志，这里面就需要Journal字段发挥重要作用了。</p>
-<p>在之前的<a href="http://webpaas.com/2018/04/15/eth/transactions/" target="_blank" rel="external">合约执行</a>一篇中介绍了3处重要的地方：</p>
+<p>在之前的<a href="http://raw.githubusercontent.com/duanbing/duanbing.github.io/master/2018/04/15/eth/transactions/" target="_blank" rel="external">合约执行</a>一篇中介绍了3处重要的地方：</p>
 <ol>
 <li><code>snapshot := evm.StateDB.Snapshot()</code> </li>
 <li><code>evm.Transfer(evm.StateDB, caller.Address(), contractAddr, value)</code></li>
@@ -121,7 +121,7 @@
 <li>nextRevisionId : 自增健，永远向前走</li>
 <li>validRevisions : 真实记录snapshot的地方，一个snapshot实际上是记录的journal列表的长度，因为journal永远是递增的，所以记录当前journal的尾部指针，就意味着在回滚的时候，只需要将validRevisions回退到当前的指针位置即可,下标后续的journal记录，都是本次执行合约产生的changes,然后从后往前，依此undo.</li>
 </ul>
-<p>大概流程如下：<br><img src="http://webpaas.com/usr/uploads/2018/04/16/eth/statedb/change.png" alt="changes"></p>
+<p>大概流程如下：<br><img src="http://raw.githubusercontent.com/duanbing/duanbing.github.io/master/usr/uploads/2018/04/16/eth/statedb/change.png" alt="changes"></p>
 <h4 id="evm-Transfer"><a href="#evm-Transfer" class="headerlink" title="evm.Transfer"></a>evm.Transfer</h4><p>实际上是执行了:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">db.SubBalance(sender, amount)</div><div class="line">db.AddBalance(recipient, amount)</div></pre></td></tr></table></figure></p>
 <p>从Sender这个account减去acmount，给recipient加上amount。<br>于是回到了statedb里面的SubBalance和AddBalance操作。我们分析下Add的操作，源码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">// AddBalance adds amount to the account associated with addr</div><div class="line">func (self *StateDB) AddBalance(addr common.Address, amount *big.Int) &#123;</div><div class="line">    stateObject := self.GetOrNewStateObject(addr)</div><div class="line">    if stateObject != nil &#123;</div><div class="line">        stateObject.AddBalance(amount)</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <p>这里首先是通过GetOrNewStateObject获得Sender的账户状态，然后将其balance加上amount。<br>GetOrNewStateObject首先判断当前的stateObjects里面是否缓存了对应的Account信息，如果没有的话，就从MPT里面去取。<br>Account代表一个账户，支持转账和合约执行,在创建Transaction阶段创建。结构体如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">// Account is the Ethereum consensus representation of accounts.</div><div class="line">// These objects are stored in the main account trie.</div><div class="line">type Account struct &#123;</div><div class="line">    Nonce    uint64</div><div class="line">    Balance  *big.Int</div><div class="line">    Root     common.Hash // merkle root of the storage trie</div><div class="line">    CodeHash []byte</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>

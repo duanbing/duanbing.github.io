@@ -13,15 +13,15 @@
 <meta property="og:url" content="http://yoursite.com/2017/07/02/drf/index.html">
 <meta property="og:site_name" content="Container based Platform as a Service">
 <meta property="og:description" content="最大最小算法最大最小算法的形式化定义：  资源按照需求递增的顺序进行分配 不存在用户得到的资源超过自己的需求 未得到满足的用户等价的分享资源  与之对应的可执行定义： 考虑用户集合1, …, n分别有资源需求x1, x2, …, xn.不失一般性,令资源需求满足x1 &amp;lt;= x2 &amp;lt;= … &amp;lt;= xn.令服务器具有能力C.那么,我们初始把C/n资源给需求最小的用户.这可能会超过用户">
-<meta property="og:image" content="http://www.webpaas.com/usr/uploads/2015/04/3699732504.png">
-<meta property="og:image" content="http://www.webpaas.com/usr/uploads/2015/04/1850794973.png">
-<meta property="og:image" content="http://www.webpaas.com/usr/uploads/2015/04/2315095933.png">
-<meta property="og:image" content="http://www.webpaas.com/usr/uploads/2015/04/3503420442.png">
+<meta property="og:image" content="http://www.raw.githubusercontent.com/duanbing/duanbing.github.io/master/usr/uploads/2015/04/3699732504.png">
+<meta property="og:image" content="http://www.raw.githubusercontent.com/duanbing/duanbing.github.io/master/usr/uploads/2015/04/1850794973.png">
+<meta property="og:image" content="http://www.raw.githubusercontent.com/duanbing/duanbing.github.io/master/usr/uploads/2015/04/2315095933.png">
+<meta property="og:image" content="http://www.raw.githubusercontent.com/duanbing/duanbing.github.io/master/usr/uploads/2015/04/3503420442.png">
 <meta property="og:updated_time" content="2017-07-01T16:01:02.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="drf算法分析">
 <meta name="twitter:description" content="最大最小算法最大最小算法的形式化定义：  资源按照需求递增的顺序进行分配 不存在用户得到的资源超过自己的需求 未得到满足的用户等价的分享资源  与之对应的可执行定义： 考虑用户集合1, …, n分别有资源需求x1, x2, …, xn.不失一般性,令资源需求满足x1 &amp;lt;= x2 &amp;lt;= … &amp;lt;= xn.令服务器具有能力C.那么,我们初始把C/n资源给需求最小的用户.这可能会超过用户">
-<meta name="twitter:image" content="http://www.webpaas.com/usr/uploads/2015/04/3699732504.png">
+<meta name="twitter:image" content="http://www.raw.githubusercontent.com/duanbing/duanbing.github.io/master/usr/uploads/2015/04/3699732504.png">
   
     <link rel="alternate" href="/atom.html" title="Container based Platform as a Service" type="application/atom+xml">
   
@@ -112,15 +112,15 @@
 <p>DRF是通过确保系统的资源在用户之间是静态和均衡地进行分配来提供sharing incentive，用户不能获得比其他用户更多的资源，共享集群，而不是创建自己的专有集群。此外，DRF是strategy-proof，用户不能通过谎报其资源需求来获得更多的资源。DRF是Pareto-efficient，在满足其他特性的同时，分配所有可以利用的资源，不用取代现有的资源分配。最后，DRF是envy-free，用户不会更喜欢其他用户的资源分配。</p>
 <p>举一个例子：</p>
 <p>考虑一个9CPU、18GBRAM的系统，拥有两个用户，其中用户A运行的任务的需求向量为{1CPU, 4GB}，用户B运行的任务的需求向量为{3CPU，1GB}。</p>
-<p><img src="http://www.webpaas.com/usr/uploads/2015/04/3699732504.png" alt="12212737\_xXnW.png"></p>
+<p><img src="http://www.raw.githubusercontent.com/duanbing/duanbing.github.io/master/usr/uploads/2015/04/3699732504.png" alt="12212737\_xXnW.png"></p>
 <p>在这个方案里面， A的每个任务的消耗总CPU的1/9和内存的4/18,所以A的dominant resource就是内存， 任务B的doninant就是cpu。如上图所示， 三个A任务总共消耗了{3CPU，12GB}，两个B任务总共消耗了{6CPU，2GB}。在这个分配中，每个用户的dominant resource是相等的。用户A获得了2/3的内存，B获得了2/3的CPU。</p>
 <p>以上的这个分配可以用如下方式计算出来：x和y分别是用户A和用户B的分配任务的数目，那么用户A消耗了{xCPU，4xGB}，用户B消耗了{3yCPU，yGB}，在图三中用户A和用户B消耗了同等dominant resource；用户A的dominant share为4x/18，用户B的dominant share为3y/9。所以DRF分配可以通过求解以下的优化问题来得到：</p>
-<p><img src="http://www.webpaas.com/usr/uploads/2015/04/1850794973.png" alt="12212738\_llIF.png"></p>
+<p><img src="http://www.raw.githubusercontent.com/duanbing/duanbing.github.io/master/usr/uploads/2015/04/1850794973.png" alt="12212738\_llIF.png"></p>
 <p>求解以上问题，可以得出x = 3以及y = 2。因而用户A获得{3CPU，12GB}，B得到{6CPU， 2GB}。</p>
 <p>需要注意的是，DRF并不是总需要使用户的dominant shares相等。当一个用户总的需求是被满足，用户不会需要更多的任务，因此多余的资源可以在其他用户之间进行分配，就好像max-min fairness。此外，如果一种资源被耗尽，那些不需要此种资源的用户仍然可以继续接收到更多其他类型的资源。</p>
-<p><img src="http://www.webpaas.com/usr/uploads/2015/04/2315095933.png" alt="12212740\_H81D.png"></p>
+<p><img src="http://www.raw.githubusercontent.com/duanbing/duanbing.github.io/master/usr/uploads/2015/04/2315095933.png" alt="12212740\_H81D.png"></p>
 <p>这是DRF算法的伪代码，算法会跟踪分配给每个用户的总资源，以及用户的dominant share：si。每一步，DRF都会从用户最低的dominant share里面选择一个任务来运行。假设用户的需求被满足，即系统中有足够可用的资源，那么用户的任务就会被加载启动。我们考虑一般情况，即一个用户拥有不用需求向量的任务，我们使用变量Di来表示用户i下一个要运行加载的任务。为了简单起见，伪码没有捕获任务结束事件，在这种情况下，用户会释放任务的资源，DRF会再一次选择拥有最低dominant share的用户去运行它的任务。</p>
-<p><img src="http://www.webpaas.com/usr/uploads/2015/04/3503420442.png" alt="12212743\_BDro.png"><br>考虑4.1的两个用户的简单例子，table1说明了DRF对这个简单例子的分配过程。DRF首先选择B来运行一个任务，结果B的资源占用率变为{3/9,1/18}，B的dominant share变成了max{3/9，1/18} = 1/3。接下来DRF选择A，因为此时A的dominant share为0。这个过程持续进行，直到不再可能运行任务新任务，在这种情况下，一般会出现CPU饱和。</p>
+<p><img src="http://www.raw.githubusercontent.com/duanbing/duanbing.github.io/master/usr/uploads/2015/04/3503420442.png" alt="12212743\_BDro.png"><br>考虑4.1的两个用户的简单例子，table1说明了DRF对这个简单例子的分配过程。DRF首先选择B来运行一个任务，结果B的资源占用率变为{3/9,1/18}，B的dominant share变成了max{3/9，1/18} = 1/3。接下来DRF选择A，因为此时A的dominant share为0。这个过程持续进行，直到不再可能运行任务新任务，在这种情况下，一般会出现CPU饱和。</p>
 <p>在以上分配过程的最后，用户A会得到{3CPU, 12GB}，同事B得到了{6CPU， 2GB}，每一个用户都获得了2/3的dominant resource。</p>
 <p>注意到，在这个例子中，一旦任何资源达到饱和，那么分配过程就会终止。然而通常情况下，它可以在某些资源已经饱和的情况下继续分配任务，因为有些任务对已经饱和的资源没有任何要求。</p>
 <p>以上这个算法在实现的时候可以用二叉堆来存储每一个用户的dominant share。对于n个用户，每一次调度决定都消耗了O(logn)时间。</p>
