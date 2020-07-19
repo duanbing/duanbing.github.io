@@ -5,14 +5,14 @@
   
 
   
-  <title>以太坊StateDB以及Snapshot机制介绍 | Container based Platform as a Service</title>
+  <title>以太坊StateDB以及Snapshot机制介绍 | Being on sea, sail; being on land, settle.</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="StateDb是以太坊里面存储交易的全部状态的数据结构，是通过Merkle Patricia Tree的形式，保存一个chain的状态（因为chain可能出现分叉）。同时通过Journal来记录状态变化信息，并且提供revert操作。 Merkle是一颗hash数，除了叶子节点存储了数据，树枝节点全部都是hash值，要么是叶子节点的数据的hash值，要么是子节点的hash值进行连接之后进行hash">
 <meta name="keywords" content="ethereum,blockchain">
 <meta property="og:type" content="article">
 <meta property="og:title" content="以太坊StateDB以及Snapshot机制介绍">
 <meta property="og:url" content="http://yoursite.com/2018/04/16/eth/statedb/index.html">
-<meta property="og:site_name" content="Container based Platform as a Service">
+<meta property="og:site_name" content="Being on sea, sail; being on land, settle.">
 <meta property="og:description" content="StateDb是以太坊里面存储交易的全部状态的数据结构，是通过Merkle Patricia Tree的形式，保存一个chain的状态（因为chain可能出现分叉）。同时通过Journal来记录状态变化信息，并且提供revert操作。 Merkle是一颗hash数，除了叶子节点存储了数据，树枝节点全部都是hash值，要么是叶子节点的数据的hash值，要么是子节点的hash值进行连接之后进行hash">
 <meta property="og:image" content="http://raw.githubusercontent.com/duanbing/duanbing.github.io/master/usr/uploads/2018/04/16/eth/statedb/mpt.png">
 <meta property="og:image" content="http://raw.githubusercontent.com/duanbing/duanbing.github.io/master/usr/uploads/2018/04/16/eth/statedb/trie.png">
@@ -23,7 +23,7 @@
 <meta name="twitter:description" content="StateDb是以太坊里面存储交易的全部状态的数据结构，是通过Merkle Patricia Tree的形式，保存一个chain的状态（因为chain可能出现分叉）。同时通过Journal来记录状态变化信息，并且提供revert操作。 Merkle是一颗hash数，除了叶子节点存储了数据，树枝节点全部都是hash值，要么是叶子节点的数据的hash值，要么是子节点的hash值进行连接之后进行hash">
 <meta name="twitter:image" content="http://raw.githubusercontent.com/duanbing/duanbing.github.io/master/usr/uploads/2018/04/16/eth/statedb/mpt.png">
   
-    <link rel="alternate" href="/atom.html" title="Container based Platform as a Service" type="application/atom+xml">
+    <link rel="alternate" href="/atom.html" title="Being on sea, sail; being on land, settle." type="application/atom+xml">
   
   
     <link rel="icon" href="/favicon.png">
@@ -42,7 +42,7 @@
   <div id="header-outer" class="outer">
     <div id="header-title" class="inner">
       <h1 id="logo-wrap">
-        <a href="/" id="logo">Container based Platform as a Service</a>
+        <a href="/" id="logo">Being on sea, sail; being on land, settle.</a>
       </h1>
       
     </div>
